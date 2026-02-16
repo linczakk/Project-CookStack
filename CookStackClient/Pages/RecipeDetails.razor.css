@@ -1,0 +1,10 @@
+﻿.ingredient-checked{
+    color: #999;
+    transition: 0.2s ease;
+    opacity: 0.6;
+}
+
+.step-checked {
+    transition: 0.2s ease;
+    display: none;
+}

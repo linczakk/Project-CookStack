@@ -1,0 +1,75 @@
+﻿@using CookStackClient.Models.UI
+@using CookStackClient.Services
+@using CookStackShared.Recipes.Dtos
+
+@page "/recipe/{id:int}"
+@inject RecipesApiClient RecipesApi
+@inject LoadingService LoadingService
+
+<PageTitle>Recipe Details</PageTitle>
+
+@if(recipeDto != null)
+{
+	<h2><b>@recipeDto.Title</b></h2>
+
+	<br />
+	<p>@recipeDto.Description</p>
+
+	<br />
+	<p><b> Składniki na @recipeDto.Title:</b></p>
+
+	<table class="table table-sm">
+		@foreach (var item in ingredients)
+		{
+			<tr class="@(item.IsChecked ? "ingredient-checked" : "")">
+				<th><input type="checkbox" @bind="item.IsChecked"></th>
+				<td>@item.Ingredient.Name</td>
+				<td>@item.Ingredient.Quantity @item.Ingredient.Unit</td>
+			</tr>
+		}
+	</table>
+
+	<br/>
+
+	@foreach (var item in steps)
+	{
+		<hr class="border-2" />
+		<p><b><input type="checkbox" @bind="item.IsChecked"> @StepConst @item.Step.Order:</b></p>
+		<div class="@(item.IsChecked ? "step-checked" : "")">
+			<p>@item.Step.Description</p>
+		</div>
+		
+	}
+
+	<br/>
+	<p>Źródło: @recipeDto.SourceUrl</p>
+}
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+	private RecipeDetailsDto? recipeDto;
+	private const string StepConst = "Krok";
+
+	private List<IngredientUiWrapper> ingredients = new();
+	private List<StepsUiWrapper> steps = new();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await LoadingService.RunWithLoading(async () =>
+		{
+			recipeDto = await RecipesApi.GetRecipeByIdAsync(Id);
+		}, "Wczytywanie przepisu");
+
+		if(recipeDto != null)
+		{
+			ingredients = recipeDto.Ingredients
+			.Select(i => new IngredientUiWrapper { Ingredient = i })
+			.ToList();
+
+			steps = recipeDto.Steps.Select(s => new StepsUiWrapper { Step = s })
+			.OrderBy(s => s.Step.Order)
+			.ToList();
+		}
+	}
+}

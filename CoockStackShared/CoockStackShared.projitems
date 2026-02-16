@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>9f1672c1-cad7-4c08-a2ad-48ddb2b088a2</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CoockStackShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\CreateRecipeDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeBaseDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeDetailsDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeIngredientDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeListDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeStepDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeUpdateDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Enums\UnitTypes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\CreateShoppingListDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingItemDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListsListDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListUpdateDto.cs" />
+  </ItemGroup>
+</Project>

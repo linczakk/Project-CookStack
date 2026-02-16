@@ -1,0 +1,44 @@
+﻿
+@if (IsOpen)
+{
+	<div class="modal-backdrop fade show"></div>
+
+	<div class="modal fade show d-block" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">@Title</h5>
+					<button type="button" class="btn-close" @onclick="Cancel"></button>
+				</div>
+				<div class="modal-body">
+					<p>@Message</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+					<button class="btn btn-danger" @onclick="Confirm">Confirm</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	[Parameter] public string Title { get; set; } = "Confirm";
+	[Parameter] public string Message { get; set; } = "";
+	[Parameter] public EventCallback OnConfirm { get; set; }
+
+	private bool IsOpen;
+
+	public void Show()
+	{
+		IsOpen = true;
+		StateHasChanged();
+	}
+	public void Cancel() => IsOpen = false;
+
+	private async Task Confirm()
+	{
+		IsOpen = false;
+		await OnConfirm.InvokeAsync();
+	}
+}

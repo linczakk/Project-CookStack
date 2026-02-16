@@ -1,0 +1,18 @@
+﻿
+@if(IsVisible)
+{
+	<div class="spinner-overlay">
+		<div class="spinner-box">
+			<div class="spinner"></div>
+			@if (!string.IsNullOrWhiteSpace(StatusText))
+			{
+				<div class="spinner-text">@StatusText</div>
+			}
+		</div>
+	</div>		
+}
+
+@code {
+	[Parameter] public bool IsVisible { get; set; }
+	[Parameter] public string? StatusText { get; set; }
+}

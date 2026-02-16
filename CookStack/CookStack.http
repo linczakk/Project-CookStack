@@ -1,0 +1,6 @@
+@CookStack_HostAddress = http://localhost:5017
+
+GET {{CookStack_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

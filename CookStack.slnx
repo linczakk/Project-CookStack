@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="CoockStackShared/CookStackShared.shproj" Id="9f1672c1-cad7-4c08-a2ad-48ddb2b088a2" />
+  <Project Path="CookStack/CookStackApi.csproj" />
+  <Project Path="CookStackClient/CookStackClient.csproj" Id="e142163a-54a2-4f9b-86bb-bdbee75d256b" />
+</Solution>
