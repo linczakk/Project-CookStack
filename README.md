@@ -9,6 +9,7 @@ Features
 - Shopping list generated from recipes (planed)
 - Progress tracking while cooking (planed)
 - Blazor WASM client with ASP.NET Core API
+- Unit tests (planned)
 
 Tech Stack
 - .NET 10
