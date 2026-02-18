@@ -28,14 +28,14 @@ namespace CookStackClient.Services
             await _httpClient.PostAsJsonAsync("api/recipes", dto);
         }
 
-        public async Task DeleteRecipeAsync(int id)
-        {
-            await _httpClient.DeleteAsync($"api/recipes/{id}");
-        }
-
         public async Task UpdateRecipeAsync(int id, RecipeUpdateDto dto)
         {
             await _httpClient.PutAsJsonAsync($"api/recipes/{id}", dto);
+        }
+
+        public async Task DeleteRecipeAsync(int id)
+        {
+            await _httpClient.DeleteAsync($"api/recipes/{id}");
         }
     }
 }

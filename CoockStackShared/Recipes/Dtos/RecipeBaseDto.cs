@@ -1,6 +1,4 @@
-﻿using CookStackShared.Recipes.Dtos;
-
-namespace CoockStackShared.Recipes.Dtos
+﻿namespace CookStackShared.Recipes.Dtos
 {
     public abstract class RecipeBaseDto
     {

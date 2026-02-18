@@ -1,5 +1,5 @@
 ﻿using CookStackApi.Data;
-using CookStackShared.Features.ShoppingList.Dtos;
+using CookStackShared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

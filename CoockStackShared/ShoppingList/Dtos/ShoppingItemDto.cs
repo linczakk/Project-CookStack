@@ -1,6 +1,6 @@
 ﻿using CookStackShared.Enums;
 
-namespace CookStackShared.Features.ShoppingList.Dtos
+namespace CookStackShared.ShoppingList.Dtos
 {
     public class ShoppingItemDto
     {

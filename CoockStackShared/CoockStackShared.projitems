@@ -19,8 +19,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Enums\UnitTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\CreateShoppingListDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingItemDto.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListDto.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListsListDto.cs" />
+    <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListDetailsDto.cs" />
+    <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListsListDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListUpdateDto.cs" />
   </ItemGroup>
 </Project>
