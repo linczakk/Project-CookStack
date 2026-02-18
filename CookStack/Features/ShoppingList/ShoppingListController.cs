@@ -33,11 +33,11 @@ namespace CookStackApi.Features.ShoppingList
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShoppingListDto>> GetShoppingList(int id)
+        public async Task<ActionResult<ShoppingListDetailsDto>> GetShoppingList(int id)
         {
             var shoppingList = await _dbContext.ShoppingLists
                 .Where(s => s.Id == id)
-                .Select(s => new ShoppingListDto
+                .Select(s => new ShoppingListDetailsDto
                 {
                     Description = s.Description,
                     Items = s.Items
