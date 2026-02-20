@@ -19,6 +19,8 @@
 
 <h3>Recipes</h3>
 
+<hr />
+
 @if (recipes != null)
 {
 	if(recipes.Count > 0)
@@ -27,15 +29,15 @@
 			@foreach (var recipe in recipes)
 			{
 				<li>
-					<p>
-						<label @onclick="() => GoToDetails(recipe.Id)">@recipe.Title</label>
-						<button class="btn btn-primary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
-							Edit
-						</button>
-						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
-							Delete
-						</button>
-					</p>
+					<label @onclick="() => GoToDetails(recipe.Id)">@recipe.Title</label>
+					<div class="vr"></div>
+					<button class="btn btn-primary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
+						Edit
+					</button>
+					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
+						Delete
+					</button>
+					<hr />
 				</li>
 			}
 		</ul>
@@ -50,6 +52,7 @@
 			</button>
 		</p>
 	}
+
 }
 
 @code {
@@ -58,35 +61,28 @@
 	private ConfirmDialog? confirmDialog;
 	private int deleteId;
 
-	private bool recipesLoaded = false;
-
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
 			recipes = await RecipesApi.GetRecipesAsync();
+			recipes.OrderBy(r => r.CreatedAt).ToList();
 		}, "Pobieranie przepisów...");
-
-
-		if(recipes != null)
-		{
-			recipes = recipes.OrderBy(r => r.CreatedAt).ToList();
-		}
 	}
 
 	private void GoToDetails(int id)
 	{
-		NavManager.NavigateTo(string.Format(Routes.RecipeDetails, id));
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
 	}
 
 	private void AddRecipe()
 	{
-		NavManager.NavigateTo(Routes.RecipeCreate);
+		NavManager.NavigateTo(Routes.Recipes.RecipeCreate);
 	}
 
 	private void UpdateRecipe(int id)
 	{
-		NavManager.NavigateTo(string.Format(Routes.RecipeUpdate, id));
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeUpdate, id));
 	}
 
 	private void AskDelete(int id)
@@ -102,6 +98,9 @@
 
 	private async Task DeleteRecipe(int id)
 	{
+		if (recipes == null)
+			return;
+
 		var recipe = recipes.FirstOrDefault(r => r.Id == id);
 
 		if (recipe == null)

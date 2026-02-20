@@ -23,7 +23,7 @@ namespace CookStackApi.Features.ShoppingList
                 .Select(s => new ShoppingListsListDto
                 {
                     Id = s.Id,
-                    Description = s.Description,
+                    Title = s.Title,
                     CreatedAt = s.CreatedAt
                 })
                 .OrderByDescending(s => s.CreatedAt)
@@ -39,6 +39,7 @@ namespace CookStackApi.Features.ShoppingList
                 .Where(s => s.Id == id)
                 .Select(s => new ShoppingListDetailsDto
                 {
+                    Title = s.Title,
                     Description = s.Description,
                     Items = s.Items
                     .Select(si => new ShoppingItemDto
@@ -64,6 +65,7 @@ namespace CookStackApi.Features.ShoppingList
         {
             var shoppingList = new ShoppingList
             {
+                Title = dto.Title,
                 Description = dto.Description,
                 CreatedAt = dto.CreateAt,
                 Items = dto.Items.Select(i => new ShoppingItem
@@ -93,6 +95,7 @@ namespace CookStackApi.Features.ShoppingList
             }
 
             shoppingList.Id = dto.Id;
+            shoppingList.Title = dto.Title;
             shoppingList.Description = dto.Description;
             shoppingList.CreatedAt = dto.CreateAt;
 

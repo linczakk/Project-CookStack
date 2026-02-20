@@ -1,0 +1,110 @@
+﻿@using CookStackClient.Components
+@using CookStackClient.Constants
+@using CookStackClient.Services
+@using CookStackShared.ShoppingList.Dtos;
+
+@page "/shopping-lists"
+@inject ShoppingListApiClient ShoppingListApi
+@inject LoadingService LoadingService
+@inject NavigationManager NavManager
+
+<ConfirmDialog @ref="confirmDialog"
+	Title="Delete list"
+	Message="Are you sure you want to delete this shopping list?"
+	OnConfirm="ConfirmDelete"/>
+
+<CreateShoppingList @ref="createShoppingList"  />
+
+<h3>Shopping Lists</h3>
+
+<hr />
+
+@if (shoppingLists != null)
+{
+	if(shoppingLists.Count > 0)
+	{
+		<ul>
+			@foreach (var shoppingList in shoppingLists)
+			{
+				<li>
+					<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
+					<div class ="vr"></div>
+					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+						Delete
+					</button>
+					<hr />
+				</li>
+			}
+		</ul>
+	}
+	else
+	{
+		<p>There are currently no added shopping lists</p>
+	}
+
+	<button class="btn btn-secondary btn-sm" @onclick=AddShoppingList>Add list</button>
+}
+
+
+@code {
+
+	private List<ShoppingListsListDto>? shoppingLists;
+
+	private ConfirmDialog? confirmDialog;
+	private CreateShoppingList? createShoppingList;
+	private int deleteId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadingService.RunWithLoading(async () =>
+		{
+			shoppingLists = await ShoppingListApi.GetShoppingListsAsync();
+			shoppingLists.OrderBy(s => s.CreatedAt).ToList();
+		}, "Pobieranie listy zakupów...");
+
+	}
+
+	private void GoToDetails(int id)
+	{
+		NavManager.NavigateTo(string.Format(Routes.ShoppingLists.ShoppingListDetails, id));
+	}
+
+	private void AddShoppingList()
+	{
+		createShoppingList?.Show();
+	}
+
+	private void AskDelete(int id)
+	{
+		deleteId = id;
+		confirmDialog?.Show();
+	}
+
+	private async Task ConfirmDelete()
+	{
+		await DeleteShoppingList(deleteId);
+	}
+
+	private async Task DeleteShoppingList(int id)
+	{
+		if (shoppingLists == null)
+			return;
+
+		var shoppingList = shoppingLists.FirstOrDefault(s => s.Id == id);
+
+		if (shoppingList == null)
+			return;
+
+		shoppingLists.Remove(shoppingList);
+
+		try
+		{
+			await ShoppingListApi.DeleteShoppingListAsync(id);
+		}
+		catch (Exception ex)
+		{
+			shoppingLists.Add(shoppingList);
+			Console.Error.WriteLine(ex);
+		}
+	}
+}

@@ -4,11 +4,11 @@ using System.Net.Http.Json;
 
 namespace CookStackClient.Services
 {
-    public class ShoppingListsClient
+    public class ShoppingListApiClient
     {
         private readonly HttpClient _httpClient;
 
-        public ShoppingListsClient(HttpClient http)
+        public ShoppingListApiClient(HttpClient http)
         {
             _httpClient = http;
         }
@@ -19,7 +19,7 @@ namespace CookStackClient.Services
                 ?? new List<ShoppingListsListDto>();
         }
 
-        public async Task<ShoppingListDetailsDto?> GetShoppingListDetailsAsync(int id)
+        public async Task<ShoppingListDetailsDto?> GetShoppingListByIdAsync(int id)
         {
             return await _httpClient.GetFromJsonAsync<ShoppingListDetailsDto>($"api/ShoppingList/{id}");
         }

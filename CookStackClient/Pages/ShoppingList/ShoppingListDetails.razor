@@ -1,0 +1,46 @@
+﻿@using CookStackClient.Services
+@using CookStackShared.ShoppingList.Dtos
+
+@page "/shopping-list/{id:int}"
+@inject ShoppingListApiClient ShoppingListApi
+@inject LoadingService LoadingService
+
+<PageTitle>Shopping List</PageTitle>
+
+@if(shoppingListDto != null)
+{
+	<h2><b>@shoppingListDto.Title</b></h2>
+	
+	<hr />
+	<p>@shoppingListDto.Description</p>
+
+	@if(shoppingListDto.Description.Any()){
+		<hr/>					
+	}
+
+	<table class="table table-sm">
+		@foreach(var item in shoppingListDto.Items)
+		{
+			<tr>
+				<td><input type="checkbox" /></td>
+				<td>@item.Name</td>
+				<td>@item.Quantity @item.Unit</td>
+			</tr>
+		}
+	</table>
+}
+
+
+@code {
+	[Parameter]
+	public int Id { get; set; }
+	private ShoppingListDetailsDto? shoppingListDto;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await LoadingService.RunWithLoading(async () =>
+		{
+			shoppingListDto = await ShoppingListApi.GetShoppingListByIdAsync(Id);
+		}, "Wczytywanie listy zakupów");
+	}
+}

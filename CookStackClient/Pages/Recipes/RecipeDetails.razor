@@ -22,7 +22,7 @@
 		@foreach (var item in ingredients)
 		{
 			<tr class="@(item.IsChecked ? "ingredient-checked" : "")">
-				<th><input type="checkbox" @bind="item.IsChecked"></th>
+				<td><input type="checkbox" @bind="item.IsChecked"></td>
 				<td>@item.Ingredient.Name</td>
 				<td>@item.Ingredient.Quantity @item.Ingredient.Unit</td>
 			</tr>
@@ -42,7 +42,7 @@
 	}
 
 	<br/>
-	<p>Źródło: @recipeDto.SourceUrl</p>
+	<p>Source: @recipeDto.SourceUrl</p>
 }
 
 @code {
