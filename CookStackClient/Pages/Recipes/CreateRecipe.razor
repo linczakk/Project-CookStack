@@ -7,7 +7,7 @@
 @inject RecipesApiClient Api
 @inject NavigationManager Nav
 
-<RecipeForm Model="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe"/>
+<RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />
 
 @code{
 	private CreateRecipeDto dto = new();
