@@ -47,6 +47,8 @@
 
 @code{
 
+	[Parameter] public EventCallback OnSaved { get; set; }
+
 	private CreateShoppingListDto shoppingListDto { get; set; } = new();
 	private bool IsOpen;
 
@@ -64,9 +66,11 @@
 
 	private async Task Save()
 	{
-		IsOpen = false;
 		await Api.CreateShoppingListAsync(shoppingListDto);
-		StateHasChanged();
+
+		IsOpen = false;
+
+		await OnSaved.InvokeAsync();
 	}
 	
 }
