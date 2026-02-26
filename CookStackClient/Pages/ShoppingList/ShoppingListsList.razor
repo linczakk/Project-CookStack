@@ -14,6 +14,8 @@
 	OnConfirm="ConfirmDelete"/>
 
 <CreateShoppingList @ref="createShoppingList"  />
+<ShoppingListDetails @ref="shoppingListDetails" />
+
 
 <h3>Shopping Lists</h3>
 
@@ -52,6 +54,7 @@
 
 	private ConfirmDialog? confirmDialog;
 	private CreateShoppingList? createShoppingList;
+	private ShoppingListDetails? shoppingListDetails;
 	private int deleteId;
 
 	protected override async Task OnInitializedAsync()
@@ -66,7 +69,8 @@
 
 	private void GoToDetails(int id)
 	{
-		NavManager.NavigateTo(string.Format(Routes.ShoppingLists.ShoppingListDetails, id));
+		// NavManager.NavigateTo(string.Format(Routes.ShoppingLists.ShoppingListDetails, id));
+		shoppingListDetails?.Show(id);
 	}
 
 	private void AddShoppingList()

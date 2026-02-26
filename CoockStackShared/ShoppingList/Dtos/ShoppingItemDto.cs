@@ -6,6 +6,6 @@ namespace CookStackShared.ShoppingList.Dtos
     {
         public string Name { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
-        public UnitType Unit { get; set; }
+        public UnitType Unit { get; set; } = UnitType.Gram;
     }
 }

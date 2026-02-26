@@ -1,28 +1,45 @@
 ﻿@using CookStackClient.Services
+@using CookStackShared.Enums
 @using CookStackShared.ShoppingList.Dtos
 
 @inject ShoppingListApiClient Api
 
 @if(IsOpen)
 {
-	<div class="card">
-		<div class="modal-backdrop fade show"></div>
+	<div class="modal-backdrop fade show"></div>
 
-		<div class="modal fade show d-block" tabindex="-1">
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<EditForm Model="@shoppingListDto" OnValidSubmit="Save">
-						<DataAnnotationsValidator />
+	<div class="modal fade show d-block" tabindex="-1" @onclick="Cancel">
+		<div class="modal-dialog" @onclick:stopPropagation="true">
+			<div class="modal-content">
+				<EditForm Model="@shoppingListDto" OnValidSubmit="Save">
+					<DataAnnotationsValidator />
 
-						<div class="modal-body">
-							<InputText class="form-control" @bind-Value="shoppingListDto.Title" @onchange="CheckTitle" />
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
-							<button type="submit" class="btn btn-primary" disabled=@IsTheTitleEmpty>Save</button>
-						</div>
-					</EditForm>
-				</div>
+					<div class="modal-body">
+						<InputText class="form-control mb-2" placeholder="Title" @bind-Value="shoppingListDto.Title"/>
+						<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="shoppingListDto.Description" />
+
+						@foreach (var item in shoppingListDto.Items)
+						{
+							<div class="input-group mb-2" @key="item">
+								<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" />
+								<InputNumber class="form-control" placeholder="Quantity" @bind-Value="item.Quantity" TValue="decimal" />
+								<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit">
+									@foreach (var unit in Enum.GetValues<UnitType>())
+									{
+										<option value="@unit">@unit</option>
+									}
+								</InputSelect>
+								<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
+							</div>
+						}
+
+						<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+						<button type="submit" class="btn btn-primary">Save</button>
+					</div>
+				</EditForm>
 			</div>
 		</div>
 	</div>
@@ -32,9 +49,9 @@
 
 	private CreateShoppingListDto shoppingListDto { get; set; } = new();
 	private bool IsOpen;
-	private bool IsTheTitleEmpty = true;
 
-	private void CheckTitle() => IsTheTitleEmpty = shoppingListDto.Title.Count() >= 0 /*TODO: FIX THIS*/;
+	private void AddShoppingItem() => shoppingListDto.Items.Add(new());
+	private void RemoveShoppingItem(ShoppingItemDto item) => shoppingListDto.Items.Remove(item);
 
 	public void Show()
 	{
@@ -49,5 +66,7 @@
 	{
 		IsOpen = false;
 		await Api.CreateShoppingListAsync(shoppingListDto);
+		StateHasChanged();
 	}
+	
 }
