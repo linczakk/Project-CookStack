@@ -67,7 +67,6 @@ namespace CookStackApi.Features.ShoppingList
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                CreatedAt = dto.CreateAt,
                 Items = dto.Items.Select(i => new ShoppingItem
                 {
                     Name = i.Name,
@@ -94,10 +93,8 @@ namespace CookStackApi.Features.ShoppingList
                 return NotFound();
             }
 
-            shoppingList.Id = dto.Id;
             shoppingList.Title = dto.Title;
             shoppingList.Description = dto.Description;
-            shoppingList.CreatedAt = dto.CreateAt;
 
             _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
 

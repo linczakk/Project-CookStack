@@ -15,7 +15,6 @@ namespace CookStackApi.Features.Recipes
             _dbContext = context;
         }
 
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecipeListDto>>> GetRecipesList()
         {

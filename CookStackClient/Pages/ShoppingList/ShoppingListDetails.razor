@@ -1,4 +1,5 @@
 ﻿@using CookStackClient.Services
+@using CookStackShared.Enums
 @using CookStackShared.ShoppingList.Dtos
 
 @page "/shopping-list/{id:int}"
@@ -16,26 +17,65 @@
 				<div class="modal-body">
 					@if (shoppingListDto != null)
 					{
-						<h2><b>@shoppingListDto.Title</b></h2>
+						@if(!IsEditMode)
+						{
+							<h2><b>@shoppingListDto.Title</b></h2>
+						}
+						else
+						{
+							<input class="form-control mb-1"
+								   @bind="shoppingListDto.Title"
+									   @ref="titleInput" />
+						}
 
-						<hr />
-						<p>@shoppingListDto.Description</p>
+						@if(!IsEditMode)
+						{
+							<p>@shoppingListDto.Description</p>
+						}
+						else
+						{
+							<InputTextArea class="form-control mb-2"
+										   @bind-Value="shoppingListDto.Description" />
+						}
 
-						@if (shoppingListDto.Description.Any())
+
+						@if (!string.IsNullOrWhiteSpace(shoppingListDto.Description))
 						{
 							<hr />
 						}
+						
 
 						<table class="table table-sm">
 							@foreach (var item in shoppingListDto.Items)
 							{
 								<tr>
-									<td><input type="checkbox" /></td>
-									<td>@item.Name</td>
-									<td>@item.Quantity @item.Unit</td>
+									@if(!IsEditMode)
+									{
+										<td><input type="checkbox" /></td>
+										<td>@item.Name</td>
+										<td>@item.Quantity @item.Unit</td>
+									}
+									else
+									{
+										<td class="d-flex gap-1 mb-1" @key="item">
+											<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" />
+											<InputNumber class="form-control" placeholder="Quantity" @bind-Value="item.Quantity" TValue="decimal" />
+											<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit">
+												@foreach (var unit in Enum.GetValues<UnitType>())
+												{
+													<option value="@unit">@unit</option>
+												}
+											</InputSelect>
+											<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
+										</td>
+									}
 								</tr>
 							}
 						</table>
+						@if (IsEditMode)
+						{
+							<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+						}
 					}
 					else
 					{
@@ -43,7 +83,21 @@
 					}
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary mb-2" @onclick="Close">Close</button>
+					@if(!IsEditMode)
+					{
+						<button type="button" class="btn btn-primary" @onclick="EnableEdit">Update</button>
+					}
+					else
+					{
+						<button class="btn btn-success" @onclick="Save">
+							Save
+						</button>
+
+						<button class="btn btn-secondary" @onclick="CancelEdit">
+							Cancel
+						</button>
+					}
+					<button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
 				</div>
 			</div>
 		</div>
@@ -53,18 +107,67 @@
 
 @code {
 	private int Id { get; set; }
-	private ShoppingListDetailsDto? shoppingListDto;
+	private ShoppingListBaseDto? shoppingListDto;
+
+	private ElementReference titleInput;
 
 	private bool IsOpen;
+	private bool IsEditMode = false;
 
 	public async Task Show(int id)
 	{
 		Id = id;
 		IsOpen = true;
-		Console.WriteLine(Id);
+		IsEditMode = false;
 
 		shoppingListDto = await ShoppingListApi.GetShoppingListByIdAsync(Id);
 		StateHasChanged();
 	}
+
+	private async Task EnableEdit()
+	{
+		if (shoppingListDto != null)
+		{
+			shoppingListDto = new ShoppingListUpdateDto
+			{
+				Title = shoppingListDto.Title,
+				Description = shoppingListDto.Description,
+				Items = shoppingListDto.Items
+			};
+		}
+		else
+		{
+			shoppingListDto = new ShoppingListUpdateDto();
+		}
+
+		IsEditMode = true;
+		await Task.Yield();
+		await titleInput.FocusAsync();
+	}
+
+	private void AddShoppingItem() => shoppingListDto?.Items.Add(new());
+	private void RemoveShoppingItem(ShoppingItemDto item) => shoppingListDto?.Items.Remove(item);
+
+	private async Task Save()
+	{
+		if (shoppingListDto is ShoppingListUpdateDto updateDto)
+		{
+			await ShoppingListApi.UpdateShoppingListAsync(Id, updateDto);
+		}
+		await ExitEditMode();
+	}
+
+
+	private async Task CancelEdit()
+	{
+		await ExitEditMode();
+	}
+
+	private async Task ExitEditMode()
+	{
+		shoppingListDto = await ShoppingListApi.GetShoppingListByIdAsync(Id);
+		IsEditMode = false;
+	}
+
 	public void Close() => IsOpen = false;
 }
