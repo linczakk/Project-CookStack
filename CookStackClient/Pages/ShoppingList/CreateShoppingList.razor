@@ -52,7 +52,14 @@
 	private CreateShoppingListDto shoppingListDto { get; set; } = new();
 	private bool IsOpen;
 
-	private void AddShoppingItem() => shoppingListDto.Items.Add(new());
+	private void AddShoppingItem()
+	{
+		var item = new ShoppingItemDto();
+
+		shoppingListDto.Items.Add(item);
+		item.Order = shoppingListDto.Items.Max(i => i.Order) + 1;
+
+	}
 	private void RemoveShoppingItem(ShoppingItemDto item) => shoppingListDto.Items.Remove(item);
 
 	public void Show()

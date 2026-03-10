@@ -7,5 +7,7 @@ namespace CookStackShared.ShoppingList.Dtos
         public string Name { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public UnitType Unit { get; set; } = UnitType.Gram;
+        public bool IsChecked { get; set; } = false;
+        public int Order { get; set; }
     }
 }

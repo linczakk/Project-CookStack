@@ -46,7 +46,9 @@ namespace CookStackApi.Features.ShoppingList
                     {
                         Name = si.Name,
                         Quantity = si.Quantity,
-                        Unit = si.Unit
+                        Unit = si.Unit,
+                        IsChecked = si.IsChecked,
+                        Order = si.Order
                     })
                     .ToList()
                 })
@@ -67,12 +69,15 @@ namespace CookStackApi.Features.ShoppingList
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Items = dto.Items.Select(i => new ShoppingItem
+                Items = dto.Items.Select(si => new ShoppingItem
                 {
-                    Name = i.Name,
-                    Quantity = i.Quantity,
-                    Unit = i.Unit
+                    Name = si.Name,
+                    Quantity = si.Quantity,
+                    Unit = si.Unit,
+                    IsChecked = si.IsChecked,
+                    Order = si.Order
                 }).ToList()
+                
             };
 
             _dbContext.ShoppingLists.Add(shoppingList);
@@ -99,11 +104,13 @@ namespace CookStackApi.Features.ShoppingList
             _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
 
             shoppingList.Items = dto.Items
-                .Select(i => new ShoppingItem
+                .Select(si => new ShoppingItem
                 {
-                    Name = i.Name,
-                    Quantity = i.Quantity,
-                    Unit = i.Unit
+                    Name = si.Name,
+                    Quantity = si.Quantity,
+                    Unit = si.Unit,
+                    IsChecked = si.IsChecked,
+                    Order = si.Order
                 }).ToList();
 
             await _dbContext.SaveChangesAsync();

@@ -15,5 +15,6 @@ namespace CookStackApi.Features.ShoppingList
         public decimal Quantity { get; set; }
         public UnitType Unit { get; set; }
         public bool IsChecked { get; set; }
+        public int Order { get; set; }
     }
 }

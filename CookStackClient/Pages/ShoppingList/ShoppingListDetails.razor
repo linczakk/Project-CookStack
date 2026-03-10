@@ -25,7 +25,8 @@
 						{
 							<input class="form-control mb-1"
 								   @bind="shoppingListDto.Title"
-									   @ref="titleInput" />
+								   @onkeydown="HandleKey"
+										@ref="titleInput" />
 						}
 
 						@if(!IsEditMode)
@@ -35,7 +36,8 @@
 						else
 						{
 							<InputTextArea class="form-control mb-2"
-										   @bind-Value="shoppingListDto.Description" />
+										   @bind-Value="shoppingListDto.Description"
+										   @onkeydown="HandleKey" />
 						}
 
 
@@ -46,21 +48,53 @@
 						
 
 						<table class="table table-sm">
-							@foreach (var item in shoppingListDto.Items)
+
+							@if(!IsEditMode)
 							{
-								<tr>
-									@if(!IsEditMode)
-									{
-										<td><input type="checkbox" /></td>
+								@foreach (var item in shoppingListDto.Items.Where(i => !i.IsChecked))
+								{
+									<tr @key="item">
+										<td>
+											<input type="checkbox"
+												checked = "@item.IsChecked"
+												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
+										</td>
 										<td>@item.Name</td>
 										<td>@item.Quantity @item.Unit</td>
-									}
-									else
-									{
+									</tr>
+								}
+
+								@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked))
+								{
+									<tr>
+										<td colspan="3"><hr/></td>
+									</tr>
+								}
+
+								@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
+								{
+									<tr @key="item">
+										<td>
+											<input type="checkbox"
+												   checked="@item.IsChecked"
+												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
+										</td>
+										<td class="text-decoration-line-through text muted">@item.Name</td>
+										<td>@item.Quantity @item.Unit</td>
+									</tr>
+								}
+
+							}
+							else
+							{
+								@foreach (var item in shoppingListDto.Items)
+								{
+									<tr @key="item">
 										<td class="d-flex gap-1 mb-1" @key="item">
-											<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" />
-											<InputNumber class="form-control" placeholder="Quantity" @bind-Value="item.Quantity" TValue="decimal" />
-											<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit">
+											<InputCheckbox @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
+											<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
+											<InputNumber class="form-control" placeholder="Quantity" @bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
+											<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
 												@foreach (var unit in Enum.GetValues<UnitType>())
 												{
 													<option value="@unit">@unit</option>
@@ -68,8 +102,9 @@
 											</InputSelect>
 											<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
 										</td>
-									}
-								</tr>
+
+									</tr>
+								}
 							}
 						</table>
 						@if (IsEditMode)
@@ -106,6 +141,9 @@
 
 
 @code {
+
+	[Parameter] public EventCallback OnUpdated { get; set; }
+
 	private int Id { get; set; }
 	private ShoppingListBaseDto? shoppingListDto;
 
@@ -132,7 +170,7 @@
 			{
 				Title = shoppingListDto.Title,
 				Description = shoppingListDto.Description,
-				Items = shoppingListDto.Items
+				Items = shoppingListDto.Items.ToList()
 			};
 		}
 		else
@@ -145,16 +183,87 @@
 		await titleInput.FocusAsync();
 	}
 
-	private void AddShoppingItem() => shoppingListDto?.Items.Add(new());
+	private void AddShoppingItem()
+	{
+		if (shoppingListDto == null)
+			return;
+
+		var maxOrder = shoppingListDto.Items
+			.Select(i => i.Order)
+			.DefaultIfEmpty(0)
+			.Max();
+
+		shoppingListDto.Items.Add(new ShoppingItemDto
+		{
+			Order = maxOrder +1
+		});
+	}
 	private void RemoveShoppingItem(ShoppingItemDto item) => shoppingListDto?.Items.Remove(item);
+
+	private async Task ToggleItem(ShoppingItemDto item, bool value) 
+	{
+		item.IsChecked = value;
+
+		if(item.IsChecked)
+		{
+			var maxCompleted = shoppingListDto == null ? 0 : shoppingListDto.Items
+				.Where(i => i.IsChecked)
+				.Select(i => i.Order)
+				.DefaultIfEmpty(0)
+				.Max();
+
+			item.Order = maxCompleted + 1;
+		}
+		else
+		{
+			var maxActive = shoppingListDto == null ? 0 : shoppingListDto.Items
+				.Where(i => !i.IsChecked)
+				.Select(i => i.Order)
+				.DefaultIfEmpty(0)
+				.Max();
+
+			item.Order = maxActive + 1;
+		}
+
+		SortItems();
+
+		if(shoppingListDto != null)
+		{
+			await ShoppingListApi.UpdateShoppingListAsync(Id, new ShoppingListUpdateDto
+			{
+				Title = shoppingListDto.Title,
+				Description = shoppingListDto.Description,
+				Items = shoppingListDto.Items.ToList()
+			});
+		}
+	}
+
+	private void SortItems()
+	{
+		shoppingListDto?.Items = shoppingListDto.Items.
+		OrderBy(i => i.IsChecked)
+		.ThenBy(i => i.Order)
+		.ToList();
+	}
+
+	private async Task HandleKey(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+			await Save();
+
+		if (e.Key == "Escape")
+			await CancelEdit();
+	}
 
 	private async Task Save()
 	{
 		if (shoppingListDto is ShoppingListUpdateDto updateDto)
-		{
 			await ShoppingListApi.UpdateShoppingListAsync(Id, updateDto);
-		}
-		await ExitEditMode();
+
+		if(IsEditMode)
+			await ExitEditMode();
+
+		await OnUpdated.InvokeAsync();
 	}
 
 
@@ -166,6 +275,9 @@
 	private async Task ExitEditMode()
 	{
 		shoppingListDto = await ShoppingListApi.GetShoppingListByIdAsync(Id);
+
+		SortItems();
+
 		IsEditMode = false;
 	}
 
