@@ -73,13 +73,13 @@
 
 								@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
 								{
-									<tr @key="item">
+									<tr @key="item" class="completed-list">
 										<td>
 											<input type="checkbox"
 												   checked="@item.IsChecked"
 												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
 										</td>
-										<td class="text-decoration-line-through text muted">@item.Name</td>
+										<td class="title text muted">@item.Name</td>
 										<td>@item.Quantity @item.Unit</td>
 									</tr>
 								}
@@ -236,6 +236,7 @@
 				Items = shoppingListDto.Items.ToList()
 			});
 		}
+		await Save();
 	}
 
 	private void SortItems()

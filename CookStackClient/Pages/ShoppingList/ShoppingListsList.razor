@@ -25,19 +25,48 @@
 {
 	if(shoppingLists.Count > 0)
 	{
+		var activeList = shoppingLists.Where(sl => !sl.IsCompleted);
+		var completedList = shoppingLists.Where(sl => sl.IsCompleted);
+
 		<ul>
-			@foreach (var shoppingList in shoppingLists)
+			@foreach (var shoppingList in activeList)
 			{
-				<li>
-					<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
-					<div class ="vr"></div>
-					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
-						Delete
-					</button>
-					<hr />
-				</li>
+			
+					<li>
+						<span class = "cursor-pointer" @onclick="() => GoToDetails(shoppingList.Id)">
+							<label>@shoppingList.Title</label>
+						</span>
+						<div class="vr"></div>
+						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+						<p class="text-muted"><small>@shoppingList.CompletedItems / @shoppingList.TotalItems bought</small></p>
+					</li>
+			
 			}
 		</ul>
+		@if (activeList.Any() && completedList.Any())
+		{
+			<hr />
+		}
+
+		<ul>
+			@foreach (var shoppingList in completedList)
+			{
+			
+					<li>
+						<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
+						<div class="vr"></div>
+						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+
+						<span class="badge bg-success ms-2">Completed</span>
+					</li>
+			
+			}
+		</ul>
+		
 	}
 	else
 	{
@@ -61,8 +90,7 @@
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
-			shoppingLists = await ShoppingListApi.GetShoppingListsAsync();
-			shoppingLists.OrderBy(s => s.CreatedAt).ToList();
+			await ReloadList();
 		}, "Pobieranie listy zakupów...");
 
 	}
@@ -70,6 +98,7 @@
 	private async Task ReloadList()
 	{
 		shoppingLists = await ShoppingListApi.GetShoppingListsAsync();
+		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
 	}
 
 	private void GoToDetails(int id)

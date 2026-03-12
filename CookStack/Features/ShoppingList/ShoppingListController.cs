@@ -24,7 +24,9 @@ namespace CookStackApi.Features.ShoppingList
                 {
                     Id = s.Id,
                     Title = s.Title,
-                    CreatedAt = s.CreatedAt
+                    CreatedAt = s.CreatedAt,
+                    TotalItems = s.Items.Count(),
+                    CompletedItems = s.Items.Count(i => i.IsChecked)
                 })
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();

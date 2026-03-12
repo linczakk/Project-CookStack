@@ -1,0 +1,11 @@
+﻿.completed-list{
+    opacity: 0.6;
+}
+
+.completed-list .title{
+    text-decoration: line-through;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
