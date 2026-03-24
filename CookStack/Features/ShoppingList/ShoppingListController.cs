@@ -46,6 +46,7 @@ namespace CookStackApi.Features.ShoppingList
                     Items = s.Items
                     .Select(si => new ShoppingItemDto
                     {
+                        Id = si.Id,
                         Name = si.Name,
                         Quantity = si.Quantity,
                         Unit = si.Unit,
@@ -133,5 +134,6 @@ namespace CookStackApi.Features.ShoppingList
             await _dbContext.SaveChangesAsync();
             return NoContent();
         }
+
     }
 }

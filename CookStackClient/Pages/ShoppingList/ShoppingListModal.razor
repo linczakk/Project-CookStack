@@ -20,10 +20,22 @@
 						<h2><b>@shoppingListDto.Title</b></h2>
 						<p>@shoppingListDto.Description</p>
 
-						<table class="table table-sm">
+						<table class="table table-sm @(isDragging ? "drag-active" : "")"
+							@ondragover:preventDefault="true">
 							@foreach (var item in shoppingListDto.Items.Where(i => !i.IsChecked))
 							{
-								<tr @key="item">
+								<tr @key="(item.Id, item.IsChecked)"
+									@ondragenter="() => DragEnter(item)"
+									@ondragover:preventDefault="true"
+									@ondrop="() => Drop(item)"
+									class="@(draggedItem == item ? "dragging" : "" ) 
+										   @(dragOverItem == item? "drag-over" : "")">
+									<td draggable="true"
+										@ondragstart="() => StartDrag(item)"
+										@ondragend="ResetDragState"
+										style="cursor: grab;">
+										☰
+									</td>
 									<td>
 										<input type="checkbox"
 											   checked="@item.IsChecked"
@@ -32,18 +44,45 @@
 									<td>@item.Name</td>
 									<td>@item.Quantity @item.Unit</td>
 								</tr>
+
+								
 							}
 
-							@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked))
+							<tr class="drop-zone @(draggedItem?.IsChecked == true ? "active" : "")"
+								@ondragover:preventDefault="true"
+								@ondrop="() => DropToEnd(false)">
+								<td colspan="4">
+									<div class="drop-hint">
+										Move to active
+									</div>
+								</td>
+							</tr>
+							
+
+							@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked) || draggedItem != null)
 							{
 								<tr>
 									<td colspan="3"><hr /></td>
 								</tr>
 							}
 
+							
+
 							@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
 							{
-								<tr @key="item" class="completed-list">
+								<tr @key="(item.Id, item.IsChecked)" 
+									@ondragenter="() => DragEnter(item)"
+									@ondragover:preventDefault="true"
+									@ondrop="() => Drop(item)"
+									class="completed-list 
+										@(draggedItem == item ? "dragging" : "") 
+										@(dragOverItem == item ? "drag-over" : "")">
+									<td draggable="true"
+										@ondragstart="() => StartDrag(item)"
+										@ondragend="ResetDragState"
+										style="cursor: grab;">
+										☰
+									</td>
 									<td>
 										<input type="checkbox"
 											   checked="@item.IsChecked"
@@ -53,6 +92,17 @@
 									<td>@item.Quantity @item.Unit</td>
 								</tr>
 							}
+
+							<tr class="drop-zone @(draggedItem?.IsChecked == false ? "active" : "")"
+								@ondragover:preventDefault="true"
+								@ondrop="() => DropToEnd(true)">
+								<td colspan="4">
+										<div class="drop-hint">
+											Move to completed
+										</div>
+								</td>
+							</tr>
+
 						</table>
 
 					</div>
@@ -125,10 +175,15 @@
 	private bool IsEditMode => Mode is ShoppingListModalMode.Edit;
 	private bool IsCreateMode => Mode is ShoppingListModalMode.Create;
 
+
 	private int Id;
 
 	private ShoppingListBaseDto shoppingListDto = new CreateShoppingListDto();
 
+	private ShoppingItemDto? draggedItem;
+	private ShoppingItemDto? dragOverItem;
+
+	private bool isDragging;
 
 	public async Task Show(ShoppingListModalMode mode, int? id = null)
 	{
@@ -204,11 +259,6 @@
 
 		SortItems();
 
-		var data = await ShoppingListApi.GetShoppingListByIdAsync(Id);
-
-		if(data != null)
-			await ShoppingListApi.UpdateShoppingListAsync(Id, data.ToUpdateDto());
-
 		await Save();
 	}
 
@@ -238,6 +288,67 @@
 		}
 	}
 
+	private void DragEnter(ShoppingItemDto item)
+	{
+		dragOverItem = item;
+	}
+
+	private void StartDrag(ShoppingItemDto item)
+	{
+		draggedItem = item;
+		isDragging = true;
+	}
+
+	private async Task Drop(ShoppingItemDto target)
+	{
+		var index = shoppingListDto.Items.IndexOf(target);
+		await MoveItem(target.IsChecked, index);
+	}
+
+	private async Task DropToEnd(bool isChecked)
+	{
+		await MoveItem(isChecked);
+	}
+
+	private async Task MoveItem(bool isChecked, int? targetIndex = null)
+	{
+		if (draggedItem == null)
+			return;
+
+		draggedItem.IsChecked = isChecked;
+
+		var items = shoppingListDto.Items;
+
+		items.Remove(draggedItem);
+
+		if (targetIndex.HasValue)
+			items.Insert(targetIndex.Value, draggedItem);
+		else
+			items.Add(draggedItem);
+
+		shoppingListDto.Items = shoppingListDto.Items.ToList();
+
+		RecalculateOrder();
+		ResetDragState();
+
+		await Save();
+	}
+
+	private void RecalculateOrder()
+	{
+		for (int i = 0; i < shoppingListDto.Items.Count; i++)
+		{
+			shoppingListDto.Items[i].Order = i;
+		}
+	}
+
+	private void ResetDragState()
+	{
+		draggedItem = null;
+		dragOverItem = null;
+		isDragging = false;
+	}
+
 	private async Task ExitEditMode()
 	{
 		var data = await ShoppingListApi.GetShoppingListByIdAsync(Id);
@@ -260,6 +371,9 @@
 		{
 			await ShoppingListApi.CreateShoppingListAsync(createListDto);
 		}
+		else if (shoppingListDto is ShoppingListDetailsDto detailsDto)
+			await ShoppingListApi.UpdateShoppingListAsync(Id, detailsDto.ToUpdateDto());
+
 
 		await OnSaved.InvokeAsync();
 	}
