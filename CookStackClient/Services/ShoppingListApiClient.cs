@@ -1,4 +1,5 @@
-﻿using CookStackShared.ShoppingList.Dtos;
+﻿using CoockStackShared.ShoppingList.Dtos;
+using CookStackShared.ShoppingList.Dtos;
 using System.Net.Http.Json;
 
 
@@ -27,6 +28,11 @@ namespace CookStackClient.Services
         public async Task CreateShoppingListAsync(CreateShoppingListDto dto)
         {
             await _httpClient.PostAsJsonAsync("api/ShoppingList", dto);
+        }
+
+        public async Task CreateShoppingListFromRecipeAsync(ShoppingListFromRecipeDto dto)
+        {
+            await _httpClient.PostAsJsonAsync("api/ShoppingList/from-recipe", dto);
         }
 
         public async Task UpdateShoppingListAsync(int id, ShoppingListUpdateDto dto)

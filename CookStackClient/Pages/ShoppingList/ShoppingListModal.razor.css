@@ -1,4 +1,10 @@
-﻿.dragging {
+﻿.shopping-list-container {
+    scrollbar-gutter: stable;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.dragging {
     opacity: 0.5;
 }
 
@@ -35,6 +41,17 @@
     transition: opacity 0.2s ease;
 }
 
+.item-name{
+    max-width: 250px;
+    word-break: break-word;
+    white-space: normal;
+}
+
 tr{
     transition: all 0.15s ease;
+}
+
+td{
+    height:40px;
+    word-break: break-word;
 }

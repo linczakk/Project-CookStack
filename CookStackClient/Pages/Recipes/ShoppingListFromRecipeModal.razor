@@ -1,0 +1,102 @@
+﻿@using CookStackClient.Services
+@using CookStackShared.Recipes.Dtos
+@using CoockStackShared.ShoppingList.Dtos
+
+@inject ShoppingListApiClient ShoppingListApi
+
+@if(IsOpen)
+{
+	<div class="modal-backdrop fade show"></div>
+
+	<div class="modal fade show d-block" tabindex="-1" @onclick="Close">
+		<div class="modal-dialog" @onclick:stopPropagation="true">
+			<div class="modal-content">
+				<EditForm Model="shoppingListDto" OnValidSubmit="SaveAndClose">
+					<DataAnnotationsValidator />
+					<div class="modal-body">
+						<input class="form-control mb-2" @bind="shoppingListDto?.Title" @ref="titleInput" @onkeydown="HandleKey" />
+						<InputTextArea class="form-control mb-2" @bind-Value="shoppingListDto.Description" @onkeydown="HandleKey" />
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary" disabled="@isSaving">
+							@(isSaving ? "Saving..." : "Add")
+						</button>
+						<button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
+					</div>
+
+				</EditForm>
+			</div>
+		</div>
+	</div>
+
+}
+
+@code {
+	[Parameter]
+	public EventCallback OnSaved { get; set; }
+
+	private bool IsOpen;
+	private ElementReference titleInput;
+
+	private ShoppingListFromRecipeDto? shoppingListDto;
+
+	private bool isSaving = false;
+
+	public async Task Show(RecipeDetailsDto dto)
+	{
+		shoppingListDto = CreateFromRecipe(dto);
+
+		IsOpen = true;
+
+		StateHasChanged();
+
+		await Task.Yield();
+		await titleInput.FocusAsync();
+	}
+
+	private ShoppingListFromRecipeDto CreateFromRecipe(RecipeDetailsDto dto)
+	{
+		return new ShoppingListFromRecipeDto
+			{
+				Title = dto.Title,
+				Description = $"Lista zakupów do: {dto.Title}",
+				Items = dto.Ingredients.ToList()
+			};
+	}
+
+
+	private async Task HandleKey(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+			await SaveAndClose();
+
+		if (e.Key == "Escape")
+			Close();
+	}
+
+
+	private async Task SaveAndClose()
+	{
+		Close();
+		await Save();
+	}
+
+	private async Task Save()
+	{
+		if(shoppingListDto != null)
+		{
+			isSaving = true;
+			StateHasChanged();
+
+			await ShoppingListApi.CreateShoppingListFromRecipeAsync(shoppingListDto);
+
+			isSaving = false;
+		}
+
+		shoppingListDto = null;
+
+		await OnSaved.InvokeAsync();
+	}
+	public void Close() => IsOpen = false;
+
+}

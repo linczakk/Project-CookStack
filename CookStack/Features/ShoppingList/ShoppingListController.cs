@@ -1,7 +1,7 @@
-﻿using CookStackApi.Data;
+﻿using CoockStackShared.ShoppingList.Dtos;
+using CookStackApi.Data;
 using CookStackShared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CookStackApi.Features.ShoppingList
 {
@@ -9,131 +9,66 @@ namespace CookStackApi.Features.ShoppingList
     [Route("api/[controller]")]
     public class ShoppingListController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ShoppingListService _shoppingListService;
 
-        public ShoppingListController(ApplicationDbContext context)
+        public ShoppingListController(ShoppingListService shoppingListService)
         {
-            _dbContext = context;
+            _shoppingListService = shoppingListService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ShoppingListsListDto>>> GetShoppingLists()
         {
-            var shoppingList = await _dbContext.ShoppingLists
-                .Select(s => new ShoppingListsListDto
-                {
-                    Id = s.Id,
-                    Title = s.Title,
-                    CreatedAt = s.CreatedAt,
-                    TotalItems = s.Items.Count(),
-                    CompletedItems = s.Items.Count(i => i.IsChecked)
-                })
-                .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
-
-            return Ok(shoppingList);
+            var result = await _shoppingListService.GetAll();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ShoppingListDetailsDto>> GetShoppingList(int id)
         {
-            var shoppingList = await _dbContext.ShoppingLists
-                .Where(s => s.Id == id)
-                .Select(s => new ShoppingListDetailsDto
-                {
-                    Title = s.Title,
-                    Description = s.Description,
-                    Items = s.Items
-                    .Select(si => new ShoppingItemDto
-                    {
-                        Id = si.Id,
-                        Name = si.Name,
-                        Quantity = si.Quantity,
-                        Unit = si.Unit,
-                        IsChecked = si.IsChecked,
-                        Order = si.Order
-                    })
-                    .ToList()
-                })
-                .FirstOrDefaultAsync();
+            var result = await _shoppingListService.GetById(id);
 
-            if (shoppingList == null)
-            {
+            if (result == null)
                 return NotFound();
-            }
 
-            return Ok(shoppingList);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateShoppingList([FromBody] CreateShoppingListDto dto)
         {
-            var shoppingList = new ShoppingList
-            {
-                Title = dto.Title,
-                Description = dto.Description,
-                Items = dto.Items.Select(si => new ShoppingItem
-                {
-                    Name = si.Name,
-                    Quantity = si.Quantity,
-                    Unit = si.Unit,
-                    IsChecked = si.IsChecked,
-                    Order = si.Order
-                }).ToList()
-                
-            };
+           var result = await _shoppingListService.Create(dto);
+            return CreatedAtAction(nameof(GetShoppingList), new { id = result.Id }, null);
+        }
 
-            _dbContext.ShoppingLists.Add(shoppingList);
-
-            await _dbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetShoppingList), new { id = shoppingList.Id }, null);
+        [HttpPost("from-recipe")]
+        public async Task<IActionResult> CreateFromRecipe([FromBody] ShoppingListFromRecipeDto dto)
+        {
+            var result = await _shoppingListService.CreateFromRecipe(dto);
+            return Ok(new { result.Id });
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateShoppingList(int id, [FromBody] ShoppingListUpdateDto dto)
         {
-            var shoppingList = await _dbContext.ShoppingLists
-                .Include(s => s.Items)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            var result = await _shoppingListService.Update(id, dto);
 
-            if (shoppingList == null)
-            {
-                return NotFound();
-            }
+            if (result)
+                return NoContent();
+            
+            return NotFound();
 
-            shoppingList.Title = dto.Title;
-            shoppingList.Description = dto.Description;
-
-            _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
-
-            shoppingList.Items = dto.Items
-                .Select(si => new ShoppingItem
-                {
-                    Name = si.Name,
-                    Quantity = si.Quantity,
-                    Unit = si.Unit,
-                    IsChecked = si.IsChecked,
-                    Order = si.Order
-                }).ToList();
-
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteShoppingList(int id)
         {
-            var shoppingList = await _dbContext.ShoppingLists.FindAsync(id);
-            if (shoppingList == null)
-            {
-                return NotFound();
-            }
+            var result = await _shoppingListService.Delete(id);
+            
+            if (result)
+                return NoContent();
 
-            _dbContext.ShoppingLists.Remove(shoppingList);
-
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
+            return NotFound();
         }
-
     }
 }

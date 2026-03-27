@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\CreateShoppingListDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingItemDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListBaseDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListFromRecipeDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Mappings\ShoppingListMappings.cs" />
     <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListDetailsDto.cs" />
     <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListsListDto.cs" />

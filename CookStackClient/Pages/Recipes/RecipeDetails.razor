@@ -1,4 +1,5 @@
 ﻿@using CookStackClient.Models.UI
+@using CookStackClient.Pages.ShoppingList
 @using CookStackClient.Services
 @using CookStackShared.Recipes.Dtos
 
@@ -7,6 +8,8 @@
 @inject LoadingService LoadingService
 
 <PageTitle>Recipe Details</PageTitle>
+
+<ShoppingListFromRecipeModal @ref="shoppingListModal" OnSaved="ReloadList" />
 
 @if(recipeDto != null)
 {
@@ -28,6 +31,8 @@
 			</tr>
 		}
 	</table>
+
+	<button class="btn btn-primary d-flex align-items-center" @onclick="AddShoppingList"><span class="bi bi-cart-plus"></span> Add ingredients to list</button>
 
 	<br/>
 
@@ -51,6 +56,8 @@
 	private RecipeDetailsDto? recipeDto;
 	private const string StepConst = "Krok";
 
+	private ShoppingListFromRecipeModal? shoppingListModal;
+
 	private List<IngredientUiWrapper> ingredients = new();
 	private List<StepsUiWrapper> steps = new();
 
@@ -58,10 +65,14 @@
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
-			recipeDto = await RecipesApi.GetRecipeByIdAsync(Id);
+			await ReloadList();
 		}, "Wczytywanie przepisu");
+	}
 
-		if(recipeDto != null)
+	private async Task ReloadList()
+	{
+		recipeDto = await RecipesApi.GetRecipeByIdAsync(Id);
+		if (recipeDto != null)
 		{
 			ingredients = recipeDto.Ingredients
 			.Select(i => new IngredientUiWrapper { Ingredient = i })
@@ -71,5 +82,11 @@
 			.OrderBy(s => s.Step.Order)
 			.ToList();
 		}
+	}
+
+	private void AddShoppingList()
+	{
+		if(recipeDto != null)
+			shoppingListModal?.Show(recipeDto);
 	}
 }

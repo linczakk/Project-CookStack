@@ -1,4 +1,5 @@
 using CookStackApi.Data;
+using CookStackApi.Features.ShoppingList;
 using Microsoft.EntityFrameworkCore;
 
 var corsPolicyName = "ClientApp";
@@ -10,6 +11,8 @@ builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ShoppingListService>();
 
 builder.Services.AddSwaggerGen();
 

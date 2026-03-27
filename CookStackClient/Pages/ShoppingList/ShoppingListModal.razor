@@ -16,94 +16,95 @@
 
 				@if(IsViewMode)
 				{
-					<div class="modal-body">
+					<div class="modal-header">
 						<h2><b>@shoppingListDto.Title</b></h2>
-						<p>@shoppingListDto.Description</p>
+					</div>
 
-						<table class="table table-sm @(isDragging ? "drag-active" : "")"
-							@ondragover:preventDefault="true">
-							@foreach (var item in shoppingListDto.Items.Where(i => !i.IsChecked))
-							{
-								<tr @key="(item.Id, item.IsChecked)"
-									@ondragenter="() => DragEnter(item)"
-									@ondragover:preventDefault="true"
-									@ondrop="() => Drop(item)"
-									class="@(draggedItem == item ? "dragging" : "" ) 
-										   @(dragOverItem == item? "drag-over" : "")">
-									<td draggable="true"
-										@ondragstart="() => StartDrag(item)"
-										@ondragend="ResetDragState"
-										style="cursor: grab;">
-										☰
-									</td>
-									<td>
-										<input type="checkbox"
-											   checked="@item.IsChecked"
-											   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-									</td>
-									<td>@item.Name</td>
-									<td>@item.Quantity @item.Unit</td>
-								</tr>
+					<div class="modal-body">
+						<p>@shoppingListDto.Description</p>
+						<div class="shopping-list-container">
+							<table class="table table-sm @(isDragging ? "drag-active" : "")"
+								@ondragover:preventDefault="true">
+								@foreach (var item in shoppingListDto.Items.Where(i => !i.IsChecked))
+								{
+									<tr @key="(item.Id, item.IsChecked)"
+										@ondragenter="() => DragEnter(item)"
+										@ondragover:preventDefault="true"
+										@ondrop="() => Drop(item)"
+										class="@(draggedItem == item ? "dragging" : "" ) 
+											   @(dragOverItem == item? "drag-over" : "")">
+										<td draggable="true"
+											@ondragstart="() => StartDrag(item)"
+											@ondragend="ResetDragState"
+											style="cursor: grab;">
+											☰
+										</td>
+										<td>
+											<input type="checkbox"
+												   checked="@item.IsChecked"
+												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
+										</td>
+										<td class="item-name">@item.Name</td>
+										<td>@item.Quantity @item.Unit</td>
+									</tr>
 
 								
-							}
+								}
 
-							<tr class="drop-zone @(draggedItem?.IsChecked == true ? "active" : "")"
-								@ondragover:preventDefault="true"
-								@ondrop="() => DropToEnd(false)">
-								<td colspan="4">
-									<div class="drop-hint">
-										Move to active
-									</div>
-								</td>
-							</tr>
-							
-
-							@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked) || draggedItem != null)
-							{
-								<tr>
-									<td colspan="3"><hr /></td>
-								</tr>
-							}
-
-							
-
-							@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
-							{
-								<tr @key="(item.Id, item.IsChecked)" 
-									@ondragenter="() => DragEnter(item)"
+								<tr class="drop-zone @(draggedItem?.IsChecked == true ? "active" : "")"
 									@ondragover:preventDefault="true"
-									@ondrop="() => Drop(item)"
-									class="completed-list 
-										@(draggedItem == item ? "dragging" : "") 
-										@(dragOverItem == item ? "drag-over" : "")">
-									<td draggable="true"
-										@ondragstart="() => StartDrag(item)"
-										@ondragend="ResetDragState"
-										style="cursor: grab;">
-										☰
-									</td>
-									<td>
-										<input type="checkbox"
-											   checked="@item.IsChecked"
-											   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-									</td>
-									<td class="title text muted">@item.Name</td>
-									<td>@item.Quantity @item.Unit</td>
-								</tr>
-							}
-
-							<tr class="drop-zone @(draggedItem?.IsChecked == false ? "active" : "")"
-								@ondragover:preventDefault="true"
-								@ondrop="() => DropToEnd(true)">
-								<td colspan="4">
+									@ondrop="() => DropToEnd(false)">
+									<td colspan="4">
 										<div class="drop-hint">
-											Move to completed
+											Move to active
 										</div>
-								</td>
-							</tr>
+									</td>
+								</tr>
 
-						</table>
+								@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked) || draggedItem != null)
+								{
+									<tr>
+										<td colspan="3"><hr /></td>
+									</tr>
+								}
+
+								@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
+								{
+									<tr @key="(item.Id, item.IsChecked)" 
+										@ondragenter="() => DragEnter(item)"
+										@ondragover:preventDefault="true"
+										@ondrop="() => Drop(item)"
+										class="completed-list 
+											@(draggedItem == item ? "dragging" : "") 
+											@(dragOverItem == item ? "drag-over" : "")">
+										<td draggable="true"
+											@ondragstart="() => StartDrag(item)"
+											@ondragend="ResetDragState"
+											style="cursor: grab;">
+											☰
+										</td>
+										<td>
+											<input type="checkbox"
+												   checked="@item.IsChecked"
+												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
+										</td>
+										<td class="title text muted">@item.Name</td>
+										<td>@item.Quantity @item.Unit</td>
+									</tr>
+								}
+
+								<tr class="drop-zone @(draggedItem?.IsChecked == false ? "active" : "")"
+									@ondragover:preventDefault="true"
+									@ondrop="() => DropToEnd(true)">
+									<td colspan="4">
+											<div class="drop-hint">
+												Move to completed
+											</div>
+									</td>
+								</tr>
+
+							</table>
+						</div>
 
 					</div>
 					<div class="modal-footer">
@@ -116,30 +117,32 @@
 					<EditForm Model="shoppingListDto" OnValidSubmit="SaveAndClose">
 						<DataAnnotationsValidator />
 
-						<div class="modal-body">
-							<input class="form-control mb-2" placeholder="Title" @bind="shoppingListDto.Title" @ref="titleInput" @onkeydown="HandleKey" />
+						<div class="shopping-list-container ">
+							<div class="modal-body">
+								<input class="form-control mb-2" placeholder="Title" @bind="shoppingListDto.Title" @ref="titleInput" @onkeydown="HandleKey" />
 
-							<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="shoppingListDto.Description" @onkeydown="HandleKey" />
+								<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="shoppingListDto.Description" @onkeydown="HandleKey" />
 
-							@foreach (var item in shoppingListDto.Items)
-							{
-								<div class="input-group mb-2" @key="item">
-									@if(IsEditMode)
-									{
-										<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
-									}
-									<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
-									<InputNumber class="form-control"@bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
-									<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
-										@foreach (var unit in Enum.GetValues<UnitType>())
+								@foreach (var item in shoppingListDto.Items)
+								{
+									<div class="input-group mb-2" @key="item">
+										@if(IsEditMode)
 										{
-											<option value="@unit">@unit</option>
+											<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
 										}
-									</InputSelect>
-									<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
-								</div>
-							}
-							<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+										<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
+										<InputNumber class="form-control"@bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
+										<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
+											@foreach (var unit in Enum.GetValues<UnitType>())
+											{
+												<option value="@unit">@unit</option>
+											}
+										</InputSelect>
+										<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
+									</div>
+								}
+								<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+							</div>
 						</div>
 						<div class="modal-footer">
 							<button type="submit" class="btn btn-primary">Save</button>
