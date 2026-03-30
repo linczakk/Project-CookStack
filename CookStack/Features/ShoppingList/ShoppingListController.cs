@@ -1,6 +1,4 @@
-﻿using CoockStackShared.ShoppingList.Dtos;
-using CookStackApi.Data;
-using CookStackShared.ShoppingList.Dtos;
+﻿using CookStackShared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookStackApi.Features.ShoppingList

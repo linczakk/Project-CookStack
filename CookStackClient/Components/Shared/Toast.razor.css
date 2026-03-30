@@ -1,0 +1,75 @@
+﻿.toast-message-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.toast-message-box{
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    animation: slide-in 0.4s ease-out;
+}
+
+.toast-message-box.closing{
+    animation: slide-out 0.5s ease-in forwards
+}
+
+.toast-message-success{
+    background-color:#28a745;
+}
+
+.toast-message-failure{
+    background-color:#dc3545;
+}
+
+.toast-message-default{
+    background-color:#17a2b8;
+}
+
+.toast-close-button{
+    background: none;
+    border:none;
+    color:white;
+    font-size:16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.toast-close-button:hover{
+    color:#000;
+}
+
+@keyframes slide-in{
+    from{
+        transform: translateX(100%);
+        opacity:0;
+    }
+
+    to{
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out{
+    from{
+        transform: translateX(0);
+        opacity:1;
+    }
+
+    to{
+        transform: translate(100%);
+        opacity: 0;
+    }
+}

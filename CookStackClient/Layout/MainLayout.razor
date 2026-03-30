@@ -1,4 +1,4 @@
-﻿@using CookStackClient.Components
+﻿@using CookStackClient.Components.Shared
 @using CookStackClient.Services
 
 @inherits LayoutComponentBase
@@ -8,8 +8,7 @@
 <Spinner 
 	IsVisible = "@LoadingService.IsLoading" 
 	StatusText= "@LoadingService.StatusText" />
-
-
+<Toast />
 <div class="page">
     <div class="sidebar">
         <NavMenu />

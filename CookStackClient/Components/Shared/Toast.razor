@@ -1,0 +1,86 @@
+﻿@using CookStackClient.Models
+@using CookStackClient.Services.ToastMessage
+@inject ToastService ToastService
+
+<div class="toast-message-container">
+	@foreach (var toast in Toasts.OrderByDescending(t => t.Id))
+	{
+		<div class="toast-message-box @GetToastClass(toast.Type) @(IsClosing ? "closing" : "")">
+			<span class="toast-message-content">@toast.Message</span>
+			<button class="toast-close-button" @onclick="() => RemoveToast(toast)">x</button>
+		</div>
+	}
+</div>
+
+@code {
+	private bool IsClosing = false;
+	private List<ToastModel> Toasts = new();
+	private Queue<ToastModel> PendingToasts = new();
+	private const int MaxToasts = 5;
+	public int DismissAfter { get; set; } = 3;
+
+	private string GetToastClass(string type) => type switch
+	{
+		"success" => "toast-message-success",
+		"failure" => "toast-message-failure",
+		_ => "toast-message-default"
+	};
+
+	protected override void OnInitialized()
+	{
+		ToastService.OnShow += ShowToast;
+	}
+
+	public async void ShowToast(ToastModel toast)
+	{
+		if (Toasts.Count >= MaxToasts)
+		{
+			PendingToasts.Enqueue(toast);
+			return;
+		}
+
+		await AddToast(toast);
+	}
+
+	private async Task AddToast(ToastModel toast)
+	{
+		Toasts.Add(toast);
+
+		await Task.Delay(100);
+
+		StateHasChanged();
+
+		_ = RemoveToastAfterDelay(toast);
+	}
+
+	private async Task RemoveToastAfterDelay(ToastModel toast)
+	{
+		await Task.Delay(toast.Duration * 1000);
+
+		await RemoveToast(toast);
+
+		if(PendingToasts.Count > 0)
+		{
+			var next = PendingToasts.Dequeue();
+			await AddToast(next);
+		}
+	}
+
+	private async Task RemoveToast(ToastModel toast)
+	{
+		IsClosing = true;
+		await InvokeAsync(StateHasChanged);
+
+		await Task.Delay(500);
+
+		Toasts.Remove(toast);
+		IsClosing = false;
+
+		await InvokeAsync(StateHasChanged);
+	}
+
+	public void Dispose()
+	{
+		ToastService.OnShow -= ShowToast;
+	}
+}

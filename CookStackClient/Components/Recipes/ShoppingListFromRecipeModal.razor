@@ -1,8 +1,11 @@
 ﻿@using CookStackClient.Services
+@using CookStackClient.Services.ToastMessage
 @using CookStackShared.Recipes.Dtos
-@using CoockStackShared.ShoppingList.Dtos
+@using CookStackShared.ShoppingList.Dtos
 
 @inject ShoppingListApiClient ShoppingListApi
+@inject ToastService ToastService
+
 
 @if(IsOpen)
 {
@@ -77,26 +80,44 @@
 
 	private async Task SaveAndClose()
 	{
-		Close();
-		await Save();
+		var success = await Save();
+		if(success)
+		{
+			Close();
+		}
 	}
 
-	private async Task Save()
+	private async Task<bool> Save()
 	{
 		if(shoppingListDto != null)
 		{
 			isSaving = true;
 			StateHasChanged();
 
-			await ShoppingListApi.CreateShoppingListFromRecipeAsync(shoppingListDto);
+			var success = await ShoppingListApi.CreateShoppingListFromRecipeAsync(shoppingListDto);
 
 			isSaving = false;
+			if (!success)
+				return false;
+
+			ShowSuccess();
+
+		}
+		else
+		{
+			return false;
 		}
 
 		shoppingListDto = null;
 
+
 		await OnSaved.InvokeAsync();
+		return true;
 	}
 	public void Close() => IsOpen = false;
 
+	private void ShowSuccess()
+	{
+		ToastService.ShowSuccess("Saved!", 3);
+	}
 }

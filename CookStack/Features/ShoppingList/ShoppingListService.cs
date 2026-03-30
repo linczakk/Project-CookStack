@@ -1,5 +1,4 @@
-﻿using CoockStackShared.ShoppingList.Dtos;
-using CookStackApi.Data;
+﻿using CookStackApi.Data;
 using CookStackShared.ShoppingList.Dtos;
 using Microsoft.EntityFrameworkCore;
 

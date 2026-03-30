@@ -4,6 +4,7 @@
 @using CookStackShared.ShoppingList.Dtos
 @using CookStackShared.ShoppingList.Mappings
 
+
 @inject ShoppingListApiClient ShoppingListApi
 
 @if(IsOpen)
@@ -364,27 +365,34 @@
 	}
 
 
-	private async Task Save()
+	private async Task<bool> Save()
 	{
+		var success = false;
+
 		if (IsEditMode && shoppingListDto is ShoppingListUpdateDto updateListDto)
 		{
-			await ShoppingListApi.UpdateShoppingListAsync(Id, updateListDto);
+			success = await ShoppingListApi.UpdateShoppingListAsync(Id, updateListDto);
 		}
 		else if (IsCreateMode && shoppingListDto is CreateShoppingListDto createListDto)
 		{
-			await ShoppingListApi.CreateShoppingListAsync(createListDto);
+			success = await ShoppingListApi.CreateShoppingListAsync(createListDto);
 		}
 		else if (shoppingListDto is ShoppingListDetailsDto detailsDto)
-			await ShoppingListApi.UpdateShoppingListAsync(Id, detailsDto.ToUpdateDto());
+			success = await ShoppingListApi.UpdateShoppingListAsync(Id, detailsDto.ToUpdateDto());
 
+		if(success)
+		{
+			await OnSaved.InvokeAsync();
+		}
 
-		await OnSaved.InvokeAsync();
+		return success;
 	}
 
 	private async Task SaveAndClose()
 	{
-		Close();
-		await Save();
+		var success = await Save();
+		if(success)
+			Close();
 	}
 
 	public void Close() => IsOpen = false;

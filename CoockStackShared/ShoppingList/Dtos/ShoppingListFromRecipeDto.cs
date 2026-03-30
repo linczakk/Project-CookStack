@@ -1,7 +1,7 @@
 ﻿using CookStackShared.Recipes.Dtos;
 using System.ComponentModel.DataAnnotations;
 
-namespace CoockStackShared.ShoppingList.Dtos
+namespace CookStackShared.ShoppingList.Dtos
 {
     public class ShoppingListFromRecipeDto
     {

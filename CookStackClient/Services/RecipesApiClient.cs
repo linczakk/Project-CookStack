@@ -1,41 +1,39 @@
-﻿using CookStackShared.Recipes.Dtos;
+﻿using CookStackClient.Services.ToastMessage;
+using CookStackShared.Recipes.Dtos;
 using System.Net.Http.Json;
 
 namespace CookStackClient.Services
 {
-    public class RecipesApiClient
+    public class RecipesApiClient : BaseApiClient
     {
-        private readonly HttpClient _httpClient;
-
-        public RecipesApiClient(HttpClient http)
+        public RecipesApiClient(HttpClient http, ToastService toast) : base(http, toast)
         {
-            _httpClient = http;
         }
 
         public async Task<List<RecipeListDto>> GetRecipesAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<RecipeListDto>>("api/recipes")
+            return await GetAsync<List<RecipeListDto>>("api/recipes")
                 ?? new List<RecipeListDto>();
         }
 
         public async Task<RecipeDetailsDto?> GetRecipeByIdAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<RecipeDetailsDto>($"api/recipes/{id}");
+            return await GetAsync<RecipeDetailsDto>($"api/recipes/{id}");
         }
 
-        public async Task CreateRecipeAsync(CreateRecipeDto dto)
+        public async Task<bool> CreateRecipeAsync(CreateRecipeDto dto)
         {
-            await _httpClient.PostAsJsonAsync("api/recipes", dto);
+            return await PostAsync("api/recipes", dto);
         }
 
-        public async Task UpdateRecipeAsync(int id, RecipeUpdateDto dto)
+        public async Task<bool> UpdateRecipeAsync(int id, RecipeUpdateDto dto)
         {
-            await _httpClient.PutAsJsonAsync($"api/recipes/{id}", dto);
+            return await PutAsync($"api/recipes/{id}", dto);
         }
 
-        public async Task DeleteRecipeAsync(int id)
+        public async Task<bool> DeleteRecipeAsync(int id)
         {
-            await _httpClient.DeleteAsync($"api/recipes/{id}");
+            return await DeleteAsync($"api/recipes/{id}");
         }
     }
 }

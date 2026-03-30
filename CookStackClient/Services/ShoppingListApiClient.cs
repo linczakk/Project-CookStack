@@ -1,48 +1,44 @@
-﻿using CoockStackShared.ShoppingList.Dtos;
+﻿using CookStackClient.Services.ToastMessage;
 using CookStackShared.ShoppingList.Dtos;
 using System.Net.Http.Json;
 
 
 namespace CookStackClient.Services
 {
-    public class ShoppingListApiClient
+    public class ShoppingListApiClient : BaseApiClient
     {
-        private readonly HttpClient _httpClient;
-
-        public ShoppingListApiClient(HttpClient http)
+        public ShoppingListApiClient(HttpClient http, ToastService toast) : base(http, toast)
         {
-            _httpClient = http;
         }
 
         public async Task<List<ShoppingListsListDto>> GetShoppingListsAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<ShoppingListsListDto>>("api/ShoppingList")
-                ?? new List<ShoppingListsListDto>();
+            return await GetAsync<List<ShoppingListsListDto>>("api/ShoppingList") ?? new List<ShoppingListsListDto>();
         }
 
         public async Task<ShoppingListDetailsDto?> GetShoppingListByIdAsync(int id)
         {
-            return await _httpClient.GetFromJsonAsync<ShoppingListDetailsDto>($"api/ShoppingList/{id}");
+            return await GetAsync<ShoppingListDetailsDto>($"api/ShoppingList/{id}");
         }
 
-        public async Task CreateShoppingListAsync(CreateShoppingListDto dto)
+        public async Task<bool> CreateShoppingListAsync(CreateShoppingListDto dto)
         {
-            await _httpClient.PostAsJsonAsync("api/ShoppingList", dto);
+            return await PostAsync("api/ShoppingList", dto);
         }
 
-        public async Task CreateShoppingListFromRecipeAsync(ShoppingListFromRecipeDto dto)
+        public async Task<bool> CreateShoppingListFromRecipeAsync(ShoppingListFromRecipeDto dto)
         {
-            await _httpClient.PostAsJsonAsync("api/ShoppingList/from-recipe", dto);
+            return await PostAsync("api/ShoppingList/from-recipe", dto);
         }
 
-        public async Task UpdateShoppingListAsync(int id, ShoppingListUpdateDto dto)
+        public async Task<bool> UpdateShoppingListAsync(int id, ShoppingListUpdateDto dto)
         {
-            await _httpClient.PutAsJsonAsync($"api/ShoppingList/{id}", dto);
+            return await PutAsync($"api/ShoppingList/{id}", dto);
         }
 
-        public async Task DeleteShoppingListAsync(int id)
+        public async Task<bool> DeleteShoppingListAsync(int id)
         {
-            await _httpClient.DeleteAsync($"api/ShoppingList/{id}");
+            return await DeleteAsync($"api/ShoppingList/{id}");
         }
     }
 }
