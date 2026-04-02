@@ -18,9 +18,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeUpdateDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Enums\UnitTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\CreateShoppingListDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\SelectableIngredientDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingItemDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListBaseDto.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Dtos\ShoppingListFromRecipeDto.cs" />
+    <Compile Include="..\CoockStackShared\ShoppingList\Dtos\AddIngredientsToShoppingListDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ShoppingList\Mappings\ShoppingListMappings.cs" />
     <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListDetailsDto.cs" />
     <Compile Include="..\CoockStackShared\ShoppingList\Dtos\ShoppingListsListDto.cs" />

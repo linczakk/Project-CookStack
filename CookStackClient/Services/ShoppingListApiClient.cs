@@ -26,9 +26,9 @@ namespace CookStackClient.Services
             return await PostAsync("api/ShoppingList", dto);
         }
 
-        public async Task<bool> CreateShoppingListFromRecipeAsync(ShoppingListFromRecipeDto dto)
+        public async Task<bool> AddIngredientsAsync(AddIngredientsToShoppingListDto dto)
         {
-            return await PostAsync("api/ShoppingList/from-recipe", dto);
+            return await PostAsync("api/ShoppingList/add-ingredients", dto);
         }
 
         public async Task<bool> UpdateShoppingListAsync(int id, ShoppingListUpdateDto dto)

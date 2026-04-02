@@ -1,6 +1,7 @@
 ﻿using CookStackApi.Data;
 using CookStackShared.ShoppingList.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace CookStackApi.Features.ShoppingList
 {
@@ -78,26 +79,54 @@ namespace CookStackApi.Features.ShoppingList
             return shoppingList;
         }
 
-        public async Task<ShoppingList> CreateFromRecipe(ShoppingListFromRecipeDto dto)
+        public async Task<ShoppingList> CreateFromRecipe(AddIngredientsToShoppingListDto dto)
         {
             var shoppingList = new ShoppingList
             {
-                Title = await GenerateUniqueTitle(dto.Title),
-                Description = dto.Description,
-                Items = dto.Items.Select((si, index) => new ShoppingItem
-                {
-                    Name = si.Name,
-                    Quantity = si.Quantity,
-                    Unit = si.Unit,
-                    IsChecked = false,
-                    Order = index
-
-                }).ToList()
+                Title = dto.Title != null ? await GenerateUniqueTitle(dto.Title) : "",
+                Description = dto.Description != null ? dto.Description : "",
+                Items = MapItems(dto.Items)
             };
 
             _dbContext.ShoppingLists.Add(shoppingList);
             await _dbContext.SaveChangesAsync();
+
             return shoppingList;
+        }
+
+        public async Task<ShoppingList> AddToExisting(AddIngredientsToShoppingListDto dto)
+        {
+            var shoppingList = await _dbContext.ShoppingLists
+                .Include(s => s.Items)
+                .FirstOrDefaultAsync(s => s.Id == dto.ExistingListId);
+
+            if (shoppingList == null)
+                throw new Exception("Shopping list not found");
+
+            var currentMaxOrder = shoppingList.Items.Any()
+                ? shoppingList.Items.Max(i => i.Order) + 1 : 0;
+
+
+            var newItems = MapItems(dto.Items, currentMaxOrder);
+
+            shoppingList.Items.AddRange(newItems);
+
+            await _dbContext.SaveChangesAsync();
+
+            return shoppingList;
+        }
+
+        private List<ShoppingItem> MapItems(List<ShoppingItemDto> items, int starterOrder = 0)
+        {
+            return items
+                .Select((i, index) => new ShoppingItem
+                {
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Unit = i.Unit,
+                    IsChecked = false,
+                    Order = starterOrder + index
+                }).ToList();
         }
 
         private async Task<string> GenerateUniqueTitle(string baseTitle)
@@ -140,13 +169,13 @@ namespace CookStackApi.Features.ShoppingList
                 _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
 
                 shoppingList.Items = dto.Items
-                    .Select(si => new ShoppingItem
+                    .Select(i => new ShoppingItem
                     {
-                        Name = si.Name,
-                        Quantity = si.Quantity,
-                        Unit = si.Unit,
-                        IsChecked = si.IsChecked,
-                        Order = si.Order
+                        Name = i.Name,
+                        Quantity = i.Quantity,
+                        Unit = i.Unit,
+                        IsChecked = i.IsChecked,
+                        Order = i.Order
                     }).ToList();
 
                 await _dbContext.SaveChangesAsync();

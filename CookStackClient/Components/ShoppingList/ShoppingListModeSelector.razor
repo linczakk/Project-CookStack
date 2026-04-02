@@ -1,0 +1,21 @@
+﻿<div class="mb-3">
+	<div>
+		<input type="radio" checked="@IsNew" @onchange="() => ChangeMode(true)" />
+		<label class="ms-1 me-3">Create new list</label>
+
+		<input type="radio" checked="@(!IsNew)" @onchange="() => ChangeMode(false)" />
+		<label class="ms-1">Add to existing list</label>
+	</div>
+
+
+</div>
+@code {
+	[Parameter] public bool IsNew { get; set; }
+	[Parameter] public EventCallback<bool> IsNewChanged { get; set; }
+
+	private async Task ChangeMode(bool value)
+	{
+		IsNew = value;
+		await IsNewChanged.InvokeAsync(value);
+	}
+}

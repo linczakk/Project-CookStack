@@ -39,11 +39,24 @@ namespace CookStackApi.Features.ShoppingList
             return CreatedAtAction(nameof(GetShoppingList), new { id = result.Id }, null);
         }
 
-        [HttpPost("from-recipe")]
-        public async Task<IActionResult> CreateFromRecipe([FromBody] ShoppingListFromRecipeDto dto)
+        [HttpPost("add-ingredients")]
+        public async Task<IActionResult> AddIngredients([FromBody] AddIngredientsToShoppingListDto dto)
         {
-            var result = await _shoppingListService.CreateFromRecipe(dto);
-            return Ok(new { result.Id });
+            if (dto.Items == null || !dto.Items.Any())
+                return BadRequest("No items provided");
+
+            var result = new ShoppingList();
+
+            if (dto.ExistingListId.HasValue)
+            {
+                result = await _shoppingListService.AddToExisting(dto);
+            }
+            else
+            {
+                result = await _shoppingListService.CreateFromRecipe(dto);
+            }
+            
+            return Ok(result.Id);
         }
 
         [HttpPut("{id}")]

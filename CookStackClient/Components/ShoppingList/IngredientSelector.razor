@@ -1,0 +1,23 @@
+﻿@using CoockStackShared.ShoppingList.Dtos
+<div class="mb-3">
+	<label class="form-label">Ingredients:</label>
+
+	@foreach (var ingredient in Ingredients)
+	{
+		<div class="form-check">
+			<input type="checkbox"
+				class="form-check-input"
+				@bind="ingredient.IsSelected" />
+
+			<label class="form-check-label">
+				@ingredient.Name (@ingredient.Quantity @ingredient.Unit)
+			</label>
+		</div>
+	}
+
+</div>
+
+
+@code {
+	[Parameter] public List<SelectableIngredientDto> Ingredients { get; set; } = [];
+}
