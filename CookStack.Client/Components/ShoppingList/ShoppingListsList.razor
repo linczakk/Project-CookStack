@@ -1,0 +1,145 @@
+﻿@using CookStack.Client.Components.Shared
+@using CookStack.Client.Constants
+@using CookStack.Client.Enums
+@using CookStack.Client.Services
+@using CookStack.Shared.ShoppingList.Dtos;
+
+@page "/shopping-lists"
+@inject ShoppingListApiClient ShoppingListApi
+@inject LoadingService LoadingService
+@inject NavigationManager NavManager
+
+<ConfirmDialog @ref="confirmDialog"
+	Title="Delete list"
+	Message="Are you sure you want to delete this shopping list?"
+	OnConfirm="ConfirmDelete"/>
+
+<ShoppingListModal @ref="shoppingListModal" OnSaved="ReloadList" />
+
+<h3>Shopping Lists</h3>
+
+<hr />
+
+@if (shoppingLists != null)
+{
+	if(shoppingLists.Count > 0)
+	{
+		var activeList = shoppingLists.Where(sl => !sl.IsCompleted);
+		var completedList = shoppingLists.Where(sl => sl.IsCompleted);
+
+		<ul>
+			@foreach (var shoppingList in activeList)
+			{
+			
+					<li>
+						<span class = "cursor-pointer" @onclick="() => GoToDetails(shoppingList.Id)">
+							<label>@shoppingList.Title</label>
+						</span>
+						<div class="vr"></div>
+						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+						<p class="text-muted"><small>@shoppingList.CompletedItems / @shoppingList.TotalItems bought</small></p>
+					</li>
+			
+			}
+		</ul>
+		@if (activeList.Any() && completedList.Any())
+		{
+			<hr />
+		}
+
+		<ul>
+			@foreach (var shoppingList in completedList)
+			{
+			
+					<li>
+						<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
+						<div class="vr"></div>
+						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+
+						<span class="badge bg-success ms-2">Completed</span>
+					</li>
+			
+			}
+		</ul>
+		
+	}
+	else
+	{
+		<p>There are currently no added shopping lists</p>
+	}
+
+	<button class="btn btn-secondary btn-sm" @onclick=AddShoppingList>Add list</button>
+}
+
+
+@code {
+
+	private List<ShoppingListsListDto>? shoppingLists;
+
+	private ConfirmDialog? confirmDialog;
+	private ShoppingListModal? shoppingListModal;
+	private int deleteId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadingService.RunWithLoading(async () =>
+		{
+			await ReloadList();
+		}, "Pobieranie listy zakupów...");
+
+	}
+
+	private async Task ReloadList()
+	{
+		shoppingLists = await ShoppingListApi.GetShoppingListsAsync();
+		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
+	}
+
+	private void GoToDetails(int id)
+	{
+		shoppingListModal?.Show(ShoppingListModalMode.View, id);
+	}
+
+	private void AddShoppingList()
+	{
+		shoppingListModal?.Show(ShoppingListModalMode.Create);
+	}
+
+	private void AskDelete(int id)
+	{
+		deleteId = id;
+		confirmDialog?.Show();
+	}
+
+	private async Task ConfirmDelete()
+	{
+		await DeleteShoppingList(deleteId);
+	}
+
+	private async Task DeleteShoppingList(int id)
+	{
+		if (shoppingLists == null)
+			return;
+
+		var shoppingList = shoppingLists.FirstOrDefault(s => s.Id == id);
+
+		if (shoppingList == null)
+			return;
+
+		shoppingLists.Remove(shoppingList);
+
+		try
+		{
+			await ShoppingListApi.DeleteShoppingListAsync(id);
+		}
+		catch (Exception ex)
+		{
+			shoppingLists.Add(shoppingList);
+			Console.Error.WriteLine(ex);
+		}
+	}
+}

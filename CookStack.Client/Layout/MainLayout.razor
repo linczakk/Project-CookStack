@@ -1,4 +1,14 @@
-﻿@inherits LayoutComponentBase
+﻿@using CookStack.Client.Components.Shared
+@using CookStack.Client.Services
+
+@inherits LayoutComponentBase
+
+@inject LoadingService LoadingService
+
+<Spinner 
+	IsVisible = "@LoadingService.IsLoading" 
+	StatusText= "@LoadingService.StatusText" />
+<Toast />
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -14,3 +24,11 @@
         </article>
     </main>
 </div>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        LoadingService.OnChange += StateHasChanged;
+    }
+}

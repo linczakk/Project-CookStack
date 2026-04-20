@@ -1,9 +1,8 @@
-﻿using CookStackApi.Data;
-using CookStackShared.ShoppingList.Dtos;
+﻿using CookStack.Api.Data;
+using CookStack.Shared.ShoppingList.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace CookStackApi.Features.ShoppingList
+namespace CookStack.Api.Features.ShoppingList
 {
     public class ShoppingListService
     {

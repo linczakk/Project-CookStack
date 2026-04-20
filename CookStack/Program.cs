@@ -1,5 +1,5 @@
-using CookStackApi.Data;
-using CookStackApi.Features.ShoppingList;
+using CookStack.Api.Data;
+using CookStack.Api.Features.ShoppingList;
 using Microsoft.EntityFrameworkCore;
 
 var corsPolicyName = "ClientApp";

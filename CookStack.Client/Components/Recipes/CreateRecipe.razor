@@ -1,0 +1,25 @@
+﻿@using CookStack.Client.Components.Recipes
+@using CookStack.Client.Services
+@using CookStack.Shared.Recipes.Dtos
+@using CookStack.Shared.Enums
+
+@page "/recipe-create"
+@inject RecipesApiClient Api
+@inject NavigationManager Nav
+
+<RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />
+
+@code{
+	private CreateRecipeDto dto = new();
+
+	private async Task Create()
+	{
+		await Api.CreateRecipeAsync(dto);
+		Nav.NavigateTo("/recipes");
+	}
+
+	private void Cancel()
+	{
+		Nav.NavigateTo("/recipes");
+	}
+}

@@ -1,4 +1,4 @@
-﻿namespace CookStackApi.Features.ShoppingList
+﻿namespace CookStack.Api.Features.ShoppingList
 {
     public class ShoppingList
     {

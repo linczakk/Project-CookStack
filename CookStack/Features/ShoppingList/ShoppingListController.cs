@@ -1,7 +1,7 @@
-﻿using CookStackShared.ShoppingList.Dtos;
+﻿using CookStack.Shared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CookStackApi.Features.ShoppingList
+namespace CookStack.Api.Features.ShoppingList
 {
     [ApiController]
     [Route("api/[controller]")]

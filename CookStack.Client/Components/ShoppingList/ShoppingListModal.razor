@@ -1,0 +1,160 @@
+﻿@using CookStack.Client.Enums
+@using CookStack.Client.Services
+@using CookStack.Shared.Enums
+@using CookStack.Shared.ShoppingList.Dtos
+@using CookStack.Shared.ShoppingList.Mappings
+
+
+@inject ShoppingListApiClient ShoppingListApi
+
+@if(isOpen)
+{
+	<div class="modal-backdrop fade show"></div> 
+
+	<div class="modal fade show d-block" tabindex="-1" @onclick="Close">
+		<div class="modal-dialog" @onclick:stopPropagation="true">
+			<div class="modal-content">
+
+				@if(isViewMode)
+				{
+					<ShoppingListView
+						Model="shoppingListDto"
+						OnChanged="HandleChanged"
+						OnEdit="() => Show(ShoppingListModalMode.Edit, id)"
+						OnClose="Close"
+						/>
+				}
+				else
+				{
+					<ShoppingListEdit
+						Model="shoppingListDto"
+						IsEditMode="isEditMode"
+						ShouldFocus="isEditMode || isCreateMode"
+						OnCancel="ExitEditMode"
+						OnClose="Close" 
+						OnSave="SaveAndClose"
+						/>
+				}
+			</div>
+		</div>
+
+	</div>
+}
+
+@code {
+
+	[Parameter] 
+	public EventCallback OnSaved { get; set; }
+
+	private bool isOpen;
+	private ShoppingListModalMode mode = ShoppingListModalMode.View;
+
+	private bool isViewMode => mode is ShoppingListModalMode.View;
+	private bool isEditMode => mode is ShoppingListModalMode.Edit;
+	private bool isCreateMode => mode is ShoppingListModalMode.Create;
+
+	private int id;
+
+	private ShoppingListBaseDto shoppingListDto = new CreateShoppingListDto();
+
+	public async Task Show(ShoppingListModalMode mode, int? id = null)
+	{
+		this.mode = mode;
+		this.id = id ?? 0;
+
+		if(isCreateMode)
+		{
+			shoppingListDto = new CreateShoppingListDto();
+		}
+		else if(isEditMode)
+		{
+			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
+			shoppingListDto = data?.ToUpdateDto() ?? new ShoppingListUpdateDto();
+		}
+		else
+		{
+			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
+			shoppingListDto = data ?? new ShoppingListDetailsDto();
+		}
+
+		isOpen = true;
+
+		StateHasChanged();
+
+	}
+
+	private async Task HandleChanged()
+	{
+		await Save();
+	}
+
+	private void SortItems()
+	{
+		var sorted = shoppingListDto.Items.
+		OrderBy(i => i.IsChecked)
+		.ThenBy(i => i.Order)
+		.ToList();
+
+		shoppingListDto.Items.Clear();
+		shoppingListDto.Items.AddRange(sorted);
+	}
+
+	private async Task HandleKey(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+			await SaveAndClose();
+
+		if (e.Key == "Escape")
+		{
+			if (isCreateMode)
+				Close();
+			else if (isEditMode)
+				await ExitEditMode();
+		}
+	}
+	
+
+	private async Task ExitEditMode()
+	{
+		var data = await ShoppingListApi.GetShoppingListByIdAsync(id);
+
+		shoppingListDto = data == null ? new ShoppingListUpdateDto() : data;
+
+		SortItems();
+
+		mode = ShoppingListModalMode.View;
+	}
+
+
+	private async Task<bool> Save()
+	{
+		var success = false;
+
+		if (isEditMode && shoppingListDto is ShoppingListUpdateDto updateListDto)
+		{
+			success = await ShoppingListApi.UpdateShoppingListAsync(id, updateListDto);
+		}
+		else if (isCreateMode && shoppingListDto is CreateShoppingListDto createListDto)
+		{
+			success = await ShoppingListApi.CreateShoppingListAsync(createListDto);
+		}
+		else if (shoppingListDto is ShoppingListDetailsDto detailsDto)
+			success = await ShoppingListApi.UpdateShoppingListAsync(id, detailsDto.ToUpdateDto());
+
+		if(success)
+		{
+			await OnSaved.InvokeAsync();
+		}
+
+		return success;
+	}
+
+	private async Task SaveAndClose()
+	{
+		var success = await Save();
+		if(success)
+			Close();
+	}
+
+	public void Close() => isOpen = false;
+}

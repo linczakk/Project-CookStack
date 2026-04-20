@@ -1,0 +1,39 @@
+﻿@using CookStack.Shared.ShoppingList.Dtos
+
+@if (Lists != null && Lists.Any())
+{
+    <div class="mb-3">
+        <label class="form-label">Select list:</label>
+
+        <select class="form-select" @onchange="OnChange">
+            <option value="">-- choose list --</option>
+
+            @foreach (var list in Lists)
+            {
+                <option value="@list.Id">
+                    @list.Title
+                </option>
+            }
+
+        </select>
+    </div>
+}
+
+
+@code {
+    [Parameter] public List<ShoppingListsListDto> Lists { get; set; } = [];
+    [Parameter] public int? SelectedListId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedListIdChanged { get; set; }
+
+
+    private async Task OnChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            SelectedListId = id;
+        else
+            SelectedListId = null;
+
+        await SelectedListIdChanged.InvokeAsync(SelectedListId);
+    }
+
+}

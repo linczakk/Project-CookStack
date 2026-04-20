@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using CookStackApi.Data;
+using CookStack.Api.Data;
 
 #nullable disable
 
-namespace CookStackShared.Migrations
+namespace CookStack.Shared.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260129132356_InitialCreate")]

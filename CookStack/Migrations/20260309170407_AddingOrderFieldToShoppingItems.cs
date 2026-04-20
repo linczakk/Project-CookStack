@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace CookStackShared.Migrations
+namespace CookStack.Shared.Migrations
 {
     /// <inheritdoc />
     public partial class AddingOrderFieldToShoppingItems : Migration

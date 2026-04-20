@@ -1,6 +1,6 @@
-﻿using CookStackShared.Enums;
+﻿using CookStack.Shared.Enums;
 
-namespace CookStackApi.Features.Recipes
+namespace CookStack.Api.Features.Recipes
 {
     public class RecipeIngredient
     {

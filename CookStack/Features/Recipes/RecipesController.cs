@@ -1,9 +1,9 @@
-﻿using CookStackApi.Data;
-using CookStackShared.Recipes.Dtos;
+﻿using CookStack.Api.Data;
+using CookStack.Shared.Recipes.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CookStackApi.Features.Recipes
+namespace CookStack.Api.Features.Recipes
 {
     [ApiController]
     [Route("api/[controller]")]

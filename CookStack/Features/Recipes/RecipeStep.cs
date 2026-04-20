@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CookStackApi.Features.Recipes
+namespace CookStack.Api.Features.Recipes
 {
     public class RecipeStep
     {

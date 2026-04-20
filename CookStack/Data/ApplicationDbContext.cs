@@ -1,8 +1,8 @@
-﻿using CookStackApi.Features.Recipes;
-using CookStackApi.Features.ShoppingList;
+﻿using CookStack.Api.Features.Recipes;
+using CookStack.Api.Features.ShoppingList;
 using Microsoft.EntityFrameworkCore;
 
-namespace CookStackApi.Data
+namespace CookStack.Api.Data
 {
     public class ApplicationDbContext : DbContext
     {

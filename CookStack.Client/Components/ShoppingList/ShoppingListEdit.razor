@@ -1,0 +1,96 @@
+﻿@using CookStack.Client.Enums
+@using CookStack.Shared.Enums
+@using CookStack.Shared.ShoppingList.Dtos
+<EditForm Model="Model" OnValidSubmit="OnSave">
+	<DataAnnotationsValidator />
+
+	<div class="shopping-list-container ">
+		<div class="modal-body">
+			<input class="form-control mb-2" placeholder="Title" @bind="Model.Title" @ref="titleInput" @onkeydown="HandleKey" />
+
+			<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="Model.Description" @onkeydown="HandleKey" />
+
+			@foreach (var item in Model.Items)
+			{
+				<div class="input-group mb-2" @key="item">
+					@if (IsEditMode)
+					{
+						<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
+					}
+					<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
+					<InputNumber class="form-control" @bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
+					<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
+						@foreach (var unit in Enum.GetValues<UnitType>())
+						{
+							<option value="@unit">@unit</option>
+						}
+					</InputSelect>
+					<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
+				</div>
+			}
+			<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button type="submit" class="btn btn-primary">Save</button>
+
+		@if (IsEditMode)
+		{
+			<button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+		}
+
+		<button type="button" class="btn btn-danger" @onclick="OnClose">Close</button>
+
+	</div>
+
+</EditForm>
+
+@code {
+	[Parameter] public ShoppingListBaseDto Model { get; set; } = new CreateShoppingListDto();
+	[Parameter] public bool IsEditMode { get; set; }
+	[Parameter] public bool ShouldFocus { get; set; }
+
+
+	[Parameter] public EventCallback OnCancel { get; set; }
+	[Parameter] public EventCallback OnClose { get; set; }
+	[Parameter] public EventCallback OnSave { get; set; }
+
+	private ElementReference titleInput;
+
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (ShouldFocus)
+		{
+			await titleInput.FocusAsync();
+		}
+	}
+
+	private void RemoveShoppingItem(ShoppingItemDto item) => Model.Items.Remove(item);
+	private void AddShoppingItem()
+	{
+		var item = new ShoppingItemDto();
+
+		var maxOrder = Model.Items
+			.Select(i => i.Order)
+			.DefaultIfEmpty(0)
+			.Max();
+
+		item.Order = maxOrder + 1;
+		Model.Items.Add(item);
+	}
+
+	private async Task HandleKey(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+			await OnSave.InvokeAsync();
+
+		if (e.Key == "Escape")
+		{
+			if (IsEditMode)
+				await OnCancel.InvokeAsync();
+			else
+				await OnClose.InvokeAsync();
+		}
+	}
+}

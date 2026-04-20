@@ -1,7 +1,7 @@
-﻿using CookStackShared.Enums;
+﻿using CookStack.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace CookStackApi.Features.ShoppingList
+namespace CookStack.Api.Features.ShoppingList
 {
     public class ShoppingItem
     {
