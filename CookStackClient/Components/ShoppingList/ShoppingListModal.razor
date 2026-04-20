@@ -7,7 +7,7 @@
 
 @inject ShoppingListApiClient ShoppingListApi
 
-@if(IsOpen)
+@if(isOpen)
 {
 	<div class="modal-backdrop fade show"></div> 
 
@@ -15,149 +15,25 @@
 		<div class="modal-dialog" @onclick:stopPropagation="true">
 			<div class="modal-content">
 
-				@if(IsViewMode)
+				@if(isViewMode)
 				{
-					<div class="modal-header">
-						<h2><b>@shoppingListDto.Title</b></h2>
-					</div>
-
-					<div class="modal-body">
-						<p>@shoppingListDto.Description</p>
-						<div class="shopping-list-container">
-							<table class="table table-sm @(isDragging ? "drag-active" : "")"
-								@ondragover:preventDefault="true">
-								@foreach (var item in shoppingListDto.Items.Where(i => !i.IsChecked))
-								{
-									<tr @key="(item.Id, item.IsChecked)"
-										@ondragenter="() => DragEnter(item)"
-										@ondragover:preventDefault="true"
-										@ondrop="() => Drop(item)"
-										class="@(draggedItem == item ? "dragging" : "" ) 
-											   @(dragOverItem == item? "drag-over" : "")">
-										<td draggable="true"
-											@ondragstart="() => StartDrag(item)"
-											@ondragend="ResetDragState"
-											style="cursor: grab;">
-											☰
-										</td>
-										<td>
-											<input type="checkbox"
-												   checked="@item.IsChecked"
-												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-										</td>
-										<td class="item-name">@item.Name</td>
-										<td>@item.Quantity @item.Unit</td>
-									</tr>
-
-								
-								}
-
-								<tr class="drop-zone @(draggedItem?.IsChecked == true ? "active" : "")"
-									@ondragover:preventDefault="true"
-									@ondrop="() => DropToEnd(false)">
-									<td colspan="4">
-										<div class="drop-hint">
-											Move to active
-										</div>
-									</td>
-								</tr>
-
-								@if (shoppingListDto.Items.Any(i => i.IsChecked) && shoppingListDto.Items.Any(i => !i.IsChecked) || draggedItem != null)
-								{
-									<tr>
-										<td colspan="3"><hr /></td>
-									</tr>
-								}
-
-								@foreach (var item in shoppingListDto.Items.Where(i => i.IsChecked))
-								{
-									<tr @key="(item.Id, item.IsChecked)" 
-										@ondragenter="() => DragEnter(item)"
-										@ondragover:preventDefault="true"
-										@ondrop="() => Drop(item)"
-										class="completed-list 
-											@(draggedItem == item ? "dragging" : "") 
-											@(dragOverItem == item ? "drag-over" : "")">
-										<td draggable="true"
-											@ondragstart="() => StartDrag(item)"
-											@ondragend="ResetDragState"
-											style="cursor: grab;">
-											☰
-										</td>
-										<td>
-											<input type="checkbox"
-												   checked="@item.IsChecked"
-												   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-										</td>
-										<td class="title text muted">@item.Name</td>
-										<td>@item.Quantity @item.Unit</td>
-									</tr>
-								}
-
-								<tr class="drop-zone @(draggedItem?.IsChecked == false ? "active" : "")"
-									@ondragover:preventDefault="true"
-									@ondrop="() => DropToEnd(true)">
-									<td colspan="4">
-											<div class="drop-hint">
-												Move to completed
-											</div>
-									</td>
-								</tr>
-
-							</table>
-						</div>
-
-					</div>
-					<div class="modal-footer">
-						<button class="btn btn-primary" @onclick="() => Show(ShoppingListModalMode.Edit, Id)">Update</button>
-						<button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
-					</div>
+					<ShoppingListView
+						Model="shoppingListDto"
+						OnChanged="HandleChanged"
+						OnEdit="() => Show(ShoppingListModalMode.Edit, id)"
+						OnClose="Close"
+						/>
 				}
 				else
 				{
-					<EditForm Model="shoppingListDto" OnValidSubmit="SaveAndClose">
-						<DataAnnotationsValidator />
-
-						<div class="shopping-list-container ">
-							<div class="modal-body">
-								<input class="form-control mb-2" placeholder="Title" @bind="shoppingListDto.Title" @ref="titleInput" @onkeydown="HandleKey" />
-
-								<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="shoppingListDto.Description" @onkeydown="HandleKey" />
-
-								@foreach (var item in shoppingListDto.Items)
-								{
-									<div class="input-group mb-2" @key="item">
-										@if(IsEditMode)
-										{
-											<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
-										}
-										<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
-										<InputNumber class="form-control"@bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
-										<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
-											@foreach (var unit in Enum.GetValues<UnitType>())
-											{
-												<option value="@unit">@unit</option>
-											}
-										</InputSelect>
-										<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
-									</div>
-								}
-								<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="submit" class="btn btn-primary">Save</button>
-
-							@if (IsEditMode)
-							{
-								<button type="button" class="btn btn-secondary" @onclick="ExitEditMode">Cancel</button>
-							}
-
-							<button type="button" class="btn btn-danger" @onclick="Close">Close</button>
-
-						</div>
-
-					</EditForm>
+					<ShoppingListEdit
+						Model="shoppingListDto"
+						IsEditMode="isEditMode"
+						ShouldFocus="isEditMode || isCreateMode"
+						OnCancel="ExitEditMode"
+						OnClose="Close" 
+						OnSave="SaveAndClose"
+						/>
 				}
 			</div>
 		</div>
@@ -170,17 +46,17 @@
 	[Parameter] 
 	public EventCallback OnSaved { get; set; }
 
-	private bool IsOpen;
-	private ShoppingListModalMode Mode = ShoppingListModalMode.View;
+	private bool isOpen;
+	private ShoppingListModalMode mode = ShoppingListModalMode.View;
 
 	private ElementReference titleInput;
 
-	private bool IsViewMode => Mode is ShoppingListModalMode.View;
-	private bool IsEditMode => Mode is ShoppingListModalMode.Edit;
-	private bool IsCreateMode => Mode is ShoppingListModalMode.Create;
+	private bool isViewMode => mode is ShoppingListModalMode.View;
+	private bool isEditMode => mode is ShoppingListModalMode.Edit;
+	private bool isCreateMode => mode is ShoppingListModalMode.Create;
 
 
-	private int Id;
+	private int id;
 
 	private ShoppingListBaseDto shoppingListDto = new CreateShoppingListDto();
 
@@ -191,81 +67,34 @@
 
 	public async Task Show(ShoppingListModalMode mode, int? id = null)
 	{
-		Mode = mode;
-		Id = id ?? 0;
+		this.mode = mode;
+		this.id = id ?? 0;
 
-		if(IsCreateMode)
+		if(isCreateMode)
 		{
 			shoppingListDto = new CreateShoppingListDto();
 		}
-		else if(IsEditMode)
+		else if(isEditMode)
 		{
-			var data = await ShoppingListApi.GetShoppingListByIdAsync(Id);
-
+			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
 			shoppingListDto = data?.ToUpdateDto() ?? new ShoppingListUpdateDto();
 		}
 		else
 		{
-			var data = await ShoppingListApi.GetShoppingListByIdAsync(Id);
+			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
 			shoppingListDto = data ?? new ShoppingListDetailsDto();
 		}
 
-		IsOpen = true;
+		isOpen = true;
 
 		StateHasChanged();
 
-		if(mode != ShoppingListModalMode.View)
-		{
-			await Task.Yield();
-			await titleInput.FocusAsync();
-		}
 	}
 
-	private void AddShoppingItem()
+	private async Task HandleChanged()
 	{
-		var item = new ShoppingItemDto();
-
-		var maxOrder = shoppingListDto.Items
-			.Select(i => i.Order)
-			.DefaultIfEmpty(0)
-			.Max();
-
-		item.Order = maxOrder + 1;
-		shoppingListDto.Items.Add(item);
-	}
-
-	private void RemoveShoppingItem(ShoppingItemDto item) => shoppingListDto.Items.Remove(item);
-
-	private async Task ToggleItem(ShoppingItemDto item, bool value)
-	{
-		item.IsChecked = value;
-
-		if (item.IsChecked)
-		{
-			var maxCompleted = shoppingListDto.Items
-				.Where(i => i.IsChecked)
-				.Select(i => i.Order)
-				.DefaultIfEmpty(0)
-				.Max();
-
-			item.Order = maxCompleted + 1;
-		}
-		else
-		{
-			var maxActive = shoppingListDto.Items
-				.Where(i => !i.IsChecked)
-				.Select(i => i.Order)
-				.DefaultIfEmpty(0)
-				.Max();
-
-			item.Order = maxActive + 1;
-		}
-
-		SortItems();
-
 		await Save();
 	}
-
 
 	private void SortItems()
 	{
@@ -285,83 +114,23 @@
 
 		if (e.Key == "Escape")
 		{
-			if (IsCreateMode)
+			if (isCreateMode)
 				Close();
-			else if (IsEditMode)
+			else if (isEditMode)
 				await ExitEditMode();
 		}
 	}
-
-	private void DragEnter(ShoppingItemDto item)
-	{
-		dragOverItem = item;
-	}
-
-	private void StartDrag(ShoppingItemDto item)
-	{
-		draggedItem = item;
-		isDragging = true;
-	}
-
-	private async Task Drop(ShoppingItemDto target)
-	{
-		var index = shoppingListDto.Items.IndexOf(target);
-		await MoveItem(target.IsChecked, index);
-	}
-
-	private async Task DropToEnd(bool isChecked)
-	{
-		await MoveItem(isChecked);
-	}
-
-	private async Task MoveItem(bool isChecked, int? targetIndex = null)
-	{
-		if (draggedItem == null)
-			return;
-
-		draggedItem.IsChecked = isChecked;
-
-		var items = shoppingListDto.Items;
-
-		items.Remove(draggedItem);
-
-		if (targetIndex.HasValue)
-			items.Insert(targetIndex.Value, draggedItem);
-		else
-			items.Add(draggedItem);
-
-		shoppingListDto.Items = shoppingListDto.Items.ToList();
-
-		RecalculateOrder();
-		ResetDragState();
-
-		await Save();
-	}
-
-	private void RecalculateOrder()
-	{
-		for (int i = 0; i < shoppingListDto.Items.Count; i++)
-		{
-			shoppingListDto.Items[i].Order = i;
-		}
-	}
-
-	private void ResetDragState()
-	{
-		draggedItem = null;
-		dragOverItem = null;
-		isDragging = false;
-	}
+	
 
 	private async Task ExitEditMode()
 	{
-		var data = await ShoppingListApi.GetShoppingListByIdAsync(Id);
+		var data = await ShoppingListApi.GetShoppingListByIdAsync(id);
 
 		shoppingListDto = data == null ? new ShoppingListUpdateDto() : data;
 
 		SortItems();
 
-		Mode = ShoppingListModalMode.View;
+		mode = ShoppingListModalMode.View;
 	}
 
 
@@ -369,16 +138,16 @@
 	{
 		var success = false;
 
-		if (IsEditMode && shoppingListDto is ShoppingListUpdateDto updateListDto)
+		if (isEditMode && shoppingListDto is ShoppingListUpdateDto updateListDto)
 		{
-			success = await ShoppingListApi.UpdateShoppingListAsync(Id, updateListDto);
+			success = await ShoppingListApi.UpdateShoppingListAsync(id, updateListDto);
 		}
-		else if (IsCreateMode && shoppingListDto is CreateShoppingListDto createListDto)
+		else if (isCreateMode && shoppingListDto is CreateShoppingListDto createListDto)
 		{
 			success = await ShoppingListApi.CreateShoppingListAsync(createListDto);
 		}
 		else if (shoppingListDto is ShoppingListDetailsDto detailsDto)
-			success = await ShoppingListApi.UpdateShoppingListAsync(Id, detailsDto.ToUpdateDto());
+			success = await ShoppingListApi.UpdateShoppingListAsync(id, detailsDto.ToUpdateDto());
 
 		if(success)
 		{
@@ -395,5 +164,5 @@
 			Close();
 	}
 
-	public void Close() => IsOpen = false;
+	public void Close() => isOpen = false;
 }

@@ -1,0 +1,5 @@
+﻿.shopping-list-container {
+    scrollbar-gutter: stable;
+    max-height: 60vh;
+    overflow-y: auto;
+}
