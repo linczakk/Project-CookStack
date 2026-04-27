@@ -60,7 +60,7 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if (ShouldFocus)
+		if (firstRender && ShouldFocus)
 		{
 			await titleInput.FocusAsync();
 		}

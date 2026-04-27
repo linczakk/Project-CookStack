@@ -55,7 +55,10 @@ namespace CookStack.Api.Features.ShoppingList
             {
                 result = await _shoppingListService.CreateFromRecipe(dto);
             }
-            
+
+            if (result == null)
+                return NotFound();
+
             return Ok(result.Id);
         }
 

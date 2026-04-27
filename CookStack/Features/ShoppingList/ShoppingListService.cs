@@ -93,18 +93,17 @@ namespace CookStack.Api.Features.ShoppingList
             return shoppingList;
         }
 
-        public async Task<ShoppingList> AddToExisting(AddIngredientsToShoppingListDto dto)
+        public async Task<ShoppingList?> AddToExisting(AddIngredientsToShoppingListDto dto)
         {
             var shoppingList = await _dbContext.ShoppingLists
                 .Include(s => s.Items)
                 .FirstOrDefaultAsync(s => s.Id == dto.ExistingListId);
 
             if (shoppingList == null)
-                throw new Exception("Shopping list not found");
+                return null;
 
             var currentMaxOrder = shoppingList.Items.Any()
                 ? shoppingList.Items.Max(i => i.Order) + 1 : 0;
-
 
             var newItems = MapItems(dto.Items, currentMaxOrder);
 

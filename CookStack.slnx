@@ -1,5 +1,6 @@
 <Solution>
-  <Project Path="CookStack.Shared/CookStack.Shared.shproj" Id="b269982d-1d57-4842-8a1f-3d2a1094ef5b" />
-  <Project Path="CookStack/CookStack.Api.csproj" />
   <Project Path="CookStack.Client/CookStack.Client.csproj" Id="e142163a-54a2-4f9b-86bb-bdbee75d256b" />
+  <Project Path="CookStack.Shared/CookStack.Shared.shproj" Id="b269982d-1d57-4842-8a1f-3d2a1094ef5b" />
+  <Project Path="CookStack.Tests/CookStack.Tests.csproj" Id="f55fafa3-2984-4bfa-9024-a154dc560595" />
+  <Project Path="CookStack/CookStack.Api.csproj" />
 </Solution>
