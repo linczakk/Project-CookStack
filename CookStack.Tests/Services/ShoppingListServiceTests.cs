@@ -2,7 +2,6 @@
 using CookStack.Api.Features.ShoppingList;
 using CookStack.Shared.ShoppingList.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace CookStack.Tests.Services
 {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CookStack.Api.Features.ShoppingList
 {
-    public class ShoppingListService
+    public class ShoppingListService : IShoppingListService
     {
         private readonly ApplicationDbContext _dbContext;
 
@@ -55,7 +55,7 @@ namespace CookStack.Api.Features.ShoppingList
             return shoppingList;
         }
 
-        public async Task<ShoppingList> Create(CreateShoppingListDto dto)
+        public async Task<int> Create(CreateShoppingListDto dto)
         {
             var shoppingList = new ShoppingList
             {
@@ -75,10 +75,10 @@ namespace CookStack.Api.Features.ShoppingList
             _dbContext.ShoppingLists.Add(shoppingList);
             await _dbContext.SaveChangesAsync();
 
-            return shoppingList;
+            return shoppingList.Id;
         }
 
-        public async Task<ShoppingList> CreateFromRecipe(AddIngredientsToShoppingListDto dto)
+        public async Task<int> CreateFromRecipe(AddIngredientsToShoppingListDto dto)
         {
             var shoppingList = new ShoppingList
             {
@@ -90,10 +90,10 @@ namespace CookStack.Api.Features.ShoppingList
             _dbContext.ShoppingLists.Add(shoppingList);
             await _dbContext.SaveChangesAsync();
 
-            return shoppingList;
+            return shoppingList.Id;
         }
 
-        public async Task<ShoppingList?> AddToExisting(AddIngredientsToShoppingListDto dto)
+        public async Task<int?> AddToExisting(AddIngredientsToShoppingListDto dto)
         {
             var shoppingList = await _dbContext.ShoppingLists
                 .Include(s => s.Items)
@@ -111,7 +111,7 @@ namespace CookStack.Api.Features.ShoppingList
 
             await _dbContext.SaveChangesAsync();
 
-            return shoppingList;
+            return shoppingList.Id;
         }
 
         private List<ShoppingItem> MapItems(List<ShoppingItemDto> items, int starterOrder = 0)

@@ -7,9 +7,9 @@ namespace CookStack.Api.Features.ShoppingList
     [Route("api/[controller]")]
     public class ShoppingListController : ControllerBase
     {
-        private readonly ShoppingListService _shoppingListService;
+        private readonly IShoppingListService _shoppingListService;
 
-        public ShoppingListController(ShoppingListService shoppingListService)
+        public ShoppingListController(IShoppingListService shoppingListService)
         {
             _shoppingListService = shoppingListService;
         }
@@ -35,8 +35,8 @@ namespace CookStack.Api.Features.ShoppingList
         [HttpPost]
         public async Task<IActionResult> CreateShoppingList([FromBody] CreateShoppingListDto dto)
         {
-           var result = await _shoppingListService.Create(dto);
-            return CreatedAtAction(nameof(GetShoppingList), new { id = result.Id }, null);
+            var id = await _shoppingListService.Create(dto);
+            return CreatedAtAction(nameof(GetShoppingList), new { id }, null);
         }
 
         [HttpPost("add-ingredients")]
@@ -45,21 +45,19 @@ namespace CookStack.Api.Features.ShoppingList
             if (dto.Items == null || !dto.Items.Any())
                 return BadRequest("No items provided");
 
-            var result = new ShoppingList();
-
             if (dto.ExistingListId.HasValue)
             {
-                result = await _shoppingListService.AddToExisting(dto);
-            }
-            else
-            {
-                result = await _shoppingListService.CreateFromRecipe(dto);
+               var id = await _shoppingListService.AddToExisting(dto);
+                if (id == null)
+                    return NotFound();
+
+                return Ok(id);
             }
 
-            if (result == null)
-                return NotFound();
+            var createdId = await _shoppingListService.CreateFromRecipe(dto);
 
-            return Ok(result.Id);
+            return CreatedAtAction(nameof(GetShoppingList), new { id = createdId }, null);
+
         }
 
         [HttpPut("{id}")]
