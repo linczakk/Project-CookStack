@@ -3,7 +3,7 @@ using CookStack.Shared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace CookStack.Tests.Services
+namespace CookStack.Tests.Controllers
 {
 
     public class ShoppingListControllerTests

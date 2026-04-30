@@ -20,6 +20,85 @@ namespace CookStack.Tests.Services
 
 
         [Fact]
+        public async Task GetAll_Should_ReturnAllShoppingLists()
+        {
+            var db = CreateDbContext();
+            var service = new ShoppingListService(db);
+
+            var now = DateTime.UtcNow;
+
+            ShoppingList[] shoppingLists =
+            [
+                new ShoppingList
+                {
+                    Title = "Test Title 1",
+                    CreatedAt = now,
+                },
+                new ShoppingList
+                {
+                    Title = "Test Title 2",
+                    CreatedAt = now,
+                }
+            ];
+
+            await db.ShoppingLists.AddRangeAsync(shoppingLists);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll();
+
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count());
+            Assert.Contains(result, r => r.Title == "Test Title 1");
+            Assert.Contains(result, r => r.Title == "Test Title 2");
+            Assert.All(result, r =>
+                Assert.NotEqual(default, r.CreatedAt));
+        }
+
+        [Fact]
+        public async Task GetById_Should_ReturnShoppingList()
+        {
+            var db = CreateDbContext();
+            var service = new ShoppingListService(db);
+
+            var shoppingList = new ShoppingList
+            {
+                Title = "Test Title",
+                Items = new List<ShoppingItem>
+                {
+                    new ShoppingItem
+                    {
+                        Name = "Test Item 1",
+                    },
+                    new ShoppingItem
+                    {
+                        Name = "Test Item 2"
+                    }
+                },
+            };
+
+            await db.ShoppingLists.AddAsync(shoppingList);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetById(shoppingList.Id);
+
+            Assert.NotNull(result);
+            Assert.Equal("Test Title", result.Title);
+            Assert.Equal(2, result.Items.Count());
+            Assert.All(result.Items, i => Assert.False(string.IsNullOrEmpty(i.Name)));
+        }
+
+        [Fact]
+        public async Task GetById_Should_ReturnNull_WhenNotFound()
+        {
+            var db = CreateDbContext();
+            var service = new ShoppingListService(db);
+
+            var result = await service.GetById(0);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
         public async Task Create_Should_CreateShoppingList()
         {
             var db = CreateDbContext();
@@ -187,99 +266,7 @@ namespace CookStack.Tests.Services
 
             Assert.Null(result);
         }
-
-
-        [Fact]
-        public async Task GetById_Should_ReturnShoppingList()
-        {
-            var db = CreateDbContext();
-            var service = new ShoppingListService(db);
-
-            var shoppingList = new ShoppingList
-            {
-                Title = "Test Title",
-                Description = "Test Description",
-                Items = new List<ShoppingItem>
-                {
-                    new ShoppingItem
-                    {
-                        Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
-                    },
-                },
-            };
-
-            await db.ShoppingLists.AddAsync(shoppingList);
-            await db.SaveChangesAsync();
-
-            var result = await service.GetById(shoppingList.Id);
-
-            Assert.NotNull(result);
-            Assert.Equal("Test Title", result.Title);
-        }
-
-        [Fact]
-        public async Task GetById_Should_ReturnNull_WhenNotFound()
-        {
-            var db = CreateDbContext();
-            var service = new ShoppingListService(db);
-
-            var result = await service.GetById(0);
-
-            Assert.Null(result);
-        }
-
-
-        [Fact]
-        public async Task GetAll_Should_ReturnAllShoppingLists()
-        {
-            var db = CreateDbContext();
-            var service = new ShoppingListService(db);
-
-            ShoppingList[] shoppingLists = 
-            [ 
-                new ShoppingList
-                {
-                    Title = "Test Title 1",
-                    Description = "Test Description 1",
-                    Items = new List<ShoppingItem>
-                    {
-                        new ShoppingItem
-                        {
-                            Name = "Test Item 1",
-                            Quantity = 1,
-                            Unit = Shared.Enums.UnitType.Gram,
-                        },
-                    },
-                },
-                new ShoppingList
-                {
-                    Title = "Test Title 2",
-                    Description = "Test Description 2",
-                    Items = new List<ShoppingItem>
-                    {
-                        new ShoppingItem
-                        {
-                            Name = "Test Item 2",
-                            Quantity = 1,
-                            Unit = Shared.Enums.UnitType.Kilogram,
-                        },
-                    },
-                }
-            ];
-
-            await db.ShoppingLists.AddRangeAsync(shoppingLists);
-            await db.SaveChangesAsync();
-
-            var result = await service.GetAll();
-
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-            Assert.Contains(result, r => r.Title == "Test Title 1");
-            Assert.Contains(result, r => r.Title == "Test Title 2");
-        }
-
+                       
 
         [Fact]
         public async Task Update_Should_UpdateShoppingList()
