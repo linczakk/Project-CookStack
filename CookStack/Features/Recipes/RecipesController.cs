@@ -9,155 +9,59 @@ namespace CookStack.Api.Features.Recipes
     [Route("api/[controller]")]
     public class RecipesController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
-        public RecipesController(ApplicationDbContext context)
+        private readonly IRecipesService _recipeService;
+
+        public RecipesController(IRecipesService recipeService)
         {
-            _dbContext = context;
+            _recipeService = recipeService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RecipeListDto>>> GetRecipesList()
         {
-            var recipes = await _dbContext.Recipes
-                .Select(r => new RecipeListDto
-                {
-                    Id = r.Id,
-                    Title = r.Title,
-                    CreatedAt = r.CreatedAt
-                })
-                .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
-
-            return Ok(recipes);
+            var result = await _recipeService.GetAll();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<RecipeDetailsDto>> GetRecipeDetails(int id)
         {
-            var recipe = await _dbContext.Recipes
-                .Where(r => r.Id == id)
-                .Select(r => new RecipeDetailsDto
-                {
-                    Id = r.Id,
-                    Title = r.Title,
-                    Description = r.Description,
-                    SourceUrl = r.SourceUrl,
-                    Ingredients = r.Ingredients
-                    .Select(i => new RecipeIngredientDto
-                    {
-                        Name = i.Name,
-                        Quantity = i.Quantity,
-                        Unit = i.Unit
+            var result = await _recipeService.GetById(id);
 
-                    })
-                    .ToList(),
-                    Steps = r.Steps
-                    .Select(s => new RecipeStepDto
-                    {
-                        Order = s.Order,
-                        Description = s.Description
-                    })
-                    .ToList(),
-
-                }).FirstOrDefaultAsync();
-
-
-            if (recipe == null)
-            {
+            if (result == null)
                 return NotFound();
-            }
 
-            return Ok(recipe);
+            return Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeDto dto)
         {
-            var recipe = new Recipe
-            {
-                Id = 0,
-                Title = dto.Title,
-                Description = dto.Description ?? string.Empty,
-                SourceUrl = dto.SourceUrl,
-                Ingredients = dto.Ingredients.Select(i => new RecipeIngredient
-                {
-                    Name = i.Name,
-                    Quantity = i.Quantity,
-                    Unit = i.Unit
-
-                })
-                .ToList(),
-                Steps = dto.Steps.Select((s, index) => new RecipeStep
-                {
-                    Order = index + 1,
-                    Description = s.Description
-                })
-                .ToList()
-            };
-
-            _dbContext.Recipes.Add(recipe);
-            await _dbContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetRecipeDetails), new { id = recipe.Id }, null);
+            var id = await _recipeService.Create(dto);
+            return CreatedAtAction(nameof(GetRecipeDetails), new { id }, null);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRecipe(int id, [FromBody] RecipeUpdateDto dto)
         {
-            var recipe = await _dbContext.Recipes
-                .Include(r => r.Ingredients)
-                .Include(r => r.Steps)
-                .FirstOrDefaultAsync(r => r.Id == id);
+            var result = await _recipeService.Update(id, dto);
 
-            if (recipe == null)
-            {
-                return NotFound();
-            }
+            if (result)
+                return NoContent();
 
-            recipe.Title = dto.Title;
-            recipe.Description = dto.Description;
-            recipe.SourceUrl = dto.SourceUrl;
-
-
-            _dbContext.Ingredients.RemoveRange(recipe.Ingredients);
-            _dbContext.Steps.RemoveRange(recipe.Steps);
-
-            recipe.Ingredients = dto.Ingredients
-                .Select(i => new RecipeIngredient
-                {
-                    Name = i.Name,
-                    Quantity = i.Quantity,
-                    Unit = i.Unit
-                }).ToList();
-
-            recipe.Steps = dto.Steps
-                .OrderBy(s => s.Order)
-                .Select(s => new RecipeStep
-                {
-                    Order = s.Order,
-                    Description = s.Description
-
-                }).ToList();
-
-
-            await _dbContext.SaveChangesAsync();
-
-            return NoContent();
+            return NotFound();
         }
 
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
         {
-            var recipe = await _dbContext.Recipes.FindAsync(id);
-            if (recipe == null)
-            {
-                return NotFound();
-            }
+            var result = await _recipeService.Delete(id);
 
-            _dbContext.Recipes.Remove(recipe);
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
+            if (result)
+                return NoContent();
+
+            return NotFound();
         }
     }
 }

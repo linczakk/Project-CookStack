@@ -1,4 +1,5 @@
 using CookStack.Api.Data;
+using CookStack.Api.Features.Recipes;
 using CookStack.Api.Features.ShoppingList;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<IRecipesService, RecipesService>();
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 
 builder.Services.AddSwaggerGen();

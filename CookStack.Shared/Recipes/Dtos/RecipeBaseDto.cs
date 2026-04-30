@@ -1,7 +1,10 @@
-﻿namespace CookStack.Shared.Recipes.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CookStack.Shared.Recipes.Dtos
 {
     public abstract class RecipeBaseDto
     {
+        [Required]
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string? SourceUrl { get; set; }
