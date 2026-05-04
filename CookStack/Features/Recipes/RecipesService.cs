@@ -60,6 +60,7 @@ namespace CookStack.Api.Features.Recipes
             return recipe;
         }
 
+
         public async Task<int> Create(CreateRecipeDto dto)
         {
             var recipe = new Recipe
@@ -77,7 +78,6 @@ namespace CookStack.Api.Features.Recipes
                 .ToList(),
 
                 Steps = dto.Steps
-                .OrderBy(s => s.Order)
                 .Select((s, index) => new RecipeStep
                 {
                     Order = index + 1,
@@ -119,10 +119,9 @@ namespace CookStack.Api.Features.Recipes
                     }).ToList();
 
                 recipe.Steps = dto.Steps
-                    .OrderBy(s => s.Order)
-                    .Select(s => new RecipeStep
+                    .Select((s, index) => new RecipeStep
                     {
-                        Order = s.Order,
+                        Order = index + 1,
                         Description = s.Description
 
                     }).ToList();

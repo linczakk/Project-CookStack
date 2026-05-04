@@ -107,25 +107,27 @@ namespace CookStack.Tests.Services
             var shoppingListDto = new CreateShoppingListDto
             {
                 Title = "Test Title",
-                Description = "Test Description",
                 Items = new List<ShoppingItemDto>
                 {
                     new ShoppingItemDto
                     {
                         Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
+                    },
+                    new ShoppingItemDto
+                    {
+                        Name = "Test Item 2"
                     }
                 }
             };
 
-            await service.Create(shoppingListDto);
+            var success = await service.Create(shoppingListDto);
 
             var result = db.ShoppingLists.SingleOrDefault(s => s.Title == "Test Title");
 
             Assert.NotNull(result);
-            Assert.Equal("Test Description", result.Description);
-            Assert.Contains(result.Items, i => i.Name == "Test Item 1");
+            Assert.True(success > 0);
+            Assert.Equal(2, result.Items.Count());
+            Assert.All(result.Items, i => Assert.False(string.IsNullOrEmpty(i.Name)));
         }
 
         [Fact]
@@ -137,25 +139,27 @@ namespace CookStack.Tests.Services
             var shoppingListDto = new AddIngredientsToShoppingListDto
             {
                 Title = "Test Title",
-                Description = "Test Description",
                 Items = new List<ShoppingItemDto>
                 {
                     new ShoppingItemDto
                     {
                         Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
+                    },
+                    new ShoppingItemDto
+                    {
+                        Name = "Test Item 2",
                     }
                 }
             };
 
-            await service.CreateFromRecipe(shoppingListDto);
+            var success = await service.CreateFromRecipe(shoppingListDto);
 
             var result = db.ShoppingLists.SingleOrDefault(s => s.Title == "Test Title");
 
             Assert.NotNull(result);
-            Assert.Equal("Test Title", result.Title);
-            Assert.Contains(result.Items, i => i.Name == "Test Item 1");
+            Assert.True(success > 0);
+            Assert.Equal(2, result.Items.Count());
+            Assert.All(result.Items, i => Assert.False(string.IsNullOrEmpty(i.Name)));
         }
 
         [Fact]
@@ -167,14 +171,11 @@ namespace CookStack.Tests.Services
             var shoppingList = new ShoppingList
             {
                 Title = "Test Title",
-                Description = "Test Description",
                 Items = new List<ShoppingItem>
                 {
                     new ShoppingItem
                     {
                         Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
                     },
                 },
             };
@@ -185,20 +186,18 @@ namespace CookStack.Tests.Services
             var shoppingListDto = new AddIngredientsToShoppingListDto
             {
                 Title = shoppingList.Title,
-                Description = shoppingList.Description,
                 Items = shoppingList.Items.Select(i => new ShoppingItemDto
                 {
                     Name = i.Name,
-                    Quantity= i.Quantity,
-                    Unit = i.Unit,
                 }).ToList(),
             };
 
-            await service.CreateFromRecipe(shoppingListDto);
+            var success = await service.CreateFromRecipe(shoppingListDto);
 
             var result = db.ShoppingLists;
 
             Assert.NotNull(result);
+            Assert.True(success > 0);
             Assert.Equal(2, result.Count());
             Assert.Contains(result, r => r.Title == "Test Title (2)");
         }
@@ -212,14 +211,11 @@ namespace CookStack.Tests.Services
             var shoppingList = new ShoppingList
             {
                 Title = "Test Title",
-                Description = "Test Description",
                 Items = new List<ShoppingItem>
                 {
                     new ShoppingItem
                     {
                         Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
                     },
                 },
             };
@@ -235,19 +231,18 @@ namespace CookStack.Tests.Services
                     new ShoppingItemDto
                     {
                         Name = "Test Item 2",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
                     }
                 }
             };
 
-            await service.AddToExisting(shoppingListDto);
+            var success = await service.AddToExisting(shoppingListDto);
 
             var result = db.ShoppingLists.SingleOrDefault(s => s.Title == "Test Title");
 
             Assert.NotNull(result);
-            Assert.Contains(result.Items, i => i.Name == "Test Item 1");
-            Assert.Contains(result.Items, i => i.Name == "Test Item 2");
+            Assert.True(success > 0);
+            Assert.Equal(2, result.Items.Count());
+            Assert.All(result.Items, i => Assert.False(string.IsNullOrEmpty(i.Name)));
         }
 
 
@@ -262,9 +257,9 @@ namespace CookStack.Tests.Services
                 ExistingListId = 999
             };
 
-            var result = await service.AddToExisting(shoppingListDto);
+            var success = await service.AddToExisting(shoppingListDto);
 
-            Assert.Null(result);
+            Assert.Null(success);
         }
                        
 
@@ -283,9 +278,11 @@ namespace CookStack.Tests.Services
                     new ShoppingItem
                     {
                         Name = "Test Item 1",
-                        Quantity = 1,
-                        Unit = Shared.Enums.UnitType.Gram,
                     },
+                    new ShoppingItem
+                    {
+                        Name = "Test Item 2",
+                    }
                 },
             };
 
@@ -295,7 +292,7 @@ namespace CookStack.Tests.Services
             var shoppingListDto = new ShoppingListUpdateDto
             {
                 Title = shoppingList.Title,
-                Description = "Updated Description",
+                Description = "Updated Test Description",
                 Items = shoppingList.Items.Select(i => new ShoppingItemDto
                 {
                     Name = i.Name,
@@ -303,13 +300,21 @@ namespace CookStack.Tests.Services
                     Unit =  i.Unit
                 }).ToList()
             };
+
+            shoppingListDto.Items.Add(new ShoppingItemDto
+            {
+                Name = "Test Item 3"
+            });
+
             var success = await service.Update(shoppingList.Id, shoppingListDto);
 
             var result = db.ShoppingLists.Find(shoppingList.Id);
 
             Assert.NotNull(result);
             Assert.True(success);
-            Assert.Equal("Updated Description", result.Description);
+            Assert.Equal("Updated Test Description", result.Description);
+            Assert.Equal(3, result.Items.Count());
+            Assert.Contains(result.Items, i => i.Name == "Test Item 3");
         }
 
         [Fact]
@@ -321,6 +326,7 @@ namespace CookStack.Tests.Services
             var result = await service.Update(0, new ShoppingListUpdateDto());
 
             Assert.False(result);
+            Assert.Empty(db.Recipes);
         }
 
 
@@ -365,6 +371,7 @@ namespace CookStack.Tests.Services
             var result = await service.Delete(0);
 
             Assert.False(result);
+            Assert.Empty(db.Recipes);
         }
     }
 }

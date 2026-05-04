@@ -1,5 +1,6 @@
 ﻿using CookStack.Api.Data;
 using CookStack.Api.Features.Recipes;
+using CookStack.Shared.Recipes.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace CookStack.Tests.Services
@@ -91,6 +92,181 @@ namespace CookStack.Tests.Services
             Assert.Equal(2, result.Ingredients.Count());
             Assert.All(result.Ingredients, i => Assert.False(string.IsNullOrEmpty(i.Name)));
             Assert.Contains(result.Steps, s => s.Description == "Test Step");
+        }
+
+        [Fact]
+        public async Task GetById_Should_ReturnNull_WhenRecipeNotFound()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var result = await service.GetById(0);
+
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task Create_Should_CreateRecipe()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var recipeDto = new CreateRecipeDto
+            {
+                Title = "Test Title",
+                Ingredients = new List<RecipeIngredientDto>
+                {
+                    new RecipeIngredientDto
+                    {
+                        Name = "Test Ingredient 1"
+                    },
+                    new RecipeIngredientDto
+                    {
+                        Name = "Test Ingredient 2"
+                    }
+                },
+                Steps = new List<RecipeStepDto>
+                {
+                    new RecipeStepDto
+                    {
+                        Description = "Test Step"
+                    }
+                }
+            };
+
+            var success = await service.Create(recipeDto);
+
+            var result = db.Recipes.SingleOrDefault(r => r.Title == "Test Title");
+
+            Assert.NotNull(result);
+            Assert.True(success > 0);
+            Assert.Equal(2, result.Ingredients.Count());
+            Assert.All(result.Ingredients, i => Assert.False(string.IsNullOrEmpty(i.Name)));
+            Assert.Contains(result.Steps, s => s.Description == "Test Step");
+            Assert.Equal(1, result.Steps.First().Order);
+        }
+
+        [Fact]
+        public async Task Update_Should_UpdateRecipe()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var recipe = new Recipe
+            {
+                Title = "Test Title",
+                Description = "Test Description",
+                Ingredients = new List<RecipeIngredient>
+                {
+                    new RecipeIngredient
+                    {
+                        Name = "Test Ingredient 1"
+                    },
+                    new RecipeIngredient
+                    {
+                        Name = "Test Ingredient 2"
+                    }
+                },
+                Steps = new List<RecipeStep>
+                {
+                    new RecipeStep
+                    {
+                        Description = "Test Step 1"
+                    }
+                }
+            };
+
+            await db.Recipes.AddAsync(recipe);
+            await db.SaveChangesAsync();
+
+            var recipeDto = new RecipeUpdateDto
+            {
+                Title = recipe.Title,
+                Description = "Updated Test Description",
+                Ingredients = recipe.Ingredients.Select(i => new RecipeIngredientDto
+                {
+                    Name = i.Name
+                }).ToList(),
+                Steps = recipe.Steps.Select(s => new RecipeStepDto
+                {
+                    Description = s.Description
+                }).ToList()
+            };
+
+            recipeDto.Ingredients.Add(new RecipeIngredientDto
+            {
+                Name = "Test Ingredient 3"
+            });
+            recipeDto.Steps.Add(new RecipeStepDto
+            {
+                Description = "Test Step 2"
+            });
+
+            var success = await service.Update(recipe.Id, recipeDto);
+
+            var result = db.Recipes
+                .Include(r => r.Ingredients)
+                .Include(r => r.Steps)
+                .First(r => r.Id == recipe.Id);
+
+            Assert.NotNull(result);
+            Assert.True(success);
+            Assert.Equal("Updated Test Description", result.Description);
+            Assert.Equal(3, result.Ingredients.Count());
+            Assert.Contains(result.Ingredients, i => i.Name == "Test Ingredient 3");
+            Assert.Equal(2, result.Steps.Count());
+            Assert.Equal(2, result.Steps[1].Order);
+        }
+
+        [Fact]
+        public async Task Update_Should_ReturnFalse_WhenRecipeNotFound()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var recipeDto = new RecipeUpdateDto
+            {
+                Title = "Test Title"
+            };
+
+            var success = await service.Update(0, recipeDto);
+
+            Assert.False(success);
+            Assert.Empty(db.Recipes);
+        }
+
+        [Fact]
+        public async Task Delete_Should_DeleteRecipe()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var recipe = new Recipe
+            {
+                Title = "Test Title"
+            };
+
+            await db.Recipes.AddAsync(recipe);
+            await db.SaveChangesAsync();
+
+            var success = await service.Delete(recipe.Id);
+
+            var result = db.Recipes.Find(recipe.Id);
+
+            Assert.True(success);
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task Delete_Should_ReturnFalse_WhenRecipeNotFound()
+        {
+            var db = CreateDbContext();
+            var service = new RecipesService(db);
+
+            var success = await service.Delete(0);
+
+            Assert.False(success);
+            Assert.Empty(db.Recipes);
         }
     }
 }
