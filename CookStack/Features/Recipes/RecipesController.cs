@@ -1,7 +1,5 @@
-﻿using CookStack.Api.Data;
-using CookStack.Shared.Recipes.Dtos;
+﻿using CookStack.Shared.Recipes.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CookStack.Api.Features.Recipes
 {
@@ -24,7 +22,7 @@ namespace CookStack.Api.Features.Recipes
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RecipeDetailsDto>> GetRecipeDetails(int id)
+        public async Task<ActionResult<RecipeDetailsDto>> GetRecipe(int id)
         {
             var result = await _recipeService.GetById(id);
 
@@ -38,7 +36,7 @@ namespace CookStack.Api.Features.Recipes
         public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeDto dto)
         {
             var id = await _recipeService.Create(dto);
-            return CreatedAtAction(nameof(GetRecipeDetails), new { id }, null);
+            return CreatedAtAction(nameof(GetRecipe), new { id }, null);
         }
 
         [HttpPut("{id}")]
