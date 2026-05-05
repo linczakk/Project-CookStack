@@ -5,11 +5,11 @@ namespace CookStack.Api.Features.Recipes
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RecipesController : ControllerBase
+    public class RecipeController : ControllerBase
     {
-        private readonly IRecipesService _recipeService;
+        private readonly IRecipeService _recipeService;
 
-        public RecipesController(IRecipesService recipeService)
+        public RecipeController(IRecipeService recipeService)
         {
             _recipeService = recipeService;
         }

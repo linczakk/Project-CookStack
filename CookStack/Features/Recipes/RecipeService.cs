@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CookStack.Api.Features.Recipes
 {
-    public class RecipesService : IRecipesService
+    public class RecipeService : IRecipeService
     {
         private readonly ApplicationDbContext _dbContext;
 
-        public RecipesService(ApplicationDbContext context)
+        public RecipeService(ApplicationDbContext context)
         {
             _dbContext = context;
         }

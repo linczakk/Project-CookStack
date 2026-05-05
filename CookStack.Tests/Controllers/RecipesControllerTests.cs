@@ -11,7 +11,7 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task GetRecipesList_Should_ReturnOk()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.GetAll())
@@ -21,7 +21,7 @@ namespace CookStack.Tests.Controllers
                     new() { Title = "Test Title 2"}
                 });
 
-            var controller = new RecipesController (mockService.Object);
+            var controller = new RecipeController (mockService.Object);
 
             var result = await controller.GetRecipesList();
 
@@ -34,15 +34,15 @@ namespace CookStack.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecipe_Should_ReturnOk_WhenListExist()
+        public async Task GetRecipe_Should_ReturnOk_WhenRecipeExist()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.GetById(1))
                 .ReturnsAsync(new RecipeDetailsDto { Title = "Test Title" });
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var result = await controller.GetRecipe(1);
 
@@ -53,15 +53,15 @@ namespace CookStack.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecipe_Should_ReturnNotFound_WhenListDoesNotExist()
+        public async Task GetRecipe_Should_ReturnNotFound_WhenRecipeDoesNotExist()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.GetById(1))
                 .ReturnsAsync((RecipeDetailsDto?)null);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var result = await controller.GetRecipe(1);
 
@@ -71,13 +71,13 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task CreateRecipe_Should_ReturnCreatedAtAction()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.Create(It.Is<CreateRecipeDto>(d => d.Title == "Test Title")))
                 .ReturnsAsync(123);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var dto = new CreateRecipeDto
             {
@@ -87,7 +87,7 @@ namespace CookStack.Tests.Controllers
             var result = await controller.CreateRecipe(dto);
 
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            Assert.Equal(nameof(RecipesController.GetRecipe), createdResult.ActionName);
+            Assert.Equal(nameof(RecipeController.GetRecipe), createdResult.ActionName);
             Assert.NotNull(createdResult.RouteValues);
             Assert.Equal(123, createdResult.RouteValues["id"]);
 
@@ -96,13 +96,13 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task UpdateRecipe_Should_ReturnNoContent_WhenUpdateIsSuccessful()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.Update(1, It.Is<RecipeUpdateDto>(d => d.Title == "Test Title")))
                 .ReturnsAsync(true);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var dto = new RecipeUpdateDto
             {
@@ -121,13 +121,13 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task UpdateRecipe_Should_ReturnNotFound_WhenUpdateIsUnsuccessful()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.Update(1, It.Is<RecipeUpdateDto>(d => d.Title == "Test Title")))
                 .ReturnsAsync(false);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var dto = new RecipeUpdateDto
             {
@@ -146,13 +146,13 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task DeleteRecipe_Should_ReturnNoContent_WhenDeleteIsSuccessful()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.Delete(1))
                 .ReturnsAsync(true);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var result = await controller.DeleteRecipe(1);
 
@@ -166,13 +166,13 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task DeleteRecipe_Should_ReturnNotFound_WhenDeleteIsUnsuccessful()
         {
-            var mockService = new Mock<IRecipesService>();
+            var mockService = new Mock<IRecipeService>();
 
             mockService
                 .Setup(s => s.Delete(1))
                 .ReturnsAsync(false);
 
-            var controller = new RecipesController(mockService.Object);
+            var controller = new RecipeController(mockService.Object);
 
             var result = await controller.DeleteRecipe(1);
 

@@ -22,7 +22,7 @@ namespace CookStack.Tests.Services
         public async Task GetAll_Should_ReturnAllRecipes()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var now = DateTime.UtcNow;
 
@@ -57,7 +57,7 @@ namespace CookStack.Tests.Services
         public async Task GetById_Should_ReturnRecipe()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var recipe = new Recipe
             {
@@ -98,7 +98,7 @@ namespace CookStack.Tests.Services
         public async Task GetById_Should_ReturnNull_WhenRecipeNotFound()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var result = await service.GetById(0);
 
@@ -109,7 +109,7 @@ namespace CookStack.Tests.Services
         public async Task Create_Should_CreateRecipe()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var recipeDto = new CreateRecipeDto
             {
@@ -150,7 +150,7 @@ namespace CookStack.Tests.Services
         public async Task Update_Should_UpdateRecipe()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var recipe = new Recipe
             {
@@ -222,7 +222,7 @@ namespace CookStack.Tests.Services
         public async Task Update_Should_ReturnFalse_WhenRecipeNotFound()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var recipeDto = new RecipeUpdateDto
             {
@@ -239,7 +239,7 @@ namespace CookStack.Tests.Services
         public async Task Delete_Should_DeleteRecipe()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var recipe = new Recipe
             {
@@ -261,7 +261,7 @@ namespace CookStack.Tests.Services
         public async Task Delete_Should_ReturnFalse_WhenRecipeNotFound()
         {
             var db = CreateDbContext();
-            var service = new RecipesService(db);
+            var service = new RecipeService(db);
 
             var success = await service.Delete(0);
 

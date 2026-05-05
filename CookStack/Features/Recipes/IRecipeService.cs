@@ -2,7 +2,7 @@
 
 namespace CookStack.Api.Features.Recipes
 {
-    public interface IRecipesService
+    public interface IRecipeService
     {
         Task<IEnumerable<RecipeListDto>> GetAll();
         Task<RecipeDetailsDto?> GetById(int id);

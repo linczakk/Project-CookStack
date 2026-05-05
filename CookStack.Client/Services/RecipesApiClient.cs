@@ -11,28 +11,28 @@ namespace CookStack.Client.Services
 
         public async Task<List<RecipeListDto>> GetRecipesAsync()
         {
-            return await GetAsync<List<RecipeListDto>>("api/recipes")
+            return await GetAsync<List<RecipeListDto>>("api/recipe")
                 ?? new List<RecipeListDto>();
         }
 
         public async Task<RecipeDetailsDto?> GetRecipeByIdAsync(int id)
         {
-            return await GetAsync<RecipeDetailsDto>($"api/recipes/{id}");
+            return await GetAsync<RecipeDetailsDto>($"api/recipe/{id}");
         }
 
         public async Task<bool> CreateRecipeAsync(CreateRecipeDto dto)
         {
-            return await PostAsync("api/recipes", dto);
+            return await PostAsync("api/recipe", dto);
         }
 
         public async Task<bool> UpdateRecipeAsync(int id, RecipeUpdateDto dto)
         {
-            return await PutAsync($"api/recipes/{id}", dto);
+            return await PutAsync($"api/recipe/{id}", dto);
         }
 
         public async Task<bool> DeleteRecipeAsync(int id)
         {
-            return await DeleteAsync($"api/recipes/{id}");
+            return await DeleteAsync($"api/recipe/{id}");
         }
     }
 }
