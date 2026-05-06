@@ -13,9 +13,17 @@ namespace CookStack.Api.Features.ShoppingList
             _dbContext = context;
         }
 
-        public async Task<IEnumerable<ShoppingListsListDto>> GetAll()
+        public async Task<IEnumerable<ShoppingListsListDto>> GetAll(string? search = null)
         {
-            var shoppingList = await _dbContext.ShoppingLists
+            var query = _dbContext.ShoppingLists.AsQueryable();
+
+
+            if(!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(s => s.Title.Contains(search));
+            }
+
+            return await query
                 .Select(s => new ShoppingListsListDto
                 {
                     Id = s.Id,
@@ -26,8 +34,6 @@ namespace CookStack.Api.Features.ShoppingList
                 })
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
-
-            return shoppingList;
         }
 
         public async Task<ShoppingListDetailsDto?> GetById(int id)

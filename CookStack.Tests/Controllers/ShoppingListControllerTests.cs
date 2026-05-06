@@ -1,7 +1,9 @@
-﻿using CookStack.Api.Features.ShoppingList;
+﻿using CookStack.Api.Features.Recipes;
+using CookStack.Api.Features.ShoppingList;
 using CookStack.Shared.ShoppingList.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Runtime.CompilerServices;
 
 namespace CookStack.Tests.Controllers
 {
@@ -9,7 +11,7 @@ namespace CookStack.Tests.Controllers
     public class ShoppingListControllerTests
     {
         [Fact]
-        public async Task GetShoppingLists_Should_ReturnOk()
+        public async Task GetShoppingLists_Should_ReturnOk_WhenSearchIsNull()
         {
             var mockService = new Mock<IShoppingListService>();
 
@@ -23,7 +25,7 @@ namespace CookStack.Tests.Controllers
 
             var controller = new ShoppingListController(mockService.Object);
 
-            var result = await controller.GetShoppingLists();
+            var result = await controller.GetShoppingLists(null);
 
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsAssignableFrom<IEnumerable<ShoppingListsListDto>>(okResult.Value);
@@ -33,6 +35,49 @@ namespace CookStack.Tests.Controllers
             Assert.Contains(value, v => v.Title == "Test Title 2");
         }
 
+        [Fact]
+        public async Task GetShoppingLists_Should_ReturnFilteredShoppingLists_WhenSearchMatchesTitle()
+        {
+            var mockService = new Mock<IShoppingListService>();
+
+            mockService
+                .Setup(s => s.GetAll("Test Title"))
+                .ReturnsAsync(new List<ShoppingListsListDto>
+                {
+                    new() { Title = "Test Title 1"},
+                    new() { Title = "Test Title 2"}
+                });
+
+            var controller = new ShoppingListController(mockService.Object);
+
+            var result = await controller.GetShoppingLists("Test Title");
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsAssignableFrom<IEnumerable<ShoppingListsListDto>>(okResult.Value);
+
+            Assert.Equal(2, value.Count());
+            Assert.Contains(value, v => v.Title == "Test Title 1");
+            Assert.Contains(value, v => v.Title == "Test Title 2");
+        }
+
+        [Fact]
+        public async Task GetShoppingLists_Should_ReturnEmptyList_WhenNoMatchFound()
+        {
+            var mockService = new Mock<IShoppingListService>();
+
+            mockService
+                .Setup(s => s.GetAll("Test Title 2"))
+                .ReturnsAsync(new List<ShoppingListsListDto>());
+
+            var controller = new ShoppingListController(mockService.Object);
+
+            var result = await controller.GetShoppingLists("Test Title 2");
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsAssignableFrom<IEnumerable<ShoppingListsListDto>>(okResult.Value);
+
+            Assert.Empty(value);
+        }
 
         [Fact]
         public async Task GetShoppingList_Should_ReturnOk_WhenListExist()

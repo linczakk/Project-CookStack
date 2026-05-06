@@ -15,9 +15,9 @@ namespace CookStack.Api.Features.ShoppingList
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ShoppingListsListDto>>> GetShoppingLists()
+        public async Task<ActionResult<IEnumerable<ShoppingListsListDto>>> GetShoppingLists([FromQuery] string? search)
         {
-            var result = await _shoppingListService.GetAll();
+            var result = await _shoppingListService.GetAll(search);
             return Ok(result);
         }
 

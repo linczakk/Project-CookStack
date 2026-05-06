@@ -20,7 +20,7 @@ namespace CookStack.Tests.Services
 
 
         [Fact]
-        public async Task GetAll_Should_ReturnAllShoppingLists()
+        public async Task GetAll_Should_ReturnAllShoppingLists_WhenSearchIsNull()
         {
             var db = CreateDbContext();
             var service = new ShoppingListService(db);
@@ -44,7 +44,7 @@ namespace CookStack.Tests.Services
             await db.ShoppingLists.AddRangeAsync(shoppingLists);
             await db.SaveChangesAsync();
 
-            var result = await service.GetAll();
+            var result = await service.GetAll(null);
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count());
@@ -53,6 +53,61 @@ namespace CookStack.Tests.Services
             Assert.All(result, r =>
                 Assert.NotEqual(default, r.CreatedAt));
         }
+
+        [Fact]
+        public async Task GetAll_Should_ReturnFilteredShoppingLists_WhenSearchMatchesTitle()
+        {
+            var db = CreateDbContext();
+            var service = new ShoppingListService(db);
+
+            var now = DateTime.UtcNow;
+
+            ShoppingList[] shoppingLists =
+            [
+                new ShoppingList
+                {
+                    Title = "Test Title 1",
+                    CreatedAt = now,
+                },
+                new ShoppingList
+                {
+                    Title = "Test Title 2",
+                    CreatedAt = now,
+                }
+            ];
+
+            await db.ShoppingLists.AddRangeAsync(shoppingLists);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll("Test Title 2");
+
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Contains(result, r => r.Title == "Test Title 2");
+            Assert.DoesNotContain(result, r => r.Title == "Test Title 1");
+            Assert.All(result, r => Assert.NotEqual(default, r.CreatedAt));
+        }
+
+        [Fact]
+        public async Task GetAll_Should_ReturnEmptyList_WhenNoMatchFound()
+        {
+            var db = CreateDbContext();
+            var service = new ShoppingListService(db);
+
+            var shoppingList = new ShoppingList
+            {
+                Title = "Test Title 1"
+            };
+
+            await db.ShoppingLists.AddAsync(shoppingList);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll("Test Title 2");
+
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
 
         [Fact]
         public async Task GetById_Should_ReturnShoppingList()

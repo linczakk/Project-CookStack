@@ -4,7 +4,7 @@ namespace CookStack.Api.Features.ShoppingList
 {
     public interface IShoppingListService
     {
-        Task<IEnumerable<ShoppingListsListDto>> GetAll();
+        Task<IEnumerable<ShoppingListsListDto>> GetAll(string? search = null);
         Task<ShoppingListDetailsDto?> GetById(int id);
         Task<int> Create(CreateShoppingListDto dto);
         Task<int> CreateFromRecipe(AddIngredientsToShoppingListDto dto);
