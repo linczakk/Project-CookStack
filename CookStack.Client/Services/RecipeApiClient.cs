@@ -9,12 +9,6 @@ namespace CookStack.Client.Services
         {
         }
 
-        public async Task<List<RecipeListDto>> GetRecipesAsync()
-        {
-            return await GetAsync<List<RecipeListDto>>("api/recipe")
-                ?? new List<RecipeListDto>();
-        }
-
         public async Task<List<RecipeListDto>> GetRecipesAsync(string? searchTerm = null)
         {
             var url = $"api/recipe?search={Uri.EscapeDataString(searchTerm ?? "")}";

@@ -61,7 +61,7 @@ namespace CookStack.Tests.Controllers
         [Fact]
         public async Task GetRecipesList_Should_ReturnEmptyList_WhenNoMatchFound()
         {
-            var mockService = new Mock<IRecipeService>();
+            var mockService = new Mock<IRecipeService>(); 
 
             mockService
                 .Setup(s => s.GetAll("Test Title 2"))

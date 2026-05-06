@@ -17,6 +17,15 @@
 	Message="Are you sure you want to delete this recipe?"
 	OnConfirm="ConfirmDelete" />
 
+
+<input 
+	class="form-control-mb-3"
+	placeholder="Search recipes..."
+	@bind="searchTerm"
+	@oninput="OnSearchChanged" />
+
+<hr />
+
 <h3>Recipes</h3>
 
 <hr />
@@ -44,13 +53,20 @@
 	}
 	else
 	{
-		<p>There are currently no added recipes</p>
-		<br />
-		<p>
-			<button @onclick="AddRecipe">
-				Add recipe
-			</button>
-		</p>
+		@if (!string.IsNullOrWhiteSpace(searchTerm))
+		{
+			<p>No results found for: <b>@searchTerm</b></p>
+		}
+		else
+		{
+			<p>There are currently no added recipes</p>
+			<br />
+			<p>
+				<button @onclick="AddRecipe">
+					Add recipe
+				</button>
+			</p>
+		}
 	}
 
 }
@@ -61,14 +77,27 @@
 	private ConfirmDialog? confirmDialog;
 	private int deleteId;
 
+	private string searchTerm = "";
+
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
-			recipes = await RecipesApi.GetRecipesAsync();
-			recipes.OrderBy(r => r.CreatedAt).ToList();
+			await LoadRecipes();
 		}, "Pobieranie przepisów...");
 	}
+
+	private async Task OnSearchChanged(ChangeEventArgs e)
+	{
+		searchTerm = e.Value?.ToString() ?? "";
+		await LoadRecipes();
+	}
+
+	private async Task LoadRecipes()
+	{
+		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
+	}
+
 
 	private void GoToDetails(int id)
 	{
