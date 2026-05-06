@@ -9,9 +9,11 @@ namespace CookStack.Client.Services
         {
         }
 
-        public async Task<List<ShoppingListsListDto>> GetShoppingListsAsync()
+        public async Task<List<ShoppingListsListDto>> GetShoppingListsAsync(string? searchTerm = null)
         {
-            return await GetAsync<List<ShoppingListsListDto>>("api/ShoppingList") ?? new List<ShoppingListsListDto>();
+            var url = $"api/ShoppingList?search={Uri.EscapeDataString(searchTerm ?? "")}";
+            return await GetAsync<List<ShoppingListsListDto>>(url) 
+                ?? new List<ShoppingListsListDto>();
         }
 
         public async Task<ShoppingListDetailsDto?> GetShoppingListByIdAsync(int id)

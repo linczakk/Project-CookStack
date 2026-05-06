@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CookStack.Tests.Services
 {
-    public class RecipesServiceTests
+    public class RecipeServiceTests
     {
         private readonly DbContextOptions<ApplicationDbContext> _options;
 
-        public RecipesServiceTests()
+        public RecipeServiceTests()
         {
             _options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())

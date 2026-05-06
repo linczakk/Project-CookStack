@@ -5,7 +5,7 @@ using Moq;
 
 namespace CookStack.Tests.Controllers
 {
-    public class RecipesControllerTests
+    public class RecipeControllerTests
     {
 
         [Fact]

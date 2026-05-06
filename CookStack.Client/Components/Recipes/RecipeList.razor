@@ -96,6 +96,7 @@
 	private async Task LoadRecipes()
 	{
 		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
+		recipes = recipes.OrderBy(r => r.CreatedAt).ToList();
 	}
 
 
