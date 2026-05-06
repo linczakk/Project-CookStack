@@ -14,10 +14,11 @@ namespace CookStack.Api.Features.Recipes
             _recipeService = recipeService;
         }
 
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RecipeListDto>>> GetRecipesList()
+        public async Task<ActionResult<IEnumerable<RecipeListDto>>> GetRecipeList([FromQuery] string? search)
         {
-            var result = await _recipeService.GetAll();
+            var result = await _recipeService.GetAll(search);
             return Ok(result);
         }
 

@@ -3,15 +3,22 @@ using CookStack.Shared.Recipes.Dtos;
 
 namespace CookStack.Client.Services
 {
-    public class RecipesApiClient : BaseApiClient
+    public class RecipeApiClient : BaseApiClient
     {
-        public RecipesApiClient(HttpClient http, ToastService toast) : base(http, toast)
+        public RecipeApiClient(HttpClient http, ToastService toast) : base(http, toast)
         {
         }
 
         public async Task<List<RecipeListDto>> GetRecipesAsync()
         {
             return await GetAsync<List<RecipeListDto>>("api/recipe")
+                ?? new List<RecipeListDto>();
+        }
+
+        public async Task<List<RecipeListDto>> GetRecipesAsync(string? searchTerm = null)
+        {
+            var url = $"api/recipe?search={Uri.EscapeDataString(searchTerm ?? "")}";
+            return await GetAsync<List<RecipeListDto>>(url)
                 ?? new List<RecipeListDto>();
         }
 

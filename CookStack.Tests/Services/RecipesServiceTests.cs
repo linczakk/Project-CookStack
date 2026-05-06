@@ -19,7 +19,42 @@ namespace CookStack.Tests.Services
         private ApplicationDbContext CreateDbContext() => new ApplicationDbContext(_options);
 
         [Fact]
-        public async Task GetAll_Should_ReturnAllRecipes()
+        public async Task GetAll_Should_ReturnAllRecipes_WhenSearchIsNull()
+        {
+            var db = CreateDbContext();
+            var service = new RecipeService(db);
+
+            var now = DateTime.UtcNow;
+
+            Recipe[] recipes =
+            [
+                new Recipe
+                {
+                    Title = "Test Title 1",
+                    CreatedAt = now
+                },
+                new Recipe
+                {
+                    Title = "Test Title 2",
+                    CreatedAt = now
+                }
+            ];
+
+            await db.Recipes.AddRangeAsync(recipes);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll(null);
+
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count());
+            Assert.Contains(result, r => r.Title == "Test Title 1");
+            Assert.Contains(result, r => r.Title == "Test Title 2");
+            Assert.All(result, r =>
+                Assert.NotEqual(default, r.CreatedAt));
+        }
+
+        [Fact]
+        public async Task GetAll_Should_ReturnAllRecipes_WhenSearchIsEmpty()
         {
             var db = CreateDbContext();
             var service = new RecipeService(db);
@@ -49,8 +84,61 @@ namespace CookStack.Tests.Services
             Assert.Equal(2, result.Count());
             Assert.Contains(result, r => r.Title == "Test Title 1");
             Assert.Contains(result, r => r.Title == "Test Title 2");
-            Assert.All(result, r =>
-                Assert.NotEqual(default, r.CreatedAt));
+            Assert.All(result, r => Assert.NotEqual(default, r.CreatedAt));
+        }
+
+        [Fact]
+        public async Task GetAll_Should_ReturnFilteredRecipes_WhenSearchMatchesTitle()
+        {
+            var db = CreateDbContext();
+            var service = new RecipeService(db);
+
+            var now = DateTime.UtcNow;
+
+            Recipe[] recipes =
+            [
+                new Recipe
+                {
+                    Title = "Test Title 1",
+                    CreatedAt = now
+                },
+                new Recipe
+                {
+                    Title = "Test Title 2",
+                    CreatedAt = now
+                },
+            ];
+
+            await db.Recipes.AddRangeAsync(recipes);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll("Test Title 2");
+
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Contains(result, r => r.Title == "Test Title 2");
+            Assert.DoesNotContain(result, r => r.Title == "Test Title 1");
+            Assert.All(result, r => Assert.NotEqual(default, r.CreatedAt));
+        }
+
+        [Fact]
+        public async Task GetAll_Should_ReturnEmptyList_WhenNoMatchFound()
+        {
+            var db = CreateDbContext();
+            var service = new RecipeService(db);
+
+            var recipe = new Recipe
+            {
+                Title = "Test Title 1",
+            };
+
+            await db.Recipes.AddAsync(recipe);
+            await db.SaveChangesAsync();
+
+            var result = await service.GetAll("Test Title 2");
+
+            Assert.NotNull(result);
+            Assert.Empty(result);
         }
 
         [Fact]

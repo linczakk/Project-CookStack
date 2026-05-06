@@ -4,7 +4,7 @@
 @using CookStack.Shared.Enums
 
 @page "/recipe-update/{id:int}"
-@inject RecipesApiClient Api
+@inject RecipeApiClient Api
 @inject NavigationManager Nav
 
 <RecipeForm RecipeDto="dto" OnSubmit="Update" OnCancel="Cancel" SubmitText="Update recipe" />

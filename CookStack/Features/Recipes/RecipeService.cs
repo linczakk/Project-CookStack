@@ -13,9 +13,16 @@ namespace CookStack.Api.Features.Recipes
             _dbContext = context;
         }
 
-        public async Task<IEnumerable<RecipeListDto>> GetAll()
+        public async Task<IEnumerable<RecipeListDto>> GetAll(string? search = null)
         {
-            var recipes = await _dbContext.Recipes
+            var query = _dbContext.Recipes.AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r => r.Title.Contains(search));
+            }
+
+            return await query
                 .Select(r => new RecipeListDto
                 {
                     Id = r.Id,
@@ -24,8 +31,6 @@ namespace CookStack.Api.Features.Recipes
                 })
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
-
-            return recipes;
         }
 
         public async Task<RecipeDetailsDto?> GetById(int id)

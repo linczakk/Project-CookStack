@@ -9,7 +9,7 @@ namespace CookStack.Tests.Controllers
     {
 
         [Fact]
-        public async Task GetRecipesList_Should_ReturnOk()
+        public async Task GetRecipesList_Should_ReturnOk_WhenSearchIsNull()
         {
             var mockService = new Mock<IRecipeService>();
 
@@ -23,7 +23,7 @@ namespace CookStack.Tests.Controllers
 
             var controller = new RecipeController (mockService.Object);
 
-            var result = await controller.GetRecipesList();
+            var result = await controller.GetRecipeList(null);
 
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var value = Assert.IsAssignableFrom<IEnumerable<RecipeListDto>>(okResult.Value);
@@ -34,9 +34,54 @@ namespace CookStack.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecipe_Should_ReturnOk_WhenRecipeExist()
+        public async Task GetRecipesList_Should_ReturnFilteredRecipes_WhenSearchMatchesTitle()
         {
             var mockService = new Mock<IRecipeService>();
+
+            mockService
+                .Setup(s => s.GetAll("Test Title"))
+                .ReturnsAsync(new List<RecipeListDto>
+                {
+                    new() { Title = "Test Title 1"},
+                    new() { Title = "Test Title 2"}
+                });
+
+            var controller = new RecipeController(mockService.Object);
+
+            var result = await controller.GetRecipeList("Test Title");
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsAssignableFrom<IEnumerable<RecipeListDto>>(okResult.Value);
+
+            Assert.Equal(2, value.Count());
+            Assert.Contains(value, v => v.Title == "Test Title 1");
+            Assert.Contains(value, v => v.Title == "Test Title 2");
+        }
+
+        [Fact]
+        public async Task GetRecipesList_Should_ReturnEmptyList_WhenNoMatchFound()
+        {
+            var mockService = new Mock<IRecipeService>();
+
+            mockService
+                .Setup(s => s.GetAll("Test Title 2"))
+                .ReturnsAsync(new List<RecipeListDto>());
+
+            var controller = new RecipeController(mockService.Object);
+
+            var result = await controller.GetRecipeList("Test Title 2");
+
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var value = Assert.IsAssignableFrom<IEnumerable<RecipeListDto>>(okResult.Value);
+
+            Assert.Empty(value);
+        }
+
+
+        [Fact]
+        public async Task GetRecipe_Should_ReturnOk_WhenRecipeExist()
+        {
+            var mockService = new Mock<IRecipeService>(); 
 
             mockService
                 .Setup(s => s.GetById(1))

@@ -4,7 +4,7 @@
 @using CookStack.Shared.Enums
 
 @page "/recipe-create"
-@inject RecipesApiClient Api
+@inject RecipeApiClient Api
 @inject NavigationManager Nav
 
 <RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />

@@ -4,7 +4,7 @@ namespace CookStack.Api.Features.Recipes
 {
     public interface IRecipeService
     {
-        Task<IEnumerable<RecipeListDto>> GetAll();
+        Task<IEnumerable<RecipeListDto>> GetAll(string? search = null);
         Task<RecipeDetailsDto?> GetById(int id);
         Task<int> Create(CreateRecipeDto dto);
         Task<bool> Update(int id, RecipeUpdateDto dto);
