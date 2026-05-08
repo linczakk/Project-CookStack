@@ -1,9 +1,11 @@
-﻿@using CookStack.Client.Components.Shared
+﻿@using CookStack.Client.Components.Search
+@using CookStack.Client.Components.Shared
 @using CookStack.Client.Services
 
 @inherits LayoutComponentBase
 
 @inject LoadingService LoadingService
+@inject SearchModalService SearchModalService
 
 <Spinner 
 	IsVisible = "@LoadingService.IsLoading" 
@@ -25,10 +27,21 @@
     </main>
 </div>
 
+<GlobalSearchModal @ref=searchModal />
+
 
 @code {
+    private GlobalSearchModal? searchModal;
+
     protected override void OnInitialized()
     {
         LoadingService.OnChange += StateHasChanged;
+        SearchModalService.OnOpen += OpenSearch;
+    }
+
+    private async Task OpenSearch()
+    {
+        if (searchModal != null)
+            await searchModal.Show();
     }
 }

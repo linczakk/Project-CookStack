@@ -8,7 +8,7 @@
 @inject ToastService ToastService
 
 
-@if(IsOpen)
+@if(isOpen)
 {
 	<div class="modal-backdrop fade show"></div>
 
@@ -67,7 +67,7 @@
 		}
 	}
 
-	private bool IsOpen;
+	private bool isOpen;
 	private bool shouldFocus;
 	private ElementReference titleInput;
 
@@ -98,7 +98,7 @@
 
 		ShoppingLists = await ShoppingListApi.GetShoppingListsAsync();
 
-		IsOpen = true;
+		isOpen = true;
 
 		StateHasChanged();
 
@@ -175,7 +175,7 @@
 		ToastService.ShowSuccess("Added!", 3);
 		return true;
 	}
-	public void Close() => IsOpen = false;
+	public void Close() => isOpen = false;
 
 	private void ShowSuccess()
 	{

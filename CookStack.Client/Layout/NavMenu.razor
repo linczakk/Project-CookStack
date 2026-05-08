@@ -1,4 +1,10 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using CookStack.Client.Components.Search
+@using CookStack.Client.Services
+
+@inject SearchModalService SearchModalService
+
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">CookStack</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
@@ -9,6 +15,12 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <button class="nav-link" @onclick="GlobalSearch">
+                <span class="bi bi-invert bi-search-nav-menu" aria-hidden="true"></span> Search
+            </button>
+        </div>
+        <hr />
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="recipe-create">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add recipe
@@ -30,6 +42,7 @@
 </div>
 
 @code {
+
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -37,5 +50,10 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task GlobalSearch()
+    {
+        await SearchModalService.Open();
     }
 }

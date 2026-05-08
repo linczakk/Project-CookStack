@@ -12,6 +12,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 builder.Services.AddScoped<RecipeApiClient>();
 builder.Services.AddScoped<ShoppingListApiClient>();
 builder.Services.AddScoped<LoadingService>();
+builder.Services.AddScoped<SearchModalService>();
 builder.Services.AddSingleton<ToastService>();
 
 

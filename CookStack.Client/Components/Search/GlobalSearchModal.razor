@@ -1,0 +1,142 @@
+﻿@using CookStack.Client.Components.ShoppingList
+@using CookStack.Client.Constants
+@using CookStack.Client.Enums
+@using CookStack.Client.Models
+@using CookStack.Client.Services
+
+@inject NavigationManager NavManager
+@inject RecipeApiClient RecipeApi
+@inject ShoppingListApiClient ShoppingListApi
+
+<ShoppingListModal @ref="shoppingListModal" />
+
+@if(isOpen)
+{
+	<div class="modal-backdrop fade show"></div>
+
+	<div class="modal fade show d-block global-search-modal" tabindex="-1" @onclick="Close">
+		<div class="modal-dialog" @onclick:stopPropagation="true">
+			<div class="modal-content">
+				<div class="modal-header">
+					<input 
+						class="form-control"
+						placeholder="Search everything..."
+						@ref="titleInput"
+						value="@searchTerm"
+						@oninput="OnSearchInput" />
+				</div>
+				<div class="modal-body">
+					@if(!string.IsNullOrWhiteSpace(searchTerm))
+					{
+						<div class="mt-3">
+
+							<h5>Recipes</h5>
+							@if(result.Recipes.Any())
+							{
+								<ul>
+									@foreach(var r in result.Recipes)
+									{
+									<li @onclick="() => GoToRecipe(r.Id)">
+										@r.Title
+									</li>	
+									}
+								</ul>
+							}
+							else
+							{
+								<p>No recipes found</p>
+							}
+
+							<hr/>
+
+							<h5>Shopping Lists</h5>
+							@if(result.ShoppingLists.Any())
+							{
+								<ul>
+									@foreach(var s in result.ShoppingLists)
+									{
+										<li @onclick="() => GoToShoppingList(s.Id)">
+											@s.Title
+										</li>
+									}
+								</ul>
+							}
+							else
+							{
+								<p>No shopping lists found</p>
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+}
+
+@code {
+	private GlobalSearchResult result = new();
+	private ShoppingListModal? shoppingListModal;
+
+	private bool isOpen;
+	private string searchTerm = "";
+	private ElementReference titleInput;
+
+	public async Task Show()
+	{
+		result = new();
+
+		isOpen = true;
+
+		StateHasChanged();
+
+		await Task.Yield();
+		await titleInput.FocusAsync();
+	}
+
+	private async Task OnSearchInput(ChangeEventArgs e)
+	{
+		searchTerm = e.Value?.ToString() ?? "";
+
+		await PerformSearch();
+	}
+
+	private async Task PerformSearch()
+	{
+		if(string.IsNullOrWhiteSpace(searchTerm))
+		{
+			return;
+		}
+
+		var recipesTask = RecipeApi.GetRecipesAsync(searchTerm);
+		var shoppingTask = ShoppingListApi.GetShoppingListsAsync(searchTerm);
+
+		await Task.WhenAll(recipesTask, shoppingTask);
+
+		result.Recipes = await recipesTask;
+		result.ShoppingLists = await shoppingTask;
+
+		StateHasChanged();
+	}
+
+	private void GoToRecipe(int id)
+	{
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+		Close();
+	}
+
+	private async Task GoToShoppingList(int id)
+	{
+		Close();
+
+		await Task.Yield();
+
+		shoppingListModal?.Show(ShoppingListModalMode.View, id);
+	}
+
+	public void Close()
+	{
+		isOpen = false;
+		searchTerm = "";
+	}
+}
