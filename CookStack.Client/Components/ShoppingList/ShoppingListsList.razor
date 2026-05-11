@@ -5,16 +5,17 @@
 @using CookStack.Shared.ShoppingList.Dtos;
 
 @page "/shopping-lists"
-@inject ShoppingListApiClient ShoppingListApi
-@inject LoadingService LoadingService
-@inject NavigationManager NavManager
+@inject ShoppingListApiClient shoppingListApi
+@inject LoadingService loadingService
+@inject NavigationManager navManager
+@inject BrowserTitleService titleService;
 
 <ConfirmDialog @ref="confirmDialog"
 	Title="Delete list"
 	Message="Are you sure you want to delete this shopping list?"
 	OnConfirm="ConfirmDelete"/>
 
-<ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingLists" />
+<ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingLists" OnClose="SetTitleName" />
 
 <input  
 	class = "form-control-mb-3"
@@ -104,11 +105,19 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await LoadingService.RunWithLoading(async () =>
+		await loadingService.RunWithLoading(async () =>
 		{
 			await LoadShoppingLists();
 		}, "Pobieranie listy zakupów...");
 
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if(firstRender)
+		{
+			await SetTitleName();
+		}
 	}
 
 	private async Task OnSearchChanged(ChangeEventArgs e)
@@ -119,7 +128,7 @@
 
 	private async Task LoadShoppingLists()
 	{
-		shoppingLists = await ShoppingListApi.GetShoppingListsAsync(searchTerm);
+		shoppingLists = await shoppingListApi.GetShoppingListsAsync(searchTerm);
 		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
 	}
 
@@ -144,6 +153,11 @@
 		await DeleteShoppingList(deleteId);
 	}
 
+	private async Task SetTitleName()
+	{
+		await titleService.SetTitle("Shopping lists");
+	}
+
 	private async Task DeleteShoppingList(int id)
 	{
 		if (shoppingLists == null)
@@ -158,7 +172,7 @@
 
 		try
 		{
-			await ShoppingListApi.DeleteShoppingListAsync(id);
+			await shoppingListApi.DeleteShoppingListAsync(id);
 		}
 		catch (Exception ex)
 		{

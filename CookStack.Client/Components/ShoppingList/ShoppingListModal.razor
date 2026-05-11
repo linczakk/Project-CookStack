@@ -4,8 +4,8 @@
 @using CookStack.Shared.ShoppingList.Dtos
 @using CookStack.Shared.ShoppingList.Mappings
 
-
-@inject ShoppingListApiClient ShoppingListApi
+@inject ShoppingListApiClient shoppingListApi
+@inject BrowserTitleService titleService
 
 @if(isOpen)
 {
@@ -45,6 +45,8 @@
 
 	[Parameter] 
 	public EventCallback OnSaved { get; set; }
+	[Parameter]
+	public EventCallback OnClose { get; set; }
 
 	private bool isOpen;
 	private ShoppingListModalMode mode = ShoppingListModalMode.View;
@@ -65,16 +67,22 @@
 		if(isCreateMode)
 		{
 			shoppingListDto = new CreateShoppingListDto();
+
+			await titleService.SetTitle("Create shopping list");
 		}
 		else if(isEditMode)
 		{
-			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
+			var data = await shoppingListApi.GetShoppingListByIdAsync(this.id);
 			shoppingListDto = data?.ToUpdateDto() ?? new ShoppingListUpdateDto();
+
+			await titleService.SetTitle(shoppingListDto.Title);
 		}
 		else
 		{
-			var data = await ShoppingListApi.GetShoppingListByIdAsync(this.id);
+			var data = await shoppingListApi.GetShoppingListByIdAsync(this.id);
 			shoppingListDto = data ?? new ShoppingListDetailsDto();
+
+			await titleService.SetTitle(shoppingListDto.Title);
 		}
 
 		isOpen = true;
@@ -112,11 +120,11 @@
 				await ExitEditMode();
 		}
 	}
-	
+
 
 	private async Task ExitEditMode()
 	{
-		var data = await ShoppingListApi.GetShoppingListByIdAsync(id);
+		var data = await shoppingListApi.GetShoppingListByIdAsync(id);
 
 		shoppingListDto = data == null ? new ShoppingListUpdateDto() : data;
 
@@ -132,14 +140,14 @@
 
 		if (isEditMode && shoppingListDto is ShoppingListUpdateDto updateListDto)
 		{
-			success = await ShoppingListApi.UpdateShoppingListAsync(id, updateListDto);
+			success = await shoppingListApi.UpdateShoppingListAsync(id, updateListDto);
 		}
 		else if (isCreateMode && shoppingListDto is CreateShoppingListDto createListDto)
 		{
-			success = await ShoppingListApi.CreateShoppingListAsync(createListDto);
+			success = await shoppingListApi.CreateShoppingListAsync(createListDto);
 		}
 		else if (shoppingListDto is ShoppingListDetailsDto detailsDto)
-			success = await ShoppingListApi.UpdateShoppingListAsync(id, detailsDto.ToUpdateDto());
+			success = await shoppingListApi.UpdateShoppingListAsync(id, detailsDto.ToUpdateDto());
 
 		if(success)
 		{
@@ -156,5 +164,9 @@
 			Close();
 	}
 
-	public void Close() => isOpen = false;
+	public async void Close()
+	{
+		isOpen = false;
+		await OnClose.InvokeAsync();
+	}
 }
