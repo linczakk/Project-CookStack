@@ -1,14 +1,13 @@
 ﻿@using CookStack.Client.Components.Shared
-@using CookStack.Client.Constants
 @using CookStack.Client.Enums
 @using CookStack.Client.Services
 @using CookStack.Shared.ShoppingList.Dtos;
 
 @page "/shopping-lists"
-@inject ShoppingListApiClient shoppingListApi
-@inject LoadingService loadingService
-@inject NavigationManager navManager
-@inject BrowserTitleService titleService;
+@inject ShoppingListApiClient ShoppingListApi
+@inject LoadingService LoadingService
+@inject NavigationManager NavManager
+@inject BrowserTitleService TitleService;
 
 <ConfirmDialog @ref="confirmDialog"
 	Title="Delete list"
@@ -105,7 +104,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await loadingService.RunWithLoading(async () =>
+		await LoadingService.RunWithLoading(async () =>
 		{
 			await LoadShoppingLists();
 		}, "Pobieranie listy zakupów...");
@@ -128,18 +127,18 @@
 
 	private async Task LoadShoppingLists()
 	{
-		shoppingLists = await shoppingListApi.GetShoppingListsAsync(searchTerm);
+		shoppingLists = await ShoppingListApi.GetShoppingListsAsync(searchTerm);
 		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
 	}
 
 	private void GoToDetails(int id)
 	{
-		shoppingListModal?.Show(ShoppingListModalMode.View, id);
+		shoppingListModal?.Open(ShoppingListModalMode.View, id);
 	}
 
 	private void AddShoppingList()
 	{
-		shoppingListModal?.Show(ShoppingListModalMode.Create);
+		shoppingListModal?.Open(ShoppingListModalMode.Create);
 	}
 
 	private void AskDelete(int id)
@@ -155,7 +154,7 @@
 
 	private async Task SetTitleName()
 	{
-		await titleService.SetTitle("Shopping lists");
+		await TitleService.SetTitle("Shopping lists");
 	}
 
 	private async Task DeleteShoppingList(int id)
@@ -172,7 +171,7 @@
 
 		try
 		{
-			await shoppingListApi.DeleteShoppingListAsync(id);
+			await ShoppingListApi.DeleteShoppingListAsync(id);
 		}
 		catch (Exception ex)
 		{

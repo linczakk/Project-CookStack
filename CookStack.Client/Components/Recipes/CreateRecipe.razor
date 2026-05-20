@@ -1,12 +1,11 @@
 ﻿@using CookStack.Client.Components.Recipes
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
-@using CookStack.Shared.Enums
 
 @page "/recipe-create"
 @inject RecipeApiClient Api
 @inject NavigationManager Nav
-@inject BrowserTitleService titleService;
+@inject BrowserTitleService TitleService;
 
 <RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />
 
@@ -15,7 +14,7 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		await titleService.SetTitle("Create recipe");
+		await TitleService.SetTitle("Create recipe");
 	}
 
 	private async Task Create()

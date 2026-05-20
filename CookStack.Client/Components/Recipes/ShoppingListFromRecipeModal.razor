@@ -4,10 +4,12 @@
 @using CookStack.Shared.Recipes.Dtos
 @using CookStack.Shared.ShoppingList.Dtos
 
-@inject ShoppingListApiClient shoppingListApi
-@inject ToastService toastService
-@inject BrowserTitleService titleService;
+@implements IDisposable
 
+@inject ShoppingListApiClient ShoppingListApi
+@inject ToastService ToastService
+@inject BrowserTitleService TitleService;
+@inject KeyboardShortcutService KeyboardShortcutService;
 
 @if(isOpen)
 {
@@ -57,9 +59,10 @@
 	[Parameter]
 	public EventCallback OnClose { get; set; }
 
+
 	private bool _isNew = true;
 
-	private bool IsNew
+	public bool IsNew
 	{
 		get => _isNew;
 		set
@@ -70,6 +73,7 @@
 			shouldFocus = true;
 		}
 	}
+	private DotNetObjectReference<ShoppingListFromRecipeModal>? objectReference;
 
 	private bool isOpen;
 	private bool shouldFocus;
@@ -84,12 +88,15 @@
 
 	private bool isSaving = false;
 
-	public async Task Show(RecipeDetailsDto dto)
+	public async Task Open(RecipeDetailsDto dto)
 	{
 		FormModel = new();
 
+		IsNew = true;
+		shouldFocus = true;
+
 		FormModel.Title = dto.Title;
-		FormModel.Description = $"Lista zakupów do: {dto.Title}";
+		FormModel.Description = $"Shopping list for: {dto.Title}";
 
 		Ingredients = dto.Ingredients
 		.Select(i => new SelectableIngredientDto
@@ -100,24 +107,27 @@
 				IsSelected = true
 			}).ToList();
 
-		ShoppingLists = await shoppingListApi.GetShoppingListsAsync();
+		ShoppingLists = await ShoppingListApi.GetShoppingListsAsync();
 
 		isOpen = true;
 
-		await titleService.SetTitle($"Create shopping list from: {FormModel.Title}");
+		await TitleService.SetTitle($"Create shopping list from: {FormModel.Title}");
 		StateHasChanged();
 
 		await Task.Yield();
 
 		if(IsNew)
-		{
 			await titleInput.FocusAsync();
-		}
+	}
+
+	protected override void OnInitialized()
+	{
+		KeyboardShortcutService.OnEscapePressed += HandleEscape;
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		if(shouldFocus && IsNew)
+		if (shouldFocus && IsNew)
 		{
 			shouldFocus = false;
 			await titleInput.FocusAsync();
@@ -128,26 +138,26 @@
 	{
 		if (e.Key == "Enter")
 			await SaveAndClose();
-
-		if (e.Key == "Escape")
-			Close();
 	}
 
+	private void HandleEscape()
+	{
+		if(isOpen)
+			Close();
+	}
 
 	private async Task SaveAndClose()
 	{
 		var success = await Save();
 		if(success)
-		{
 			Close();
-		}
 	}
 
 	private async Task<bool> Save()
 	{
 		if (!IsNew && SelectedListId == null)
 		{
-			toastService.ShowError("Select a shopping list", 3);
+			ToastService.ShowError("Select a shopping list", 3);
 			return false;
 		}
 
@@ -163,7 +173,7 @@
 
 		if(!selectedItems.Any())
 		{
-			toastService.ShowError("Select at least one ingredient", 3);
+			ToastService.ShowError("Select at least one ingredient", 3);
 			return false;
 		}
 
@@ -175,19 +185,25 @@
 			Items = selectedItems
 		};
 
-		await shoppingListApi.AddIngredientsAsync(FormModel);
+		await ShoppingListApi.AddIngredientsAsync(FormModel);
 
-		toastService.ShowSuccess("Added!", 3);
+		ToastService.ShowSuccess("Added!", 3);
 		return true;
 	}
 	public async void Close()
 	{
 		isOpen = false;
+		StateHasChanged();
 		await OnClose.InvokeAsync();
 	}
 
 	private void ShowSuccess()
 	{
-		toastService.ShowSuccess("Saved!", 3);
+		ToastService.ShowSuccess("Saved!", 3);
+	}
+
+	public void Dispose()
+	{
+		KeyboardShortcutService.OnEscapePressed -= HandleEscape;
 	}
 }

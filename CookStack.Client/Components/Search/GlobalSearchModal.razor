@@ -4,9 +4,12 @@
 @using CookStack.Client.Models
 @using CookStack.Client.Services
 
+@implements IDisposable
+
 @inject NavigationManager NavManager
 @inject RecipeApiClient RecipeApi
 @inject ShoppingListApiClient ShoppingListApi
+@inject KeyboardShortcutService KeyboardShortcutService
 
 <ShoppingListModal @ref="shoppingListModal" />
 
@@ -82,7 +85,7 @@
 	private string searchTerm = "";
 	private ElementReference titleInput;
 
-	public async Task Show()
+	public async Task Open()
 	{
 		result = new();
 
@@ -92,6 +95,11 @@
 
 		await Task.Yield();
 		await titleInput.FocusAsync();
+	}
+
+	protected override void OnInitialized()
+	{
+		KeyboardShortcutService.OnEscapePressed += HandleEscape;
 	}
 
 	private async Task OnSearchInput(ChangeEventArgs e)
@@ -131,12 +139,25 @@
 
 		await Task.Yield();
 
-		shoppingListModal?.Show(ShoppingListModalMode.View, id);
+		shoppingListModal?.Open(ShoppingListModalMode.View, id);
+	}
+
+	private void HandleEscape()
+	{
+		if (isOpen)
+			Close();
 	}
 
 	public void Close()
 	{
 		isOpen = false;
 		searchTerm = "";
+
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		KeyboardShortcutService.OnEscapePressed -= HandleEscape;
 	}
 }

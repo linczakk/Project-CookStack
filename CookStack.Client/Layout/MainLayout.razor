@@ -4,14 +4,16 @@
 
 @inherits LayoutComponentBase
 
-@inject LoadingService LoadingService
-@inject SearchModalService SearchModalService
+@inject LoadingService loadingService
+@inject SearchModalService searchModalService
+@inject KeyboardShortcutService keyboardShortcutService;
+@inject IJSRuntime jS
 
 <PageTitle>CookStack</PageTitle>
 
 <Spinner 
-	IsVisible = "@LoadingService.IsLoading" 
-	StatusText= "@LoadingService.StatusText" />
+	IsVisible = "@loadingService.IsLoading" 
+	StatusText= "@loadingService.StatusText" />
 <Toast />
 <div class="page">
     <div class="sidebar">
@@ -30,16 +32,39 @@
 
 @code {
     private GlobalSearchModal? searchModal;
+    private DotNetObjectReference<MainLayout>? objectReference;
 
     protected override void OnInitialized()
     {
-        LoadingService.OnChange += StateHasChanged;
-        SearchModalService.OnOpen += OpenSearch;
+        loadingService.OnChange += StateHasChanged;
+        searchModalService.OnOpen += async () => await OpenSearch();
     }
 
-    private async Task OpenSearch()
+    [JSInvokable]
+    public async Task OpenSearch()
     {
         if (searchModal != null)
-            await searchModal.Show();
+            await searchModal.Open();
+        
+    }
+
+    [JSInvokable]
+    public async Task EscapePressed()
+    {
+        // if (searchModal != null)
+        //     searchModal.Close();
+        keyboardShortcutService.EscapePressed();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            objectReference = DotNetObjectReference.Create(this);
+
+            await jS.InvokeVoidAsync(
+            "keyboardShortcuts.register",
+            objectReference);
+        }
     }
 }

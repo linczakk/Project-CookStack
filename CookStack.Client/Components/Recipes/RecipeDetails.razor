@@ -1,13 +1,11 @@
-﻿@using CookStack.Client.Constants
-@using CookStack.Client.Models.UI
-@using CookStack.Client.Components.ShoppingList
+﻿@using CookStack.Client.Models.UI
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
 @page "/recipe/{id:int}"
-@inject RecipeApiClient recipesApi
-@inject LoadingService loadingService
-@inject BrowserTitleService titleService;
+@inject RecipeApiClient RecipesApi
+@inject LoadingService LoadingService
+@inject BrowserTitleService TitleService;
 
 <ShoppingListFromRecipeModal @ref="shoppingListModal" OnSaved="ReloadList" OnClose="SetTitleName" />
 
@@ -63,7 +61,7 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		await loadingService.RunWithLoading(async () =>
+		await LoadingService.RunWithLoading(async () =>
 		{
 			await ReloadList();
 		}, "Wczytywanie przepisu");
@@ -71,7 +69,7 @@
 
 	private async Task ReloadList()
 	{
-		recipeDto = await recipesApi.GetRecipeByIdAsync(Id);
+		recipeDto = await RecipesApi.GetRecipeByIdAsync(Id);
 		if (recipeDto != null)
 		{
 			await SetTitleName();			
@@ -89,14 +87,14 @@
 	private void AddShoppingList()
 	{
 		if(recipeDto != null)
-			shoppingListModal?.Show(recipeDto);
+			shoppingListModal?.Open(recipeDto);
 	}
 
 	private async Task SetTitleName()
 	{
 		if(recipeDto != null)
 		{
-			await titleService.SetTitle(recipeDto.Title);
+			await TitleService.SetTitle(recipeDto.Title);
 		}
 	}
 }

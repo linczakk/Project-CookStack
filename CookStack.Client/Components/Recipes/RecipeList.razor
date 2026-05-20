@@ -5,10 +5,10 @@
 
 @page "/"
 @page "/recipes"
-@inject RecipeApiClient recipesApi
-@inject LoadingService loadingService
-@inject NavigationManager navManager
-@inject BrowserTitleService titleService
+@inject RecipeApiClient RecipesApi
+@inject LoadingService LoadingService
+@inject NavigationManager NavManager
+@inject BrowserTitleService TitleService
 
 
 <ConfirmDialog @ref="confirmDialog" 
@@ -67,7 +67,6 @@
 			</p>
 		}
 	}
-
 }
 
 @code {
@@ -80,13 +79,12 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await loadingService.RunWithLoading(async () =>
+		await LoadingService.RunWithLoading(async () =>
 		{
 			await LoadRecipes(true);
 		}, "Pobieranie przepisów...");
-	}
 
-	
+	}
 
 	private async Task OnSearchChanged(ChangeEventArgs e)
 	{
@@ -96,27 +94,26 @@
 
 	private async Task LoadRecipes(bool firstLoad = false)
 	{
-		recipes = await recipesApi.GetRecipesAsync(searchTerm);
+		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
 		recipes = recipes.OrderBy(r => r.CreatedAt).ToList();
 
 		if (firstLoad)
-			await titleService.SetTitle("Recipe list");
+			await TitleService.SetTitle("Recipe list");
 	}
-
 
 	private void GoToDetails(int id)
 	{
-		navManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
 	}
 
 	private void AddRecipe()
 	{
-		navManager.NavigateTo(Routes.Recipes.RecipeCreate);
+		NavManager.NavigateTo(Routes.Recipes.RecipeCreate);
 	}
 
 	private void UpdateRecipe(int id)
 	{
-		navManager.NavigateTo(string.Format(Routes.Recipes.RecipeUpdate, id));
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeUpdate, id));
 	}
 
 	private void AskDelete(int id)
@@ -144,7 +141,7 @@
 
 		try
 		{
-			await recipesApi.DeleteRecipeAsync(id);
+			await RecipesApi.DeleteRecipeAsync(id);
 		}
 		catch (Exception ex)
 		{

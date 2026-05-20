@@ -13,16 +13,9 @@ namespace CookStack.Client.Services
 
         public async Task SetTitle(string title)
         {
-            try
-            {
-                await js.InvokeVoidAsync(
-               "setDocumentTitle",
-               $"{title} - CookStack");
-            }
-            catch (JSException)
-            {
-                // JS may not be ready during first render
-            }
+            await js.InvokeVoidAsync(
+              "setDocumentTitle",
+              $"{title} - CookStack");
         }
     }
 }

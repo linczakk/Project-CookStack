@@ -1,25 +1,24 @@
-﻿@using CookStack.Client.Enums
-@using CookStack.Shared.Enums
+﻿@using CookStack.Shared.Enums
 @using CookStack.Shared.ShoppingList.Dtos
-<EditForm Model="Model" OnValidSubmit="OnSave">
+<EditForm Model="Model" OnValidSubmit="OnSubmit">
 	<DataAnnotationsValidator />
 
 	<div class="shopping-list-container ">
 		<div class="modal-body">
-			<input class="form-control mb-2" placeholder="Title" @bind="Model.Title" @ref="titleInput" @onkeydown="HandleKey" />
+			<input class="form-control mb-2" placeholder="Title" @bind="Model.Title" @ref="titleInput" @onkeydown="OnKey" />
 
-			<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="Model.Description" @onkeydown="HandleKey" />
+			<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="Model.Description" @onkeydown="OnKey" />
 
 			@foreach (var item in Model.Items)
 			{
 				<div class="input-group mb-2" @key="item">
 					@if (IsEditMode)
 					{
-						<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="HandleKey" />
+						<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="OnKey" />
 					}
-					<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="HandleKey" />
-					<InputNumber class="form-control" @bind-Value="item.Quantity" @onkeydown="HandleKey" TValue="decimal" />
-					<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="HandleKey">
+					<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="OnKey" />
+					<InputNumber class="form-control" @bind-Value="item.Quantity" @onkeydown="OnKey" TValue="decimal" />
+					<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="OnKey">
 						@foreach (var unit in Enum.GetValues<UnitType>())
 						{
 							<option value="@unit">@unit</option>
@@ -53,7 +52,8 @@
 
 	[Parameter] public EventCallback OnCancel { get; set; }
 	[Parameter] public EventCallback OnClose { get; set; }
-	[Parameter] public EventCallback OnSave { get; set; }
+	[Parameter] public EventCallback OnSubmit { get; set; }
+	[Parameter] public EventCallback<KeyboardEventArgs> OnKey { get; set; }
 
 	private ElementReference titleInput;
 
@@ -78,19 +78,5 @@
 
 		item.Order = maxOrder + 1;
 		Model.Items.Add(item);
-	}
-
-	private async Task HandleKey(KeyboardEventArgs e)
-	{
-		if (e.Key == "Enter")
-			await OnSave.InvokeAsync();
-
-		if (e.Key == "Escape")
-		{
-			if (IsEditMode)
-				await OnCancel.InvokeAsync();
-			else
-				await OnClose.InvokeAsync();
-		}
 	}
 }

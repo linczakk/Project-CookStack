@@ -1,12 +1,11 @@
 ﻿@using CookStack.Client.Components.Recipes
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
-@using CookStack.Shared.Enums
 
 @page "/recipe-update/{id:int}"
-@inject RecipeApiClient api
-@inject NavigationManager nav
-@inject BrowserTitleService titleService
+@inject RecipeApiClient Api
+@inject NavigationManager Nav
+@inject BrowserTitleService TitleService
 
 <RecipeForm RecipeDto="dto" OnSubmit="Update" OnCancel="Cancel" SubmitText="Update recipe" />
 
@@ -16,7 +15,7 @@
 
 	protected override async Task OnParametersSetAsync()
 	{
-		var recipe = await api.GetRecipeByIdAsync(Id);
+		var recipe = await Api.GetRecipeByIdAsync(Id);
 		if(recipe != null) dto = MapToUpdateDto(recipe);
 	}
 
@@ -24,7 +23,7 @@
 	{
 		if(firstRender)
 		{
-			await titleService.SetTitle("Create recipe");
+			await TitleService.SetTitle("Create recipe");
 		}
 	}
 
@@ -42,9 +41,9 @@
 
 	private async Task Update()
 	{
-		await api.UpdateRecipeAsync(Id, dto);
-		nav.NavigateTo("/recipe");
+		await Api.UpdateRecipeAsync(Id, dto);
+		Nav.NavigateTo("/recipe");
 	}
 
-	private void Cancel() => nav.NavigateTo("/recipe");
+	private void Cancel() => Nav.NavigateTo("/recipe");
 }

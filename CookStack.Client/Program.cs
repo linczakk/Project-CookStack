@@ -14,6 +14,7 @@ builder.Services.AddScoped<ShoppingListApiClient>();
 builder.Services.AddScoped<LoadingService>();
 builder.Services.AddScoped<SearchModalService>();
 builder.Services.AddScoped<BrowserTitleService>();
+builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddSingleton<ToastService>();
 
 
