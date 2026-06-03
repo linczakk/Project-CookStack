@@ -15,6 +15,22 @@ window.keyboardShortcuts = {
             if (e.key === "Escape") {
                 dotNetHelper.invokeMethodAsync("EscapePressed");
             }
+
+            if (e.key === "ArrowDown") {
+                dotNetHelper.invokeMethodAsync("ArrowDownPressed");
+            }
+
+            if (e.key === "ArrowUp") {
+                dotNetHelper.invokeMethodAsync("ArrowUpPressed");
+            }
+
+            if (e.key === "Enter") {
+                dotNetHelper.invokeMethodAsync("EnterPressed");
+            }
+        });
+
+        document.addEventListener("mousedown", () => {
+            dotNetHelper.invokeMethodAsync("MouseUsed");
         });
     }
 };

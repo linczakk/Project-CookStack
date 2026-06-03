@@ -3,11 +3,14 @@
 @using CookStack.Client.Services
 @using CookStack.Shared.ShoppingList.Dtos;
 
+@implements IDisposable
+
 @page "/shopping-lists"
 @inject ShoppingListApiClient ShoppingListApi
 @inject LoadingService LoadingService
 @inject NavigationManager NavManager
 @inject BrowserTitleService TitleService;
+@inject KeyboardShortcutService KeyboardShortcutService
 
 <ConfirmDialog @ref="confirmDialog"
 	Title="Delete list"
@@ -36,20 +39,21 @@
 		var completedList = shoppingLists.Where(sl => sl.IsCompleted);
 
 		<ul>
-			@foreach (var shoppingList in activeList)
+			@for(int i = 0; i < activeList.Count(); i++)
 			{
-			
-					<li>
-						<span class = "cursor-pointer" @onclick="() => GoToDetails(shoppingList.Id)">
-							<label>@shoppingList.Title</label>
-						</span>
-						<div class="vr"></div>
-						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
-							Delete
-						</button>
-						<p class="text-muted"><small>@shoppingList.CompletedItems / @shoppingList.TotalItems bought</small></p>
-					</li>
-			
+				var shoppingList = activeList.ElementAt(i);
+
+				<li class="@(selectedIndex == i ? "selected" : "")">
+					<span class="cursor-pointer" @onclick="() => GoToDetails(shoppingList.Id)">
+						<label>@shoppingList.Title</label>
+					</span>
+					<div class="vr"></div>
+					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+						Delete
+					</button>
+					<p class="text-muted"><small>@shoppingList.CompletedItems / @shoppingList.TotalItems bought</small></p>
+				</li>
+
 			}
 		</ul>
 		@if (activeList.Any() && completedList.Any())
@@ -58,19 +62,23 @@
 		}
 
 		<ul>
-			@foreach (var shoppingList in completedList)
-			{
-			
-					<li>
-						<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
-						<div class="vr"></div>
-						<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
-							Delete
-						</button>
 
-						<span class="badge bg-success ms-2">Completed</span>
-					</li>
-			
+			@for(int i = 0; i < completedList.Count(); i++)
+			{
+				var shoppingList = completedList.ElementAt(i);
+
+				var globalIndex = activeList.Count() + i;
+
+				<li class="@(selectedIndex == globalIndex ? "selected" : "") mb-2">
+					<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
+					<div class="vr"></div>
+					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+						Delete
+					</button>
+
+					<span class="badge bg-success ms-2">Completed</span>
+				</li>
+
 			}
 		</ul>
 		
@@ -102,11 +110,22 @@
 
 	private string searchTerm = "";
 
+	private int selectedIndex = -1;
+
+	protected override void OnInitialized()
+	{
+		KeyboardShortcutService.OnEnter += HandleEnter;
+		KeyboardShortcutService.OnArrowDown += MoveDown;
+		KeyboardShortcutService.OnArrowUp += MoveUp;
+		KeyboardShortcutService.OnMouseDown += ClearSelection;
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
 			await LoadShoppingLists();
+
 		}, "Pobieranie listy zakupów...");
 
 	}
@@ -127,6 +146,8 @@
 
 	private async Task LoadShoppingLists()
 	{
+		ClearSelection();
+
 		shoppingLists = await ShoppingListApi.GetShoppingListsAsync(searchTerm);
 		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
 	}
@@ -178,5 +199,51 @@
 			shoppingLists.Add(shoppingList);
 			Console.Error.WriteLine(ex);
 		}
+	}
+
+	private void MoveDown()
+	{
+		if (shoppingLists == null)
+			return;
+
+		if (KeyboardShortcutService.IsModalOpen)
+			return;
+
+		if (selectedIndex < shoppingLists.Count - 1)
+		{
+			selectedIndex++;
+			StateHasChanged();
+		}
+	}
+
+	private void MoveUp()
+	{
+		if(selectedIndex > 0)
+		{
+			selectedIndex--;
+			StateHasChanged();
+		}
+	}
+
+	private void HandleEnter()
+	{
+		if (selectedIndex < 0 || shoppingLists == null)
+			return;
+
+		GoToDetails(shoppingLists[selectedIndex].Id);
+	}
+
+	private void ClearSelection()
+	{
+		selectedIndex = -1;
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		KeyboardShortcutService.OnEnter -= HandleEnter;
+		KeyboardShortcutService.OnArrowDown -= MoveDown;
+		KeyboardShortcutService.OnArrowUp -= MoveUp;
+		KeyboardShortcutService.OnMouseDown -= ClearSelection;
 	}
 }

@@ -20,13 +20,21 @@
 	<div class="modal fade show d-block global-search-modal" tabindex="-1" @onclick="Close">
 		<div class="modal-dialog" @onclick:stopPropagation="true">
 			<div class="modal-content">
-				<div class="modal-header">
+				<div class="modal-header search-input-container">
 					<input 
 						class="form-control"
 						placeholder="Search everything..."
 						@ref="titleInput"
 						value="@searchTerm"
 						@oninput="OnSearchInput" />
+
+						@if(string.IsNullOrWhiteSpace(searchTerm))
+						{
+							<span class="search-shortcut">
+								<kbd>Ctrl</kbd>
+								<kbd>K</kbd>
+							</span>
+						}
 				</div>
 				<div class="modal-body">
 					@if(!string.IsNullOrWhiteSpace(searchTerm))
@@ -37,11 +45,15 @@
 							@if(result.Recipes.Any())
 							{
 								<ul>
-									@foreach(var r in result.Recipes)
+
+									@for(int i = 0; i < result.Recipes.Count; i++)
 									{
-									<li @onclick="() => GoToRecipe(r.Id)">
-										@r.Title
-									</li>	
+										var recipe = result.Recipes[i];
+
+										<li class="@(selectedIndex == i ? "selected" : "")"
+											@onclick="() => GoToRecipe(recipe.Id)">
+											@recipe.Title
+										</li>
 									}
 								</ul>
 							}
@@ -56,10 +68,16 @@
 							@if(result.ShoppingLists.Any())
 							{
 								<ul>
-									@foreach(var s in result.ShoppingLists)
+
+									@for(int i = 0; i < result.ShoppingLists.Count; i++)
 									{
-										<li @onclick="() => GoToShoppingList(s.Id)">
-											@s.Title
+										var shoppingList = result.ShoppingLists[i];
+
+										var globalIndex = result.Recipes.Count + i;
+
+										<li class="@(selectedIndex == globalIndex ? "selected" : "")"
+											@onclick="() => GoToShoppingList(shoppingList.Id)">
+											@shoppingList.Title
 										</li>
 									}
 								</ul>
@@ -85,11 +103,20 @@
 	private string searchTerm = "";
 	private ElementReference titleInput;
 
+	private int selectedIndex = -1;
+
+	private int TotalResult =>
+		result.Recipes.Count +
+		result.ShoppingLists.Count;
+
+
 	public async Task Open()
 	{
 		result = new();
 
 		isOpen = true;
+
+		KeyboardShortcutService.IsModalOpen = true;
 
 		StateHasChanged();
 
@@ -99,7 +126,11 @@
 
 	protected override void OnInitialized()
 	{
+		KeyboardShortcutService.OnEnter += HandleEnter;
 		KeyboardShortcutService.OnEscapePressed += HandleEscape;
+		KeyboardShortcutService.OnArrowDown += MoveDown;
+		KeyboardShortcutService.OnArrowUp += MoveUp;
+		KeyboardShortcutService.OnMouseDown += ClearSelection;
 	}
 
 	private async Task OnSearchInput(ChangeEventArgs e)
@@ -112,9 +143,7 @@
 	private async Task PerformSearch()
 	{
 		if(string.IsNullOrWhiteSpace(searchTerm))
-		{
 			return;
-		}
 
 		var recipesTask = RecipeApi.GetRecipesAsync(searchTerm);
 		var shoppingTask = ShoppingListApi.GetShoppingListsAsync(searchTerm);
@@ -123,6 +152,8 @@
 
 		result.Recipes = await recipesTask;
 		result.ShoppingLists = await shoppingTask;
+
+		selectedIndex = -1;
 
 		StateHasChanged();
 	}
@@ -142,6 +173,59 @@
 		shoppingListModal?.Open(ShoppingListModalMode.View, id);
 	}
 
+
+	private async void HandleEnter()
+	{
+		if (!isOpen)
+			return;
+
+		if (selectedIndex == -1)
+			return;
+
+		if(selectedIndex < result.Recipes.Count)
+		{
+			var recipe = result.Recipes[selectedIndex];
+
+			GoToRecipe(recipe.Id);
+			return;
+		}
+
+		var shoppingIndex =
+			selectedIndex - result.Recipes.Count;
+
+		if(shoppingIndex < result.ShoppingLists.Count)
+		{
+			var shoppingList =
+			result.ShoppingLists[shoppingIndex];
+
+			await GoToShoppingList(shoppingList.Id);
+		}
+	}
+
+	private void MoveDown()
+	{
+		if(!isOpen)
+			return;
+
+		if (selectedIndex < TotalResult - 1)
+		{
+			selectedIndex++;
+			StateHasChanged();
+		}
+	}
+
+	private void MoveUp()
+	{
+		if (!isOpen)
+			return;
+
+		if(selectedIndex > 0)
+		{
+			selectedIndex--;
+			StateHasChanged();
+		}
+	}
+
 	private void HandleEscape()
 	{
 		if (isOpen)
@@ -152,12 +236,27 @@
 	{
 		isOpen = false;
 		searchTerm = "";
+		selectedIndex = -1;
 
+		result = new();
+
+		KeyboardShortcutService.IsModalOpen = false;
+
+		StateHasChanged();
+	}
+
+	private void ClearSelection()
+	{
+		selectedIndex = -1;
 		StateHasChanged();
 	}
 
 	public void Dispose()
 	{
+		KeyboardShortcutService.OnEnter -= HandleEnter;
 		KeyboardShortcutService.OnEscapePressed -= HandleEscape;
+		KeyboardShortcutService.OnArrowDown -= MoveDown;
+		KeyboardShortcutService.OnArrowUp -= MoveUp;
+		KeyboardShortcutService.OnMouseDown -= ClearSelection;
 	}
 }

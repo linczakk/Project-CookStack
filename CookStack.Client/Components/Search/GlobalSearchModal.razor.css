@@ -1,0 +1,23 @@
+﻿.search-input-container {
+    position: relative;
+}
+
+.search-shortcut {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.selected {
+    background-color: #dbeafe;
+    border-radius: 4px;
+}
+
+.modal-body li{
+    padding: 6px 10px;
+    cursor: pointer;
+}

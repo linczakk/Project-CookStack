@@ -3,12 +3,15 @@
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
+@implements IDisposable
+
 @page "/"
 @page "/recipes"
 @inject RecipeApiClient RecipesApi
 @inject LoadingService LoadingService
 @inject NavigationManager NavManager
 @inject BrowserTitleService TitleService
+@inject KeyboardShortcutService KeyboardShortcutService
 
 
 <ConfirmDialog @ref="confirmDialog" 
@@ -34,9 +37,11 @@
 	if(recipes.Count > 0)
 	{
 		<ul>
-			@foreach (var recipe in recipes)
+			@for(int i = 0; i < recipes.Count; i++)
 			{
-				<li>
+				var recipe = recipes[i];
+
+				<li class="@(selectedIndex == i ? "selected" : "")">
 					<label @onclick="() => GoToDetails(recipe.Id)">@recipe.Title</label>
 					<div class="vr"></div>
 					<button class="btn btn-primary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
@@ -77,6 +82,16 @@
 
 	private string searchTerm = "";
 
+	private int selectedIndex = -1;
+
+	protected override void OnInitialized()
+	{
+		KeyboardShortcutService.OnArrowDown += MoveDown;
+		KeyboardShortcutService.OnArrowUp += MoveUp;
+		KeyboardShortcutService.OnEnter += HandleEnter;
+		KeyboardShortcutService.OnMouseDown += ClearSelection;
+	}
+
 	protected override async Task OnInitializedAsync()
 	{
 		await LoadingService.RunWithLoading(async () =>
@@ -94,6 +109,8 @@
 
 	private async Task LoadRecipes(bool firstLoad = false)
 	{
+		ClearSelection();
+
 		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
 		recipes = recipes.OrderBy(r => r.CreatedAt).ToList();
 
@@ -149,5 +166,54 @@
 			Console.Error.WriteLine(ex);
 
 		}
+	}
+
+	private void MoveDown()
+	{
+		if (recipes == null)
+			return;
+
+		if (KeyboardShortcutService.IsModalOpen)
+			return;
+
+		if (selectedIndex < recipes.Count - 1)
+		{
+			selectedIndex++;
+			StateHasChanged();
+		}
+	}
+
+	private void MoveUp()
+	{
+		if (recipes == null)
+			return;
+
+		if(selectedIndex > 0)
+		{
+			selectedIndex--;
+			StateHasChanged();
+		}
+	}
+
+	private void HandleEnter()
+	{
+		if (selectedIndex < 0 || recipes == null)
+			return;
+
+		GoToDetails(recipes[selectedIndex].Id);
+	}
+
+	private void ClearSelection()
+	{
+		selectedIndex = -1;
+		StateHasChanged();
+	}
+
+	public void Dispose()
+	{
+		KeyboardShortcutService.OnArrowDown -= MoveDown;
+		KeyboardShortcutService.OnArrowUp -= MoveUp;
+		KeyboardShortcutService.OnEnter -= HandleEnter;
+		KeyboardShortcutService.OnMouseDown -= ClearSelection;
 	}
 }
