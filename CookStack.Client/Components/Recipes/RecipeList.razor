@@ -1,5 +1,8 @@
 ﻿@using CookStack.Client.Components.Shared
+@using CookStack.Client.Components.Sort
 @using CookStack.Client.Constants
+@using CookStack.Client.Enums
+@using CookStack.Client.Models.Sort
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
@@ -29,6 +32,11 @@
 <hr />
 
 <h3>Recipes</h3>
+
+<SortDropdown 
+	TSortField="RecipeSortField"
+	SortOptions="@sortOptions"
+	OnChanged="OnSortChanged" />
 
 <hr />
 
@@ -84,6 +92,14 @@
 
 	private int selectedIndex = -1;
 
+
+	private SortOptions<RecipeSortField> sortOptions =
+		new()
+		{
+			Field = RecipeSortField.CreatedAt,
+			Direction = SortDirection.Ascending
+		};
+
 	protected override void OnInitialized()
 	{
 		KeyboardShortcutService.OnArrowDown += MoveDown;
@@ -112,7 +128,8 @@
 		ClearSelection();
 
 		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
-		recipes = recipes.OrderBy(r => r.CreatedAt).ToList();
+
+		ApplySorting();
 
 		if (firstLoad)
 			await TitleService.SetTitle("Recipe list");
@@ -166,6 +183,39 @@
 			Console.Error.WriteLine(ex);
 
 		}
+	}
+
+	private Task OnSortChanged(SortOptions<RecipeSortField> newOptions)
+	{
+		sortOptions = newOptions;
+
+		ApplySorting();
+
+		return Task.CompletedTask;
+	}
+
+	private void ApplySorting()
+	{
+		if (recipes == null)
+			return;
+
+		recipes = sortOptions.Field switch
+		{
+			RecipeSortField.Title =>
+				sortOptions.Direction == SortDirection.Ascending
+					? recipes.OrderBy(r => r.Title).ToList()
+					: recipes.OrderByDescending(r => r.Title).ToList(),
+
+			RecipeSortField.CreatedAt =>
+				sortOptions.Direction == SortDirection.Ascending
+					? recipes.OrderBy(r => r.CreatedAt).ToList()
+					: recipes.OrderByDescending(r => r.CreatedAt).ToList(),
+
+			_ => recipes
+
+		};
+
+		StateHasChanged();
 	}
 
 	private void MoveDown()

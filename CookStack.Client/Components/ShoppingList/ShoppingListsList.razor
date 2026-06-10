@@ -1,5 +1,7 @@
 ﻿@using CookStack.Client.Components.Shared
+@using CookStack.Client.Components.Sort
 @using CookStack.Client.Enums
+@using CookStack.Client.Models.Sort
 @using CookStack.Client.Services
 @using CookStack.Shared.ShoppingList.Dtos;
 
@@ -28,6 +30,11 @@
 <hr /> 
 
 <h3>Shopping Lists</h3>
+
+<SortDropdown 
+	TSortField="ShoppingListSortField"
+	SortOptions="sortOptions" 
+	OnChanged="OnSortChanged" />
 
 <hr />
 
@@ -112,6 +119,14 @@
 
 	private int selectedIndex = -1;
 
+	private SortOptions<ShoppingListSortField> sortOptions =
+		new()
+			{
+				Field = ShoppingListSortField.CreatedAt,
+				Direction = SortDirection.Ascending
+			};
+
+
 	protected override void OnInitialized()
 	{
 		KeyboardShortcutService.OnEnter += HandleEnter;
@@ -149,7 +164,9 @@
 		ClearSelection();
 
 		shoppingLists = await ShoppingListApi.GetShoppingListsAsync(searchTerm);
-		shoppingLists = shoppingLists.OrderBy(s => s.CreatedAt).ToList();
+
+		ApplySorting();
+
 	}
 
 	private void GoToDetails(int id)
@@ -200,6 +217,41 @@
 			Console.Error.WriteLine(ex);
 		}
 	}
+
+
+	private Task OnSortChanged(SortOptions<ShoppingListSortField> newOptions)
+	{
+		sortOptions = newOptions;
+
+		ApplySorting();
+
+		return Task.CompletedTask;
+	}
+
+
+	private void ApplySorting()
+	{
+		if (shoppingLists == null)
+			return;
+
+		shoppingLists = sortOptions.Field switch
+		{
+			ShoppingListSortField.Title =>
+				sortOptions.Direction == SortDirection.Ascending
+					? shoppingLists.OrderBy(s => s.Title).ToList()
+					: shoppingLists.OrderByDescending(s => s.Title).ToList(),
+
+			ShoppingListSortField.CreatedAt =>
+				sortOptions.Direction == SortDirection.Ascending
+					? shoppingLists.OrderBy(s => s.CreatedAt).ToList()
+					: shoppingLists.OrderByDescending(s => s.CreatedAt).ToList(),
+
+			_ => shoppingLists
+		};
+
+		StateHasChanged();
+	}
+
 
 	private void MoveDown()
 	{

@@ -1,0 +1,60 @@
+﻿@using CookStack.Client.Enums
+@using CookStack.Client.Models.Sort
+
+@typeparam TSortField where TSortField : struct, Enum
+
+<div class="dropdown">
+	<button class="btn btn-outline-secondary dropdown-toggle"
+			type="button"
+			data-bs-toggle="dropdown">
+		Sort: @SortOptions.Field
+		@(SortOptions.Direction == SortDirection.Ascending ? "↑" : "↓")
+	</button>
+
+	<ul class="dropdown-menu">
+		@foreach (var field in Enum.GetValues<TSortField>())
+		{
+			<li>
+				<button class="dropdown-item" @onclick="() => SelectField(field)">
+					@field
+
+					@if (EqualityComparer<TSortField>.Default.Equals(
+						SortOptions.Field,
+						field))
+					{
+						<span class="ms-2">
+							@(SortOptions.Direction == SortDirection.Ascending ? "↑" : "↓")
+						</span>
+					}
+				</button>
+			</li>
+		}
+	</ul>
+	
+</div>
+
+@code {
+	[Parameter] public SortOptions<TSortField> SortOptions { get; set; } = default!;
+	[Parameter] public EventCallback<SortOptions<TSortField>> OnChanged { get; set; }
+
+	private async Task SelectField(TSortField field)
+	{
+		if(EqualityComparer<TSortField>.Default.Equals(
+			SortOptions.Field,
+			field))
+		{
+			SortOptions.Direction =
+				SortOptions.Direction == SortDirection.Ascending
+				? SortDirection.Descending
+				: SortDirection.Ascending;
+		}
+		else
+		{
+			SortOptions.Field = field;
+			SortOptions.Direction = SortDirection.Ascending;
+		}
+
+
+		await OnChanged.InvokeAsync(SortOptions);
+	}
+}
