@@ -199,23 +199,27 @@
 		if (recipes == null)
 			return;
 
-		recipes = sortOptions.Field switch
+		recipes = SortRecipeList(recipes);
+
+		StateHasChanged();
+	}
+
+	private List<RecipeListDto> SortRecipeList(List<RecipeListDto> lists)
+	{
+		return sortOptions.Field switch
 		{
 			RecipeSortField.Title =>
 				sortOptions.Direction == SortDirection.Ascending
-					? recipes.OrderBy(r => r.Title).ToList()
-					: recipes.OrderByDescending(r => r.Title).ToList(),
+					? lists.OrderBy(r => r.Title).ToList()
+					: lists.OrderByDescending(r => r.Title).ToList(),
 
 			RecipeSortField.CreatedAt =>
 				sortOptions.Direction == SortDirection.Ascending
-					? recipes.OrderBy(r => r.CreatedAt).ToList()
-					: recipes.OrderByDescending(r => r.CreatedAt).ToList(),
+					? lists.OrderBy(r => r.CreatedAt).ToList()
+					: lists.OrderByDescending(r => r.CreatedAt).ToList(),
 
-			_ => recipes
-
+			_ => lists
 		};
-
-		StateHasChanged();
 	}
 
 	private void MoveDown()
