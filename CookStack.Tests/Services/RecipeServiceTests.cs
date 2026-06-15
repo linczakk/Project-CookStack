@@ -31,12 +31,14 @@ namespace CookStack.Tests.Services
                 new Recipe
                 {
                     Title = "Test Title 1",
-                    CreatedAt = now
+                    CreatedAt = now,
+                    LastVisitedAt = now
                 },
                 new Recipe
                 {
                     Title = "Test Title 2",
-                    CreatedAt = now
+                    CreatedAt = now,
+                    LastVisitedAt = now
                 }
             ];
 
@@ -49,8 +51,8 @@ namespace CookStack.Tests.Services
             Assert.Equal(2, result.Count());
             Assert.Contains(result, r => r.Title == "Test Title 1");
             Assert.Contains(result, r => r.Title == "Test Title 2");
-            Assert.All(result, r =>
-                Assert.NotEqual(default, r.CreatedAt));
+            Assert.All(result, r => Assert.NotEqual(default, r.CreatedAt));
+            Assert.All(result, r => Assert.NotEqual(default, r.LastVisitedAt));
         }
         
 
@@ -67,12 +69,14 @@ namespace CookStack.Tests.Services
                 new Recipe
                 {
                     Title = "Test Title 1",
-                    CreatedAt = now
+                    CreatedAt = now,
+                    LastVisitedAt = now,
                 },
                 new Recipe
                 {
                     Title = "Test Title 2",
-                    CreatedAt = now
+                    CreatedAt = now,
+                    LastVisitedAt = now,
                 },
             ];
 
@@ -86,6 +90,7 @@ namespace CookStack.Tests.Services
             Assert.Contains(result, r => r.Title == "Test Title 2");
             Assert.DoesNotContain(result, r => r.Title == "Test Title 1");
             Assert.All(result, r => Assert.NotEqual(default, r.CreatedAt));
+            Assert.All(result, r => Assert.NotEqual(default, r.LastVisitedAt));
         }
 
         [Fact]
@@ -288,6 +293,40 @@ namespace CookStack.Tests.Services
 
             Assert.False(success);
             Assert.Empty(db.Recipes);
+        }
+
+        [Fact]
+        public async Task MarkAsVisited_Should_MarkRecipeAsVisited()
+        {
+            var db = CreateDbContext();
+            var service = new RecipeService(db);
+
+            var recipe = new Recipe
+            {
+                Title = "Test Title",
+            };
+
+            await db.AddAsync(recipe);
+            await db.SaveChangesAsync();
+
+            var success = await service.MarkAsVisited(recipe.Id);
+
+            var result = db.Recipes.First(r => r.Id == recipe.Id);
+
+            Assert.NotNull(result);
+            Assert.True(success);
+            Assert.NotNull(result.LastVisitedAt);
+        }
+
+        [Fact]
+        public async Task MarkAsVisited_Should_ReturnFalse_WhenRecipeNotFound()
+        {
+            var db = CreateDbContext();
+            var service = new RecipeService(db);
+
+            var success = await service.MarkAsVisited(0);
+
+            Assert.False(success);
         }
 
         [Fact]

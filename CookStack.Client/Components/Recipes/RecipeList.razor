@@ -15,6 +15,7 @@
 @inject NavigationManager NavManager
 @inject BrowserTitleService TitleService
 @inject KeyboardShortcutService KeyboardShortcutService
+@inject SortStateService SortStateService
 
 
 <ConfirmDialog @ref="confirmDialog" 
@@ -97,11 +98,13 @@
 		new()
 		{
 			Field = RecipeSortField.CreatedAt,
-			Direction = SortDirection.Ascending
+			Direction = SortDirection.Descending
 		};
 
 	protected override void OnInitialized()
 	{
+		sortOptions = SortStateService.RecipeSort;
+
 		KeyboardShortcutService.OnArrowDown += MoveDown;
 		KeyboardShortcutService.OnArrowUp += MoveUp;
 		KeyboardShortcutService.OnEnter += HandleEnter;
@@ -128,7 +131,7 @@
 		ClearSelection();
 
 		recipes = await RecipesApi.GetRecipesAsync(searchTerm);
-
+		
 		ApplySorting();
 
 		if (firstLoad)
@@ -187,6 +190,7 @@
 
 	private Task OnSortChanged(SortOptions<RecipeSortField> newOptions)
 	{
+		SortStateService.RecipeSort = newOptions;
 		sortOptions = newOptions;
 
 		ApplySorting();
@@ -212,11 +216,14 @@
 				sortOptions.Direction == SortDirection.Ascending
 					? lists.OrderBy(r => r.Title).ToList()
 					: lists.OrderByDescending(r => r.Title).ToList(),
-
 			RecipeSortField.CreatedAt =>
 				sortOptions.Direction == SortDirection.Ascending
 					? lists.OrderBy(r => r.CreatedAt).ToList()
 					: lists.OrderByDescending(r => r.CreatedAt).ToList(),
+			RecipeSortField.RecentlyVisited =>
+				sortOptions.Direction == SortDirection.Ascending
+					? lists.OrderBy(r => r.LastVisitedAt ?? DateTime.MinValue).ToList()
+					: lists.OrderByDescending(r => r.LastVisitedAt ?? DateTime.MinValue).ToList(),
 
 			_ => lists
 		};

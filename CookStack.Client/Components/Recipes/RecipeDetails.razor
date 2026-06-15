@@ -63,25 +63,32 @@
 	{
 		await LoadingService.RunWithLoading(async () =>
 		{
-			await ReloadList();
+			var loaded = await ReloadList();
+
+			if(loaded)
+				await RecipesApi.MarkRecipeAsVisitedAsync(Id);
+
 		}, "Wczytywanie przepisu");
 	}
 
-	private async Task ReloadList()
+	private async Task<bool> ReloadList()
 	{
 		recipeDto = await RecipesApi.GetRecipeByIdAsync(Id);
-		if (recipeDto != null)
-		{
-			await SetTitleName();			
 
-			ingredients = recipeDto.Ingredients
-			.Select(i => new IngredientUiWrapper { Ingredient = i })
-			.ToList();
+		if (recipeDto == null)
+			return false;
 
-			steps = recipeDto.Steps.Select(s => new StepsUiWrapper { Step = s })
-			.OrderBy(s => s.Step.Order)
-			.ToList();
-		}
+		await SetTitleName();
+
+		ingredients = recipeDto.Ingredients
+		.Select(i => new IngredientUiWrapper { Ingredient = i })
+		.ToList();
+
+		steps = recipeDto.Steps.Select(s => new StepsUiWrapper { Step = s })
+		.OrderBy(s => s.Step.Order)
+		.ToList();
+
+		return true;
 	}
 
 	private void AddShoppingList()

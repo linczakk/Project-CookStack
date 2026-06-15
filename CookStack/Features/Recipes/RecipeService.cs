@@ -27,7 +27,8 @@ namespace CookStack.Api.Features.Recipes
                 {
                     Id = r.Id,
                     Title = r.Title,
-                    CreatedAt = r.CreatedAt
+                    CreatedAt = r.CreatedAt,
+                    LastVisitedAt = r.LastVisitedAt,
                 })
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -136,6 +137,25 @@ namespace CookStack.Api.Features.Recipes
             }
             return recipeFound;
         }
+
+        public async Task<bool> MarkAsVisited(int id)
+        {
+            var recipeFound = false;
+
+            var recipe = await _dbContext.Recipes.FindAsync(id);
+
+            if(recipe != null)
+            {
+                recipeFound = true;
+
+                recipe.LastVisitedAt = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return recipeFound;
+        }
+
 
         public async Task<bool> Delete(int id)
         {

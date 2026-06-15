@@ -13,6 +13,7 @@
 @inject NavigationManager NavManager
 @inject BrowserTitleService TitleService;
 @inject KeyboardShortcutService KeyboardShortcutService
+@inject SortStateService SortStateService
 
 <ConfirmDialog @ref="confirmDialog"
 	Title="Delete list"
@@ -124,12 +125,14 @@
 		new()
 			{
 				Field = ShoppingListSortField.CreatedAt,
-				Direction = SortDirection.Ascending
+				Direction = SortDirection.Descending
 			};
 
 
 	protected override void OnInitialized()
 	{
+		sortOptions = SortStateService.ShoppingListSort;
+
 		KeyboardShortcutService.OnEnter += HandleEnter;
 		KeyboardShortcutService.OnArrowDown += MoveDown;
 		KeyboardShortcutService.OnArrowUp += MoveUp;
@@ -165,7 +168,7 @@
 		ClearSelection();
 
 		shoppingLists = await ShoppingListApi.GetShoppingListsAsync(searchTerm);
-
+		
 		ApplySorting();
 	}
 
@@ -232,6 +235,7 @@
 
 	private Task OnSortChanged(SortOptions<ShoppingListSortField> newOptions)
 	{
+		SortStateService.ShoppingListSort = newOptions;
 		sortOptions = newOptions;
 
 		ApplySorting();

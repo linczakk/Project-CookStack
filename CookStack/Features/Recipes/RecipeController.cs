@@ -39,6 +39,7 @@ namespace CookStack.Api.Features.Recipes
             return CreatedAtAction(nameof(GetRecipe), new { id }, null);
         }
 
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRecipe(int id, [FromBody] RecipeUpdateDto dto)
         {
@@ -50,6 +51,16 @@ namespace CookStack.Api.Features.Recipes
             return NotFound();
         }
 
+        [HttpPost("{id}/visit")]
+        public async Task<IActionResult> MarkRecipeAsVisited(int id)
+        {
+            var result = await _recipeService.MarkAsVisited(id);
+
+            if (result)
+                return NoContent();
+
+            return NotFound();
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)

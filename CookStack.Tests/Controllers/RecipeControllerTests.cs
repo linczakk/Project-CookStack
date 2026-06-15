@@ -189,6 +189,48 @@ namespace CookStack.Tests.Controllers
         }
 
         [Fact]
+        public async Task MarkRecipeAsVisited_Should_ReturnNoContent_WhenMarkAsVisitedIsSuccessful()
+        {
+            var mockService = new Mock<IRecipeService>();
+
+            mockService
+                .Setup(s => s.MarkAsVisited(1))
+                .ReturnsAsync(true);
+
+
+            var controller = new RecipeController(mockService.Object);
+
+
+            var result = await controller.MarkRecipeAsVisited(1);
+
+            Assert.IsType<NoContentResult>(result);
+
+            mockService.Verify(
+                s => s.MarkAsVisited(1),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task MarkRecipeAsVisited_Should_ReturnNotFound_WhenMarkAsVisitedIsUnsuccessful()
+        {
+            var mockService = new Mock<IRecipeService>();
+
+            mockService
+                .Setup(s => s.MarkAsVisited(1))
+                .ReturnsAsync(false);
+
+            var controller = new RecipeController(mockService.Object);
+
+            var result = await controller.MarkRecipeAsVisited(1);
+
+            Assert.IsType<NotFoundResult>(result);
+
+            mockService.Verify(
+                s => s.MarkAsVisited(1),
+                Times.Once);
+        }
+
+        [Fact]
         public async Task DeleteRecipe_Should_ReturnNoContent_WhenDeleteIsSuccessful()
         {
             var mockService = new Mock<IRecipeService>();
