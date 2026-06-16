@@ -3,75 +3,69 @@ using System;
 using CookStack.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CookStack.Shared.Migrations
+namespace CookStack.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260218112408_AddShoppingListTitle")]
-    partial class AddShoppingListTitle
+    [Migration("20260616094221_InitialSqlite")]
+    partial class InitialSqlite
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CookStackApi.Features.Recipes.Recipe", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.Recipe", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastVisitedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SourceUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.Recipes.RecipeIngredient", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.RecipeIngredient", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RecipeId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Unit")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -80,23 +74,21 @@ namespace CookStack.Shared.Migrations
                     b.ToTable("Ingredients");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.Recipes.RecipeStep", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.RecipeStep", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("RecipeId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -105,29 +97,30 @@ namespace CookStack.Shared.Migrations
                     b.ToTable("Steps");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.ShoppingList.ShoppingItem", b =>
+            modelBuilder.Entity("CookStack.Api.Features.ShoppingList.ShoppingItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsChecked")
-                        .HasColumnType("bit");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ShoppingListId")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Unit")
-                        .HasColumnType("int");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -136,33 +129,31 @@ namespace CookStack.Shared.Migrations
                     b.ToTable("ShoppingItems");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.ShoppingList.ShoppingList", b =>
+            modelBuilder.Entity("CookStack.Api.Features.ShoppingList.ShoppingList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("ShoppingLists");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.Recipes.RecipeIngredient", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.RecipeIngredient", b =>
                 {
-                    b.HasOne("CookStackApi.Features.Recipes.Recipe", "Recipe")
+                    b.HasOne("CookStack.Api.Features.Recipes.Recipe", "Recipe")
                         .WithMany("Ingredients")
                         .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -171,9 +162,9 @@ namespace CookStack.Shared.Migrations
                     b.Navigation("Recipe");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.Recipes.RecipeStep", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.RecipeStep", b =>
                 {
-                    b.HasOne("CookStackApi.Features.Recipes.Recipe", "Recipe")
+                    b.HasOne("CookStack.Api.Features.Recipes.Recipe", "Recipe")
                         .WithMany("Steps")
                         .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -182,9 +173,9 @@ namespace CookStack.Shared.Migrations
                     b.Navigation("Recipe");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.ShoppingList.ShoppingItem", b =>
+            modelBuilder.Entity("CookStack.Api.Features.ShoppingList.ShoppingItem", b =>
                 {
-                    b.HasOne("CookStackApi.Features.ShoppingList.ShoppingList", "ShoppingList")
+                    b.HasOne("CookStack.Api.Features.ShoppingList.ShoppingList", "ShoppingList")
                         .WithMany("Items")
                         .HasForeignKey("ShoppingListId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -193,14 +184,14 @@ namespace CookStack.Shared.Migrations
                     b.Navigation("ShoppingList");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.Recipes.Recipe", b =>
+            modelBuilder.Entity("CookStack.Api.Features.Recipes.Recipe", b =>
                 {
                     b.Navigation("Ingredients");
 
                     b.Navigation("Steps");
                 });
 
-            modelBuilder.Entity("CookStackApi.Features.ShoppingList.ShoppingList", b =>
+            modelBuilder.Entity("CookStack.Api.Features.ShoppingList.ShoppingList", b =>
                 {
                     b.Navigation("Items");
                 });
