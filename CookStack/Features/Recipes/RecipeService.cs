@@ -19,7 +19,7 @@ namespace CookStack.Api.Features.Recipes
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(r => r.Title.Contains(search));
+                query = query.Where(r => r.Title.ToLower().Contains(search.ToLower()));
             }
 
             return await query
@@ -99,77 +99,66 @@ namespace CookStack.Api.Features.Recipes
         }
         public async Task<bool> Update(int id, RecipeUpdateDto dto)
         {
-            var recipeFound = false;
             var recipe = await _dbContext.Recipes
                 .Include(r => r.Ingredients)
                 .Include(r => r.Steps)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (recipe != null)
-            {
-                recipeFound = true;
-                recipe.Title = dto.Title;
-                recipe.Description = dto.Description;
-                recipe.SourceUrl = dto.SourceUrl;
+            if (recipe == null)
+                return false;
+
+            recipe.Title = dto.Title;
+            recipe.Description = dto.Description;
+            recipe.SourceUrl = dto.SourceUrl;
 
 
-                _dbContext.Ingredients.RemoveRange(recipe.Ingredients);
-                _dbContext.Steps.RemoveRange(recipe.Steps);
+            _dbContext.Ingredients.RemoveRange(recipe.Ingredients);
+            _dbContext.Steps.RemoveRange(recipe.Steps);
 
-                recipe.Ingredients = dto.Ingredients
-                    .Select(i => new RecipeIngredient
-                    {
-                        Name = i.Name,
-                        Quantity = i.Quantity,
-                        Unit = i.Unit
-                    }).ToList();
+            recipe.Ingredients = dto.Ingredients
+                .Select(i => new RecipeIngredient
+                {
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Unit = i.Unit
+                }).ToList();
 
-                recipe.Steps = dto.Steps
-                    .Select((s, index) => new RecipeStep
-                    {
-                        Order = index + 1,
-                        Description = s.Description
+            recipe.Steps = dto.Steps
+                .Select((s, index) => new RecipeStep
+                {
+                    Order = index + 1,
+                    Description = s.Description
 
-                    }).ToList();
+                }).ToList();
 
 
-                await _dbContext.SaveChangesAsync();
-            }
-            return recipeFound;
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> MarkAsVisited(int id)
         {
-            var recipeFound = false;
-
             var recipe = await _dbContext.Recipes.FindAsync(id);
 
-            if(recipe != null)
-            {
-                recipeFound = true;
+            if(recipe == null)
+                return false;
 
-                recipe.LastVisitedAt = DateTime.UtcNow;
-
-                await _dbContext.SaveChangesAsync();
-            }
-
-            return recipeFound;
+            recipe.LastVisitedAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
 
         public async Task<bool> Delete(int id)
         {
-            var recipeFound = false;
             var recipe = await _dbContext.Recipes.FindAsync(id);
 
-            if(recipe != null)
-            {
-                recipeFound = true;
+            if(recipe == null)
+                return false;
 
-                _dbContext.Recipes.Remove(recipe);
-                await _dbContext.SaveChangesAsync();
-            }
-            return recipeFound;
+            _dbContext.Recipes.Remove(recipe);
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
     }

@@ -20,7 +20,7 @@ namespace CookStack.Api.Features.ShoppingList
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(s => s.Title.Contains(search));
+                query = query.Where(s => s.Title.ToLower().Contains(search.ToLower()));
             }
 
             return await query
@@ -156,50 +156,44 @@ namespace CookStack.Api.Features.ShoppingList
             return newTitle;
         }
 
-
         public async Task<bool> Update(int id, ShoppingListUpdateDto dto)
         {
-            var itemFound = false;
             var shoppingList = await _dbContext.ShoppingLists
                 .Include(s => s.Items)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
-            if(shoppingList != null)
-            {
-                itemFound = true;
-                shoppingList.Title = dto.Title;
-                shoppingList.Description = dto.Description;
+            if(shoppingList == null)
+                return false;
 
-                _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
+            shoppingList.Title = dto.Title;
+            shoppingList.Description = dto.Description;
 
-                shoppingList.Items = dto.Items
-                    .Select(i => new ShoppingItem
-                    {
-                        Name = i.Name,
-                        Quantity = i.Quantity,
-                        Unit = i.Unit,
-                        IsChecked = i.IsChecked,
-                        Order = i.Order
-                    }).ToList();
+            _dbContext.ShoppingItems.RemoveRange(shoppingList.Items);
 
-                await _dbContext.SaveChangesAsync();
-            }
-            return itemFound;
+            shoppingList.Items = dto.Items
+                .Select(i => new ShoppingItem
+                {
+                    Name = i.Name,
+                    Quantity = i.Quantity,
+                    Unit = i.Unit,
+                    IsChecked = i.IsChecked,
+                    Order = i.Order
+                }).ToList();
+
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var itemFound = false;
             var shoppingList = await _dbContext.ShoppingLists.FindAsync(id);
 
-            if(shoppingList != null)
-            {
-                itemFound = true;
+            if(shoppingList == null)
+                return false;
 
-                _dbContext.ShoppingLists.Remove(shoppingList);
-                await _dbContext.SaveChangesAsync();
-            }
-            return itemFound;
+            _dbContext.ShoppingLists.Remove(shoppingList);
+            await _dbContext.SaveChangesAsync();
+            return true;
         }
     }
 }
