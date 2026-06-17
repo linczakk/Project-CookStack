@@ -17,7 +17,7 @@
 						<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="OnKey" />
 					}
 					<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="OnKey" />
-					<InputNumber class="form-control" @bind-Value="item.Quantity" @onkeydown="OnKey" TValue="decimal" />
+					<InputNumber class="form-control" min="0" @bind-Value="item.Quantity" @onkeydown="OnKey" TValue="decimal" />
 					<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="OnKey">
 						@foreach (var unit in Enum.GetValues<UnitType>())
 						{

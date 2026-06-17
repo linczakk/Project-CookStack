@@ -32,7 +32,7 @@
 				<InputText class="form-control" @bind-Value="ingredient.Name" placeholder="Name" />
 			</div>
 			<div class="col">
-				<InputNumber class="form-control" @bind-Value="ingredient.Quantity" TValue="decimal" />
+				<InputNumber class="form-control" min="0" @bind-Value="ingredient.Quantity" TValue="decimal"/>
 			</div>
 			<div class="col">
 				<InputSelect class="form-control" @bind-Value="ingredient.Unit">

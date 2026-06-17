@@ -19,7 +19,8 @@ namespace CookStack.Api.Features.Recipes
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(r => r.Title.ToLower().Contains(search.ToLower()));
+                var normalizedSearch = search.ToLower();
+                query = query.Where(r => r.Title.ToLower().Contains(normalizedSearch));
             }
 
             return await query
@@ -77,7 +78,7 @@ namespace CookStack.Api.Features.Recipes
                 Ingredients = dto.Ingredients.Select(i => new RecipeIngredient
                 {
                     Name = i.Name,
-                    Quantity = i.Quantity,
+                    Quantity = Math.Max(0, i.Quantity),
                     Unit = i.Unit
 
                 })
@@ -119,7 +120,7 @@ namespace CookStack.Api.Features.Recipes
                 .Select(i => new RecipeIngredient
                 {
                     Name = i.Name,
-                    Quantity = i.Quantity,
+                    Quantity = Math.Max(0, i.Quantity),
                     Unit = i.Unit
                 }).ToList();
 

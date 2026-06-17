@@ -20,7 +20,8 @@ namespace CookStack.Api.Features.ShoppingList
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(s => s.Title.ToLower().Contains(search.ToLower()));
+                var normalizedSearch = search;
+                query = query.Where(s => s.Title.ToLower().Contains(normalizedSearch));
             }
 
             return await query
@@ -70,7 +71,7 @@ namespace CookStack.Api.Features.ShoppingList
                 Items = dto.Items.Select(si => new ShoppingItem
                 {
                     Name = si.Name,
-                    Quantity = si.Quantity,
+                    Quantity = Math.Max(0, si.Quantity),
                     Unit = si.Unit,
                     IsChecked = si.IsChecked,
                     Order = si.Order
@@ -126,7 +127,7 @@ namespace CookStack.Api.Features.ShoppingList
                 .Select((i, index) => new ShoppingItem
                 {
                     Name = i.Name,
-                    Quantity = i.Quantity,
+                    Quantity = Math.Max(0, i.Quantity),
                     Unit = i.Unit,
                     IsChecked = false,
                     Order = starterOrder + index
@@ -174,7 +175,7 @@ namespace CookStack.Api.Features.ShoppingList
                 .Select(i => new ShoppingItem
                 {
                     Name = i.Name,
-                    Quantity = i.Quantity,
+                    Quantity = Math.Max(0, i.Quantity),
                     Unit = i.Unit,
                     IsChecked = i.IsChecked,
                     Order = i.Order
