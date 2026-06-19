@@ -16,6 +16,7 @@ builder.Services.AddScoped<SearchModalService>();
 builder.Services.AddScoped<BrowserTitleService>();
 builder.Services.AddScoped<KeyboardShortcutService>();
 builder.Services.AddScoped<SortStateService>();
+builder.Services.AddScoped<AddShoppingListModalService>();
 builder.Services.AddSingleton<ToastService>();
 
 

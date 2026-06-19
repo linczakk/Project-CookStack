@@ -1,19 +1,26 @@
 ﻿@using CookStack.Client.Components.Search
 @using CookStack.Client.Components.Shared
+@using CookStack.Client.Components.ShoppingList
+@using CookStack.Client.Enums
 @using CookStack.Client.Services
+
+@implements IDisposable
 
 @inherits LayoutComponentBase
 
-@inject LoadingService loadingService
-@inject SearchModalService searchModalService
-@inject KeyboardShortcutService keyboardShortcutService;
+@inject LoadingService LoadingService
+@inject SearchModalService SearchModalService
+@inject KeyboardShortcutService KeyboardShortcutService;
+@inject AddShoppingListModalService ShoppingListModalService; 
 @inject IJSRuntime jS
+
+<ShoppingListModal @ref="shoppingListModal" />
 
 <PageTitle>CookStack</PageTitle>
 
 <Spinner 
-	IsVisible = "@loadingService.IsLoading" 
-	StatusText= "@loadingService.StatusText" />
+	IsVisible = "@LoadingService.IsLoading" 
+	StatusText= "@LoadingService.StatusText" />
 <Toast />
 <div class="page">
     <div class="sidebar">
@@ -29,15 +36,23 @@
 
 <GlobalSearchModal @ref=searchModal />
 
-
 @code {
     private GlobalSearchModal? searchModal;
+    private ShoppingListModal? shoppingListModal;
     private DotNetObjectReference<MainLayout>? objectReference;
+
 
     protected override void OnInitialized()
     {
-        loadingService.OnChange += StateHasChanged;
-        searchModalService.OnOpen += async () => await OpenSearch();
+        LoadingService.OnChange += StateHasChanged;
+        SearchModalService.OnOpen += OpenSearch;
+        ShoppingListModalService.OnOpen += AddShoppingList;
+    }
+
+    private async Task AddShoppingList()
+    {
+        if (shoppingListModal != null)
+            await shoppingListModal.Open(ShoppingListModalMode.Create);
     }
 
     [JSInvokable]
@@ -50,31 +65,31 @@
     [JSInvokable]
     public async Task EscapePressed()
     {
-        keyboardShortcutService.EscapePressed();
+        KeyboardShortcutService.EscapePressed();
     }
 
     [JSInvokable]
     public async Task ArrowDownPressed()
     {
-        keyboardShortcutService.ArrowDownPressed();
+        KeyboardShortcutService.ArrowDownPressed();
     }
 
     [JSInvokable]
     public async Task ArrowUpPressed()
     {
-        keyboardShortcutService.ArrowUpPressed();
+        KeyboardShortcutService.ArrowUpPressed();
     }
 
     [JSInvokable]
     public async Task EnterPressed()
     {
-        keyboardShortcutService.EnterPressed();
+        KeyboardShortcutService.EnterPressed();
     }
 
     [JSInvokable]
     public async Task MouseUsed()
     {
-        keyboardShortcutService.MouseUsed();
+        KeyboardShortcutService.MouseUsed();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,5 +102,13 @@
             "keyboardShortcuts.register",
             objectReference);
         }
+    }
+
+    public void Dispose()
+    {
+        LoadingService.OnChange -= StateHasChanged;
+        SearchModalService.OnOpen -= OpenSearch;
+        ShoppingListModalService.OnOpen -= AddShoppingList;
+        objectReference?.Dispose();
     }
 }

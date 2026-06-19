@@ -1,6 +1,6 @@
 ﻿namespace CookStack.Client.Services
 {
-    public class SearchModalService
+    public class AddShoppingListModalService
     {
         public event Func<Task>? OnOpen;
 
