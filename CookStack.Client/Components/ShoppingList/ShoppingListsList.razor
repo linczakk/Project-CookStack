@@ -22,15 +22,16 @@
 
 <ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingLists" OnClose="SetTitleName" />
 
-<input  
-	class = "form-control-mb-3"
-	placeholder="Search shopping lists..."
-	@bind="searchTerm"
-	@oninput="OnSearchChanged"/>
 
-<hr /> 
+
 
 <h3>Shopping Lists</h3>
+
+<input class="form-control-mb-3"
+	   placeholder="Search shopping lists..."
+	   @bind="searchTerm"
+	   @oninput="OnSearchChanged" />
+<hr /> 
 
 <SortDropdown 
 	TSortField="ShoppingListSortField"
@@ -145,7 +146,7 @@
 		{
 			await LoadShoppingLists();
 
-		}, "Pobieranie listy zakupów...");
+		}, "Loading shopping lists...");
 
 	}
 

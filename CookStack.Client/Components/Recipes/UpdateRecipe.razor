@@ -1,4 +1,5 @@
 ﻿@using CookStack.Client.Components.Recipes
+@using CookStack.Client.Constants
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
@@ -42,8 +43,8 @@
 	private async Task Update()
 	{
 		await Api.UpdateRecipeAsync(Id, dto);
-		Nav.NavigateTo("/recipe");
+		Nav.NavigateTo(Routes.Recipes.RecipesMain);
 	}
 
-	private void Cancel() => Nav.NavigateTo("/recipe");
+	private void Cancel() => Nav.NavigateTo(Routes.Recipes.RecipesMain);
 }

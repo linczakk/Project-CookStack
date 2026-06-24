@@ -6,9 +6,11 @@
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
-@implements IDisposable
 
 @page "/recipes"
+
+@implements IDisposable
+
 @inject RecipeApiClient RecipesApi
 @inject LoadingService LoadingService
 @inject NavigationManager NavManager
@@ -22,16 +24,14 @@
 	Message="Are you sure you want to delete this recipe?"
 	OnConfirm="ConfirmDelete" />
 
+<h3>Recipes</h3>
 
-<input 
-	class="form-control-mb-3"
-	placeholder="Search recipes..."
-	@bind="searchTerm"
-	@oninput="OnSearchChanged" />
+<input class="form-control-mb-3"
+	   placeholder="Search recipes..."
+	   @bind="searchTerm"
+	   @oninput="OnSearchChanged" />
 
 <hr />
-
-<h3>Recipes</h3>
 
 <SortDropdown 
 	TSortField="RecipeSortField"
@@ -58,7 +58,6 @@
 					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
 						Delete
 					</button>
-					<hr />
 				</li>
 			}
 		</ul>
@@ -110,7 +109,7 @@
 		await LoadingService.RunWithLoading(async () =>
 		{
 			await LoadRecipes(true);
-		}, "Pobieranie przepisów...");
+		}, "Loading recipies...");
 
 	}
 

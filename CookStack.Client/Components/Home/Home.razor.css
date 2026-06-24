@@ -1,0 +1,10 @@
+﻿.selected {
+    background-color: #dbeafe;
+    border-radius: 4px;
+}
+
+
+li {
+    padding: 6px 10px;
+    cursor: pointer;
+}

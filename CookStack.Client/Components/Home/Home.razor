@@ -1,9 +1,240 @@
-﻿@page "/"
+﻿@using CookStack.Client.Components.ShoppingList
+@using CookStack.Client.Constants
+@using CookStack.Client.Enums
+@using CookStack.Client.Services
+@using CookStack.Shared.Recipes.Dtos
+@using CookStack.Shared.ShoppingList.Dtos
+
+@page "/"
+
+@implements IDisposable
+
+@inject LoadingService LoadingService
+@inject RecipeApiClient RecipesApi
+@inject ShoppingListApiClient ShoppingListApi
+@inject BrowserTitleService TitleService
+@inject NavigationManager NavManager
+@inject KeyboardShortcutService KeyboardService
+
+<ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingList" OnClose="SetTitleName" />
 
 
-<h1>TEST</h1>
+<h1>Welcome to CookStack</h1>
 
+<hr />
+
+@if(recipes != null)
+{
+	if(!recipes.Any())
+	{
+		<p>No recipes yet</p>
+	}
+	else
+	{
+		<h4>Recently Visited Recipes</h4>
+
+
+		if (RecentlyVisitedRecipes.Count == 0)
+		{
+			<p>No recently visited recipes.</p>
+		}
+
+		<ul>
+			@for (var i = 0; i < RecentlyVisitedRecipes.Count; i++)
+			{
+				var recipe = RecentlyVisitedRecipes[i];
+
+				<li class="@(selectedIndex == i ? "selected" : "")">
+					<label @onclick="() => GoToRecipeDetails(recipe.Id)">@recipe.Title</label>
+				</li>
+			}
+		</ul>
+
+		<hr />
+
+		<h4>Latest Recipes</h4>
+
+		<ul>
+
+			@for (var i = 0; i < LatestRecipes.Count; i++)
+			{
+				var recipe = LatestRecipes[i];
+				var globalIndex = RecentlyVisitedRecipes.Count + i;
+
+				<li class="@(selectedIndex == globalIndex ? "selected" : "")">
+					<label @onclick="() => GoToRecipeDetails(recipe.Id)">@recipe.Title</label>
+				</li>
+			}
+		</ul>
+
+		<hr />
+	}
+}
+
+@if(shoppingLists != null)
+{
+	if(!shoppingLists.Any())
+	{
+		<p>No shopping lists yet</p>
+	}
+	else
+	{
+		<h4>Latest Shopping Lists</h4>
+	
+		<ul>
+			@for (var i = 0; i < LatestShoppingLists.Count; i++)
+			{
+				var shoppingList = LatestShoppingLists[i];
+				var globalIndex = RecentlyVisitedRecipes.Count + LatestRecipes.Count + i;
+
+				<li class="@(selectedIndex == globalIndex ? "selected" : "")">
+					<label @onclick="() => GoToShoppingListDetails(shoppingList.Id)">@shoppingList.Title</label>
+				</li>
+			}
+		</ul>
+	}
+}
 
 @code {
 
+	private List<RecipeListDto>? recipes;
+	private List<ShoppingListsListDto>? shoppingLists;
+
+	private ShoppingListModal? shoppingListModal;
+
+	private int selectedIndex = -1;
+
+	private List<RecipeListDto> RecentlyVisitedRecipes =>
+		recipes?
+			.Where(r => r.LastVisitedAt != null)
+			.OrderByDescending(r => r.LastVisitedAt)
+			.Take(5)
+			.ToList()
+		?? [];
+
+	private List<RecipeListDto> LatestRecipes =>
+		recipes?
+			.OrderByDescending(r => r.CreatedAt)
+			.Take(5)
+			.ToList()
+		?? [];
+
+	private List<ShoppingListsListDto> LatestShoppingLists =>
+		shoppingLists?
+			.OrderByDescending(r => r.CreatedAt)
+			.Take(5)
+			.ToList()
+		?? [];
+
+	private List<HomeNavigationItem> NavigationItems =>
+	[
+		..RecentlyVisitedRecipes.Select(r => new HomeNavigationItem(r.Id, r.Title, HomeItemType.Recipe)),
+		..LatestRecipes.Select(r => new HomeNavigationItem(r.Id, r.Title, HomeItemType.Recipe)),
+		..LatestShoppingLists.Select(s => new HomeNavigationItem(s.Id, s.Title, HomeItemType.ShoppingList))
+	];
+
+	protected override void OnInitialized()
+	{
+		KeyboardService.OnArrowDown += MoveDown;
+		KeyboardService.OnArrowUp += MoveUp;
+		KeyboardService.OnEnter += HandleEnter;
+		KeyboardService.OnMouseDown += ClearSelection;
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadingService.RunWithLoading(async () => 
+		{ 
+			await LoadData(true); 
+		}, "Loading data..."); 
+	}
+
+	private async Task LoadData(bool firstLoad = false)
+	{
+		ClearSelection();
+
+		recipes = await RecipesApi.GetRecipesAsync();
+		await LoadShoppingList();
+
+		if (firstLoad)
+			await SetTitleName();
+	}
+
+	private async Task LoadShoppingList()
+	{
+		shoppingLists = await ShoppingListApi.GetShoppingListsAsync();
+	}
+
+	private async Task SetTitleName()
+	{
+		await TitleService.SetTitle("Home");
+	}
+
+	private void MoveDown()
+	{
+		if(selectedIndex < NavigationItems.Count - 1)
+		{
+			selectedIndex++;
+			StateHasChanged();
+		}
+	}
+
+	private void MoveUp()
+	{
+		if(selectedIndex > 0)
+		{
+			selectedIndex--;
+			StateHasChanged();
+		}
+	}
+
+	private async void HandleEnter()
+	{
+		if (selectedIndex < 0 || selectedIndex >= NavigationItems.Count)
+			return;
+
+		var item = NavigationItems[selectedIndex];
+
+		if (item.Type == HomeItemType.Recipe)
+			GoToRecipeDetails(item.Id);
+		else
+			await GoToShoppingListDetails(item.Id);
+	}
+
+	private void ClearSelection()
+	{
+		selectedIndex = -1;
+		StateHasChanged();
+	}
+
+
+	private void GoToRecipeDetails(int id)
+	{
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+	}
+
+	private async Task GoToShoppingListDetails(int id)
+	{
+		if(shoppingListModal != null)
+			await shoppingListModal.Open(ShoppingListModalMode.View, id);
+	}
+
+	public void Dispose()
+	{
+		KeyboardService.OnArrowDown -= MoveDown;
+		KeyboardService.OnArrowUp -= MoveUp;
+		KeyboardService.OnEnter -= HandleEnter;
+		KeyboardService.OnMouseDown -= ClearSelection;
+	}
+
+	private enum HomeItemType
+	{
+		Recipe,
+		ShoppingList
+	}
+
+	private record HomeNavigationItem(
+		int Id,
+		string Title,
+		HomeItemType Type);
 }
