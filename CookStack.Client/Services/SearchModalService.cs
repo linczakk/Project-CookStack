@@ -2,12 +2,12 @@
 {
     public class SearchModalService
     {
-        public event Func<Task>? OnOpen;
+        public event Func<string?, Task>? OnOpen;
 
-        public async Task Open()
+        public async Task Open(string? searchTerm = null)
         {
             if(OnOpen != null)
-                await OnOpen.Invoke();
+                await OnOpen.Invoke(searchTerm);
         }
     }
 }

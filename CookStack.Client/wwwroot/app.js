@@ -9,7 +9,7 @@ window.keyboardShortcuts = {
 
             if (e.ctrlKey && e.key === "k") {
                 e.preventDefault();
-                dotNetHelper.invokeMethodAsync("OpenSearch");
+                dotNetHelper.invokeMethodAsync("OpenSearch", null);
             }
 
             if (e.key === "Escape") {

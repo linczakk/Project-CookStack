@@ -1,0 +1,139 @@
+﻿
+.top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 64px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: var(--cs-nav-bg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+}
+
+.brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--cs-nav-text);
+    white-space: nowrap;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links ::deep a{
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--cs-nav-muted);
+    font-weight: 500;
+}
+
+.nav-links ::deep a:hover {
+    background: var(--cs-nav-hover);
+    color: var(--cs-nav-text);
+}
+
+.nav-links ::deep a.active {
+    background: var(--cs-accent);
+    color: white;
+    font-weight: bold;
+}
+
+.nav-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-box{
+    height: 38px;
+    min-width: 320px;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.search-box button {
+    border: none;
+    background: transparent;
+    color: var(--cs-nav-muted); 
+    padding: 0 12px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-box .bi {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0;
+    position: static;
+    background-size: cover;
+}
+
+.search-box input{
+    border: none;
+    outline: none;
+    background: transparent;
+    color: white;
+    width: 100%;
+    padding-right: 14px;
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.55)
+}
+
+.nav-actions ::deep .action-link,
+.action-button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: var(--cs-accent);
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.nav-actions ::deep .action-link:hover,
+.action-button:hover {
+    background: var(--cs-accent-hover);
+    color: white;
+}
+
+.nav-actions ::deep .action-link:active{
+    background: var(--cs-accent-hover);
+    color: white;
+}
+
+.bi {
+    display: inline-block;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-size: cover;
+}
+
+.bi-invert {
+    filter: invert(1);
+}
+
+.bi-search-nav-menu {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-search' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0'/%3E%3C/svg%3E");
+}

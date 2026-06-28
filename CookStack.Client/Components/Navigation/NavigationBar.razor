@@ -1,0 +1,61 @@
+﻿@using CookStack.Client.Services
+
+@inject SearchModalService SearchModalService
+@inject AddShoppingListModalService ShoppingListModalService
+
+
+<nav class="top-nav">
+	<a class="brand" href="">CookStack</a>
+
+	<div class="nav-links">
+		<NavLink href="" Match="NavLinkMatch.All">Home</NavLink>
+		<NavLink href="recipes">Recipes</NavLink>
+		<NavLink href="shopping-lists">Shopping List</NavLink>
+	</div>
+	
+	<div class="nav-actions">
+		<div class="search-box">
+			<button @onclick="GlobalSearch">
+				<span class="bi bi-invert bi-search-nav-menu" aria-hidden="true"></span>
+			</button>
+			<input placeholder="Search recipes and shopping lists..."
+				   value="@searchTerm"
+				   @oninput="OnSearchInput"
+				   @onkeydown="HandleSearchKeyDown" />
+		</div>
+
+		<NavLink class="action-link" href="recipe-create">+ Recipe</NavLink>
+		<button class="action-button" @onclick="ShoppingListModal">+ List</button>
+	</div>
+</nav>
+
+
+
+@code {
+	private string searchTerm = "";
+
+	private async Task HandleSearchKeyDown(KeyboardEventArgs e)
+	{
+
+		if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(searchTerm))
+		{
+			await SearchModalService.Open(searchTerm);
+			searchTerm = "";
+		}
+	}
+
+	private void OnSearchInput(ChangeEventArgs e)
+	{
+		searchTerm = e.Value?.ToString() ?? "";
+	}
+
+	private async Task GlobalSearch()
+	{
+		await SearchModalService.Open();
+	}
+
+	private async Task ShoppingListModal()
+	{
+		await ShoppingListModalService.Open();
+	}
+}
