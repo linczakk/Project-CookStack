@@ -23,75 +23,112 @@
 <ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingLists" OnClose="SetTitleName" />
 
 
-
-
-<h3>Shopping Lists</h3>
-
-<input class="form-control-mb-3"
-	   placeholder="Search shopping lists..."
-	   @bind="searchTerm"
-	   @oninput="OnSearchChanged" />
-<hr /> 
-
-<SortDropdown 
-	TSortField="ShoppingListSortField"
-	SortOptions="sortOptions" 
-	OnChanged="OnSortChanged" />
-
-<hr />
-
 @if (shoppingLists != null)
 {
+	<div class="page-header">
+		<div>
+			<h3>Shopping Lists</h3>
+			<p class="page-subtitle">Manage your shopping lists.</p>
+		</div>
+
+		<button class="btn btn-cs-primary" @onclick=AddShoppingList>
+			+Add shopping list
+		</button>
+	</div>
+
+	<div class="page-toolbar">
+		<input class="form-control-mb-3"
+			   placeholder="Search shopping lists..."
+			   @bind="searchTerm"
+			   @oninput="OnSearchChanged" />
+
+		<SortDropdown TSortField="ShoppingListSortField"
+					  SortOptions="sortOptions"
+					  OnChanged="OnSortChanged" />
+	</div>
+
+	<hr />
+
 	if(shoppingLists.Count > 0)
 	{
 		var displayedLists = GetDisplayedShoppingLists();
 		var activeList = displayedLists.Where(sl => !sl.IsCompleted).ToList();
 		var completedList = displayedLists.Where(sl => sl.IsCompleted).ToList();
+		
+		@if (activeList.Any())
+		{
+			<h4 class="section-title">
+				Active shopping lists (@activeList.Count)
+			</h4>
+		}
 
-		<ul>
+		<div class="shopping-list-grid">
 			@for(int i = 0; i < activeList.Count(); i++)
 			{
 				var shoppingList = activeList.ElementAt(i);
 
-				<li class="@(selectedIndex == i ? "selected" : "")">
-					<span class="cursor-pointer" @onclick="() => GoToDetails(shoppingList.Id)">
-						<label>@shoppingList.Title</label>
-					</span>
-					<div class="vr"></div>
-					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
-						Delete
-					</button>
-					<p class="text-muted"><small>@shoppingList.CompletedItems / @shoppingList.TotalItems bought</small></p>
-				</li>
+				<div class="shopping-list-card @(selectedIndex == i ? "selected" : "")">
+					<div class="shopping-list-card-body" @onclick="() => GoToDetails(shoppingList.Id)">
+						<h5>@shoppingList.Title</h5>
 
+						<p class="text-muted">
+							Created: @shoppingList.CreatedAt.ToString("dd.MM.yyyy")
+						</p>
+
+						<p class="text-muted">
+							<small>
+								@shoppingList.CompletedItems / @shoppingList.TotalItems bought
+							</small>
+						</p>
+					</div>
+					<div class="shopping-list-card-actions">
+						<button class="btn btn-cs-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+					</div>
+				</div>
 			}
-		</ul>
+
+		</div>
+
 		@if (activeList.Any() && completedList.Any())
 		{
 			<hr />
+
+			if(completedList.Any())
+			{
+				<h4 class="section-title">
+					Completed shopping lists (@completedList.Count)
+				</h4>
+			}
 		}
 
-		<ul>
-
-			@for(int i = 0; i < completedList.Count(); i++)
+		<div class="shopping-list-grid">
+			@for (int i = 0; i < completedList.Count(); i++)
 			{
 				var shoppingList = completedList.ElementAt(i);
-
 				var globalIndex = activeList.Count() + i;
 
-				<li class="@(selectedIndex == globalIndex ? "selected" : "") mb-2">
-					<label @onclick="() => GoToDetails(shoppingList.Id)">@shoppingList.Title</label>
-					<div class="vr"></div>
-					<button class="btn btn-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
-						Delete
-					</button>
+				<div class="shopping-list-card @(selectedIndex == globalIndex ? "selected" : "")">
+					<div class="shopping-list-card-body" @onclick="() => GoToDetails(shoppingList.Id)">
+						<h5>@shoppingList.Title</h5>
 
-					<span class="badge bg-success ms-2">Completed</span>
-				</li>
-
+						<p class="text-muted">
+							Created: @shoppingList.CreatedAt.ToString("dd.MM.yyyy");
+						</p>
+						<p class="text-muted">
+							<span class="badge bg-success ms-2">Completed</span>
+						</p>
+					</div>
+					<div class="shopping-list-card-actions">
+						<button class="btn btn-cs-danger btn-sm" @onclick="() => AskDelete(shoppingList.Id)">
+							Delete
+						</button>
+					</div>
+				</div>
 			}
-		</ul>
-		
+		</div>
+
 	}
 	else
 	{
@@ -106,7 +143,7 @@
 
 	}
 
-	<button class="btn btn-secondary btn-sm" @onclick=AddShoppingList>Add list</button>
+	
 }
 
 
