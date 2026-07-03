@@ -7,25 +7,47 @@
 <nav class="top-nav">
 	<a class="brand" href="">CookStack</a>
 
-	<div class="nav-links">
-		<NavLink href="" Match="NavLinkMatch.All">Home</NavLink>
-		<NavLink href="recipes">Recipes</NavLink>
-		<NavLink href="shopping-lists">Shopping List</NavLink>
-	</div>
-	
-	<div class="nav-actions">
-		<div class="search-box">
-			<button @onclick="GlobalSearch">
-				<span class="bi bi-invert bi-search-nav-menu" aria-hidden="true"></span>
-			</button>
-			<input placeholder="Search recipes and shopping lists..."
-				   value="@searchTerm"
-				   @oninput="OnSearchInput"
-				   @onkeydown="HandleSearchKeyDown" />
+	<button class="mobile-search-button" @onclick="GlobalSearch" aria-label="Open search">
+		<span class="bi bi-invert bi-search-nav-menu" aria-hidden="true"></span>
+	</button>
+
+	<button class="mobile-menu-button"
+			title="Navigation menu"
+			@onclick="ToggleMobileMenu">
+		<span class="menu-icon">
+			@(isMobileMenuOpen ? "✕" :  "☰")
+		</span>
+	</button>
+
+	<div class="nav-content @(isMobileMenuOpen ? "open" : "")">
+		<div class="nav-links">
+			<NavLink href="" Match="NavLinkMatch.All" @onclick="CloseMobileMenu">Home</NavLink>
+			<NavLink href="recipes" @onclick="CloseMobileMenu">Recipes</NavLink>
+			<NavLink href="shopping-lists" @onclick="CloseMobileMenu">Shopping List</NavLink>
 		</div>
 
-		<NavLink class="action-link" href="recipe-create">+ Recipe</NavLink>
-		<button class="action-button" @onclick="ShoppingListModal">+ List</button>
+		<hr class="mobile-menu-divider" />
+
+		<div class="nav-actions">
+			<div class="search-box">
+				<button @onclick="GlobalSearch">
+					<span class="bi bi-invert bi-search-nav-menu" aria-hidden="true"></span>
+				</button>
+				<input placeholder="Search recipes and shopping lists..."
+					   value="@searchTerm"
+					   @oninput="OnSearchInput"
+					   @onkeydown="HandleSearchKeyDown" />
+			</div>
+
+			<NavLink class="action-link" href="recipe-create" @onclick="CloseMobileMenu">
+				+ Recipe
+			</NavLink>
+			<button class="action-button" @onclick="ShoppingListModal">
+				+ List
+			</button>
+
+		</div>
+		
 	</div>
 </nav>
 
@@ -33,6 +55,17 @@
 
 @code {
 	private string searchTerm = "";
+	private bool isMobileMenuOpen;
+
+	private void ToggleMobileMenu()
+	{
+		isMobileMenuOpen = !isMobileMenuOpen;
+	}
+
+	private void CloseMobileMenu()
+	{
+		isMobileMenuOpen = false;
+	}
 
 	private async Task HandleSearchKeyDown(KeyboardEventArgs e)
 	{
@@ -41,6 +74,7 @@
 		{
 			await SearchModalService.Open(searchTerm);
 			searchTerm = "";
+			CloseMobileMenu();
 		}
 	}
 
@@ -52,10 +86,12 @@
 	private async Task GlobalSearch()
 	{
 		await SearchModalService.Open();
+		CloseMobileMenu();
 	}
 
 	private async Task ShoppingListModal()
 	{
 		await ShoppingListModalService.Open();
+		CloseMobileMenu();
 	}
 }
