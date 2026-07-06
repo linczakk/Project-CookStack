@@ -1,10 +1,68 @@
-﻿.selected {
-    background-color: #dbeafe;
-    border-radius: 4px;
+﻿.page-header {
+    padding: 28px 32px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.12), rgba(31, 41, 51, 0.06))
 }
 
+    .page-header h1 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 2rem;
+        font-weight: 700;
+    }
 
-li {
-    padding: 6px 10px;
+.page-subtitle {
+    margin: 6px 0 0;
+    color: #6b7280;
+}
+
+.page-section {
+    margin-top: 32px;
+}
+
+.section-title {
+    margin-bottom: 14px;
+}
+
+    .section-title h4 {
+        color: var(--cs-nav-bg);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.home-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: white;
+    padding: 16px;
+    transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+    .home-card h5 {
+        color: var(--cs-nav-bg);
+    }
+
+    .home-card:hover {
+        border-color: var(--cs-accent);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .home-card.selected {
+        border-color: var(--cs-accent);
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+    }
+
+.home-card-body {
     cursor: pointer;
+    flex: 1;
 }

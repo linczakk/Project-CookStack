@@ -19,7 +19,10 @@
 <ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingList" OnClose="SetTitleName" />
 
 
-<h1>Welcome to CookStack</h1>
+<div class="page-header">
+	<h1>Welcome to CookStack</h1>
+	<p class="page-subtitle">Quick access to your recipes and shopping lists.</p>
+</div>
 
 <hr />
 
@@ -31,43 +34,77 @@
 	}
 	else
 	{
-		<h4>Recently Visited Recipes</h4>
+		<section class="page-section">
+			
+			<div class="section-title">
+				<h4>Recently Visited Recipes</h4>
+			</div>
 
-
-		if (RecentlyVisitedRecipes.Count == 0)
-		{
-			<p>No recently visited recipes.</p>
-		}
-
-		<ul>
-			@for (var i = 0; i < RecentlyVisitedRecipes.Count; i++)
+			@if (!RecentlyVisitedRecipes.Any())
 			{
-				var recipe = RecentlyVisitedRecipes[i];
-
-				<li class="@(selectedIndex == i ? "selected" : "")">
-					<label @onclick="() => GoToRecipeDetails(recipe.Id)">@recipe.Title</label>
-				</li>
+				<p>No recently visited recipes.</p>
 			}
-		</ul>
 
-		<hr />
+			<div class="home-grid">
+				@for (var i = 0; i < RecentlyVisitedRecipes.Count; i++)
+				{
+					var recipe = RecentlyVisitedRecipes[i];
 
-		<h4>Latest Recipes</h4>
+					<div class="home-card @(selectedIndex == i ? "selected" : "")">
+						<div class="home-card-body" @onclick="() => GoToRecipeDetails(recipe.Id)">
+							<h5>@recipe.Title</h5>
 
-		<ul>
+							<p class="text-muted">
+								Created: @recipe.CreatedAt.ToString("dd.MM.yyyy")
+							</p>
 
-			@for (var i = 0; i < LatestRecipes.Count; i++)
-			{
-				var recipe = LatestRecipes[i];
-				var globalIndex = RecentlyVisitedRecipes.Count + i;
+							@if (@recipe.LastVisitedAt != null)
+							{
+								<p class="text-muted">
+									Last visited: @recipe.LastVisitedAt.Value.ToString("dd.MM.yyyy")
+								</p>
+							}
 
-				<li class="@(selectedIndex == globalIndex ? "selected" : "")">
-					<label @onclick="() => GoToRecipeDetails(recipe.Id)">@recipe.Title</label>
-				</li>
-			}
-		</ul>
+							
+						</div>
+					</div>
+				}
+			</div>
 
-		<hr />
+		</section>
+		
+		<section class="page-section">
+
+			<div class="section-title">
+				<h4>Latest Recipes</h4>
+			</div>
+
+			<div class="home-grid">
+				@for (var i = 0; i < LatestRecipes.Count; i++)
+				{
+					var recipe = LatestRecipes[i];
+					var globalIndex = RecentlyVisitedRecipes.Count + i;
+
+					<div class="home-card @(selectedIndex == globalIndex ? "selected" : "")">
+						<div class="home-card-body" @onclick="() => GoToRecipeDetails(recipe.Id)">
+							<h5>@recipe.Title</h5>
+
+							<p class="text-muted">
+								Created: @recipe.CreatedAt.ToString("dd.MM.yyyy")
+							</p>
+
+							@if (recipe.LastVisitedAt != null)
+							{
+								<p class="text-muted">
+									Last visited: @recipe.LastVisitedAt.Value.ToString("dd.MM.yyyy")
+								</p>
+							}
+
+						</div>
+					</div>
+				}
+			</div>
+		</section>
 	}
 }
 
@@ -79,19 +116,44 @@
 	}
 	else
 	{
-		<h4>Latest Shopping Lists</h4>
-	
-		<ul>
-			@for (var i = 0; i < LatestShoppingLists.Count; i++)
-			{
-				var shoppingList = LatestShoppingLists[i];
-				var globalIndex = RecentlyVisitedRecipes.Count + LatestRecipes.Count + i;
+		<section class="page-section">
 
-				<li class="@(selectedIndex == globalIndex ? "selected" : "")">
-					<label @onclick="() => GoToShoppingListDetails(shoppingList.Id)">@shoppingList.Title</label>
-				</li>
-			}
-		</ul>
+			<div class="section-title">
+				<h4>Latest Shopping Lists</h4>
+			</div>
+
+			<div class="home-grid">
+				@for (var i = 0; i < LatestShoppingLists.Count; i++)
+				{
+					var shoppingList = LatestShoppingLists[i];
+					var globalIndex = RecentlyVisitedRecipes.Count + LatestRecipes.Count + i;
+
+					<div class="home-card @(selectedIndex == globalIndex ? "selected" : "")">
+						<div class="home-card-body" @onclick="() => GoToShoppingListDetails(shoppingList.Id)">
+							<h5>@shoppingList.Title</h5>
+
+							<p class="text-muted">
+								Created: @shoppingList.CreatedAt.ToString("dd.MM.yyyy")
+							</p>
+
+							<p class="text-muted">
+								@if (shoppingList.CompletedItems >= shoppingList.TotalItems)
+								{
+									<span class="badge bg-success ms-2">Completed</span>
+								}
+								else
+								{
+									<small>
+										@shoppingList.CompletedItems / @shoppingList.TotalItems bought
+									</small>
+								}
+							</p>
+						</div>
+					</div>
+				}
+			</div>
+		</section>
+		
 	}
 }
 

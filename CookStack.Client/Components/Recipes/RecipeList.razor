@@ -51,52 +51,57 @@
 
 	<hr/>
 
-	if(recipes.Count > 0)
-	{
-		<div class="recipe-grid">
-			@for(int i = 0; i < recipes.Count; i++)
-			{
-				var recipe = recipes[i];
+	<section class="page-section">
 
-				<div class="recipe-card @(selectedIndex == i ? "selected" : "")">
-					<div class="recipe-card-body" @onclick="() => GoToDetails(recipe.Id)">
-						<h5>@recipe.Title</h5>
-
-						<p class="text-muted">
-							Created: @recipe.CreatedAt.ToString("dd.MM.yyyy")
-						</p>
-
-						@if(recipe.LastVisitedAt != null)
-						{
-							<p class="text-muted">
-								Last visited: @recipe.LastVisitedAt.Value.ToString("dd.MM.yyyy HH:mm")
-							</p>
-						}
-					</div>
-					
-					<div class="recipe-card-actions">
-						<button class="btn btn-cs-secondary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
-							Edit
-						</button>
-						<button class="btn btn-cs-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
-							Delete
-						</button>
-					</div>
-				</div>
-			}
-		</div>
-	}
-	else
-	{
-		@if (!string.IsNullOrWhiteSpace(searchTerm))
+		@if (recipes.Count > 0)
 		{
-			<p>No results found for: <b>@searchTerm</b></p>
+			<div class="recipe-grid">
+				@for (int i = 0; i < recipes.Count; i++)
+				{
+					var recipe = recipes[i];
+
+					<div class="recipe-card @(selectedIndex == i ? "selected" : "")">
+						<div class="recipe-card-body" @onclick="() => GoToDetails(recipe.Id)">
+							<h5>@recipe.Title</h5>
+
+							<p class="text-muted">
+								Created: @recipe.CreatedAt.ToString("dd.MM.yyyy")
+							</p>
+
+							@if (recipe.LastVisitedAt != null)
+							{
+								<p class="text-muted">
+									Last visited: @recipe.LastVisitedAt.Value.ToString("dd.MM.yyyy HH:mm")
+								</p>
+							}
+						</div>
+
+						<div class="recipe-card-actions">
+							<button class="btn btn-cs-secondary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
+								Edit
+							</button>
+							<button class="btn btn-cs-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
+								Delete
+							</button>
+						</div>
+					</div>
+				}
+			</div>
 		}
 		else
 		{
-			<p>There are currently no added recipes</p>
+			@if (!string.IsNullOrWhiteSpace(searchTerm))
+			{
+				<p>No results found for: <b>@searchTerm</b></p>
+			}
+			else
+			{
+				<p>There are currently no added recipes</p>
+			}
 		}
-	}
+	</section>
+
+	
 }
 
 @code {
