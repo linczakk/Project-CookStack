@@ -55,7 +55,7 @@
 
     .search-result-item:hover,
     .search-result-item.selected {
-        background: rgba(249, 115, 22, 0.12);
+        background: var(--cs-accent-focus);
         color: var(--cs-nav-bg);
     }
 
@@ -86,12 +86,6 @@
 }
 
 .search-result-item.selected {
-    background: rgba(249, 115, 22, 0.12);
+    background: var(--cs-accent-focus);
     color: var(--cs-nav-bg);
 }
-
-/*.modal-body li{
-    padding: 6px 10px;
-    cursor: pointer;
-}
-*/
