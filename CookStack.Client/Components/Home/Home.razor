@@ -234,6 +234,9 @@
 
 	private void MoveDown()
 	{
+		if (KeyboardService.IsModalOpen)
+			return;
+
 		if(selectedIndex < NavigationItems.Count - 1)
 		{
 			selectedIndex++;
@@ -243,6 +246,9 @@
 
 	private void MoveUp()
 	{
+		if (KeyboardService.IsModalOpen)
+			return;
+
 		if(selectedIndex > 0)
 		{
 			selectedIndex--;
