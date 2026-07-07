@@ -8,6 +8,15 @@
 @inject NavigationManager Nav
 @inject BrowserTitleService TitleService
 
+<div class="page-top">
+	<div class="page-header">
+		<div>
+			<h3>Update Recipe</h3>
+			<p class="page-subtitle">Edit recipe details, ingredients and steps..</p>
+		</div>
+	</div>
+</div>
+
 <RecipeForm RecipeDto="dto" OnSubmit="Update" OnCancel="Cancel" SubmitText="Update recipe" />
 
 @code{

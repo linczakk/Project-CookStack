@@ -13,7 +13,7 @@
 
 .home-page-subtitle {
     margin: 6px 0 0;
-    color: #6b7280;
+    color: var(--cs-text-muted);
 }
 
 .home-grid {
@@ -23,7 +23,7 @@
 }
 
 .home-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--cs-border);
     border-radius: 14px;
     background: white;
     padding: 16px;

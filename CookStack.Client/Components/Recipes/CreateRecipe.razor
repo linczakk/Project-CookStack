@@ -8,6 +8,15 @@
 @inject NavigationManager Nav
 @inject BrowserTitleService TitleService;
 
+<div class="page-top">
+	<div class="page-header">
+		<div>
+			<h3>Create Recipe</h3>
+			<p class="page-subtitle">Add a new recipe to CookStack.</p>
+		</div>
+	</div>
+</div>
+
 <RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />
 
 @code{

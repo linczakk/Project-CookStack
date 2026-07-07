@@ -39,19 +39,17 @@
 					   @onkeydown="HandleSearchKeyDown" />
 			</div>
 
-			<NavLink class="action-link" href="recipe-create" @onclick="CloseMobileMenu">
-				+ Recipe
+			<NavLink class="action-link btn-with-icon" href="recipe-create" @onclick="CloseMobileMenu">
+				<i class="bi bi-plus bi-invert"></i>Recipe
 			</NavLink>
-			<button class="action-button" @onclick="ShoppingListModal">
-				+ List
+			<button class="action-button btn-with-icon" @onclick="ShoppingListModal">
+				<i class="bi bi-plus bi-invert"></i>List
 			</button>
 
 		</div>
 		
 	</div>
 </nav>
-
-
 
 @code {
 	private string searchTerm = "";

@@ -1,0 +1,17 @@
+﻿
+:root {
+    --cs-nav-bg: #1f2933;
+    --cs-nav-text: #f9fafb;
+    --cs-nav-muted: #d1d5db;
+    --cs-nav-hover: rgba(249, 115, 22, 0.14);
+    --cs-accent: #f97316;
+    --cs-accent-hover: #ea580c;
+    --cs-accent-focus: rgba(249, 115, 22, 0.25);
+    --cs-bg: #ffffff;
+    --cs-bg-secondary: #f9fafb;
+    --cs-text: #111827;
+    --cs-text-muted: #6b7280;
+    --cs-border: #e5e7eb;
+    --cs-secondary-focus: rgba(156, 163, 175, 0.25);
+    --cs-danger-focus: rgba(220, 38, 38, 0.25);
+}

@@ -25,36 +25,35 @@
 
 @if (shoppingLists != null)
 {
-	<div class="page-header">
-		<div>
-			<h3>Shopping Lists</h3>
-			<p class="page-subtitle">Manage your shopping lists.</p>
+	<div class="page-top">
+		<div class="page-header">
+			<div>
+				<h3>Shopping Lists</h3>
+				<p class="page-subtitle">Manage your shopping lists.</p>
+			</div>
+
+			<button class="btn btn-cs-primary" @onclick=AddShoppingList>
+				+ Add shopping list
+			</button>
 		</div>
 
-		<button class="btn btn-cs-primary" @onclick=AddShoppingList>
-			+ Add shopping list
-		</button>
+		<div class="page-toolbar">
+			<input class="form-control cs-input"
+				   placeholder="Search shopping lists..."
+				   @bind="searchTerm"
+				   @oninput="OnSearchChanged" />
+
+			<SortDropdown TSortField="ShoppingListSortField"
+						  SortOptions="sortOptions"
+						  OnChanged="OnSortChanged" />
+		</div>
 	</div>
-
-	<div class="page-toolbar">
-		<input class="form-control cs-input"
-			   placeholder="Search shopping lists..."
-			   @bind="searchTerm"
-			   @oninput="OnSearchChanged" />
-
-		<SortDropdown TSortField="ShoppingListSortField"
-					  SortOptions="sortOptions"
-					  OnChanged="OnSortChanged" />
-	</div>
-
-	<hr />
 
 	if(shoppingLists.Count > 0)
 	{
 		var displayedLists = GetDisplayedShoppingLists();
 		var activeList = displayedLists.Where(sl => !sl.IsCompleted).ToList();
 		var completedList = displayedLists.Where(sl => sl.IsCompleted).ToList();
-		
 
 		<section class="page-section">
 			@if (activeList.Any())

@@ -27,29 +27,29 @@
 
 @if (recipes != null)
 {
-	<div class="page-header">
-		<div>
-			<h3>Recipes</h3>
-			<p class="page-subtitle">Manage your recipes.</p>
+	<div class="page-top">
+		<div class="page-header">
+			<div>
+				<h3>Recipes</h3>
+				<p class="page-subtitle">Manage your recipes.</p>
+			</div>
+
+			<button class="btn btn-cs-primary" @onclick="AddRecipe">
+				+ Add recipe
+			</button>
 		</div>
 
-		<button class="btn btn-cs-primary" @onclick="AddRecipe">
-			+ Add recipe
-		</button>
+		<div class="page-toolbar">
+			<input class="form-control cs-input"
+				   placeholder="Search recipes..."
+				   @bind="searchTerm"
+				   @oninput="OnSearchChanged" />
+
+			<SortDropdown TSortField="RecipeSortField"
+						  SortOptions="@sortOptions"
+						  OnChanged="OnSortChanged" />
+		</div>
 	</div>
-
-	<div class="page-toolbar">
-		<input class="form-control cs-input"
-			   placeholder="Search recipes..."
-			   @bind="searchTerm"
-			   @oninput="OnSearchChanged" />
-
-		<SortDropdown TSortField="RecipeSortField"
-					  SortOptions="@sortOptions"
-					  OnChanged="OnSortChanged" />
-	</div>
-
-	<hr/>
 
 	<section class="page-section">
 

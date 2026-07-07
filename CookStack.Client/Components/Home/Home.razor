@@ -18,13 +18,12 @@
 
 <ShoppingListModal @ref="shoppingListModal" OnSaved="LoadShoppingList" OnClose="SetTitleName" />
 
-
-<div class="home-page-header">
-	<h1>Welcome to CookStack</h1>
-	<p class="home-page-subtitle">Quick access to your recipes and shopping lists.</p>
+<div class="page-top">
+	<div class="home-page-header">
+		<h1>Welcome to CookStack</h1>
+		<p class="home-page-subtitle">Quick access to your recipes and shopping lists.</p>
+	</div>
 </div>
-
-<hr />
 
 @if(recipes != null)
 {

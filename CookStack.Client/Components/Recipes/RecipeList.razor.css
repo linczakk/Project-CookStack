@@ -5,7 +5,7 @@
 }
 
 .recipe-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--cs-border);
     border-radius: 14px;
     background: white;
     padding: 16px;

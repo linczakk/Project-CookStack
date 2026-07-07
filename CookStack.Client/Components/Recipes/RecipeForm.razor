@@ -6,75 +6,139 @@
 	<DataAnnotationsValidator/>
 	<ValidationSummary/>
 
-	<div class="mb-3">
-		<label>Title</label>
-		<InputText class="form-control" @bind-Value="RecipeDto.Title" />
-	</div>
-
-	<div class="mb-3">
-		<label>Description</label>
-		<InputText class="form-control" @bind-Value="RecipeDto.Description" />
-	</div>
-
-	<div class="mb-3">
-		<label>Source URL</label>
-		<InputText class="form-control" @bind-Value="RecipeDto.SourceUrl" />
-	</div>
-
-	<hr />
-
-	<h5>Ingredients</h5>
-
-	@foreach (var ingredient in RecipeDto.Ingredients)
-	{
-		<div class="row mb-2">
-			<div class="col">
-				<InputText class="form-control" @bind-Value="ingredient.Name" placeholder="Name" />
-			</div>
-			<div class="col">
-				<InputNumber class="form-control" min="0" @bind-Value="ingredient.Quantity" TValue="decimal"/>
-			</div>
-			<div class="col">
-				<InputSelect class="form-control" @bind-Value="ingredient.Unit">
-					@foreach(var unit in Enum.GetValues<UnitType>())
-					{
-						<option value="@unit">@unit</option>
-					}
-				</InputSelect>
-			</div>
-			<div class="col-auto">
-				<button type="button" class="btn btn-danger" @onclick="() => RemoveIngredient(ingredient)">X</button>
-			</div>
+	<div class="form-card">
+		<div class="form-card-header">
+			<h4>Recipe Details</h4>
 		</div>
-	}
 
-	<button type="button" class="btn btn-secondary mb-2" @onclick="AddIngredient">Add ingredient</button>
-
-	<hr />
-
-	<h5 class="mt-3">Steps</h5>
-
-	@foreach (var step in RecipeDto.Steps)
-	{
-		<div class="row mb-2">
-			<div class="col">
-				<InputTextArea class="form-control" @bind-Value="step.Description"/>
-			</div>
-			<div class="col-auto">
-				<button type="button" class="btn btn-danger" @onclick="() => RemoveStep(step)">X</button>
-			</div>
+		<div class="form-field">
+			<label for="recipe-title">Title</label>
+			<InputText id="recipe-title" 
+						class="form-control cs-input" 
+						placeholder="Recipe title" 
+						@bind-Value="RecipeDto.Title" />
 		</div>
-	}
+
+		<div class="form-field">
+			<label for="recipe-description">Description</label>
+			<InputTextArea id="recipe-description" 
+							class="form-control cs-input" 
+							placeholder="Short description of the recipe" 
+							rows="3" 
+							@bind-Value="RecipeDto.Description" />
+		</div>
+
+		<div class="form-field">
+			<label for="recipe-url">Source URL</label>
+			<InputText id="recipe-url" 
+						class="form-control cs-input" 
+						placeholder="https://..." 
+						@bind-Value="RecipeDto.SourceUrl" />
+		</div>
+	</div>
+
+	<div class="form-card">
+		<div class="form-card-header">
+			<h4>Ingredients</h4>
+
+			<button type="button" class="btn btn-cs-secondary btn-with-icon" @onclick="AddIngredient">
+				<i class="bi bi-plus"></i> Add ingredient
+			</button>
+		</div>
+
+		@if (RecipeDto.Ingredients.Count > 0)
+		{
+			<div class="ingredient-header">
+				<span>Name</span>
+				<span>Quantity</span>
+				<span>Unit</span>
+				<span></span>
+			</div>
+		}
+
+		<div class="form-list">
+			@foreach (var ingredient in RecipeDto.Ingredients)
+			{
+				<div class="form-list-item">
+					<div class="item-fields ingredient-fields">
+						<div class="form-field">
+							<label class="field-label">Name</label>
+							<InputText class="form-control cs-input" 
+										@bind-Value="ingredient.Name" 
+										placeholder="Chicken breast" />
+						</div>
+
+						<div class="form-field">
+							<label class="field-label">Quantity</label>
+							<InputNumber class="form-control cs-input" 
+											min="0" 
+											@bind-Value="ingredient.Quantity" 
+											TValue="decimal" />
+						</div>
+						<div class="form-field">
+							<label class="field-label">Unit</label>
+							<InputSelect class="form-control cs-input" 
+											@bind-Value="ingredient.Unit">
+								@foreach (var unit in Enum.GetValues<UnitType>())
+								{
+									<option value="@unit">@unit</option>
+								}
+							</InputSelect>
+						</div>
+
+						<button type="button"
+								class="btn btn-cs-danger btn-with-icon item-remove"
+								title="Delete ingredient"
+								@onclick="() => RemoveIngredient(ingredient)">
+							<i class="bi bi-trash bi-invert"></i>
+						</button>
+					</div>
+
+					
+				</div>
+			}
+		</div>
+	</div>
+
+	<div class="form-card">
+		<div class="form-card-header">
+			<h4>Steps</h4>
+
+			<button type="button" class="btn btn-cs-secondary btn-with-icon" @onclick="AddStep">
+				<i class="bi bi-plus"></i> Add step
+			</button>
+		</div>
+
+		<div class="form-list">
+			@foreach (var step in RecipeDto.Steps)
+			{
+				<div class="form-list-item">
+					<div class="item-fields step-fields">
+						<div class="form-field">
+							<label>Step @(step.Order)</label>
+							<InputTextArea class="form-control cs-input"
+										   rows="3"
+										   placeholder="Description of the current step in the recipe"
+										   @bind-Value="step.Description" />
+						</div>
+					</div>
+					
+					<button type="button" 
+							class="btn btn-cs-danger btn-sm btn-with-icon item-remove"
+							title="Delete step"
+							@onclick="() => RemoveStep(step)">
+						<i class="bi bi-trash bi-invert"></i>
+					</button>
+				</div>
+			}
+		</div>
 		
-	<button type="button" class="btn btn-secondary mb-2" @onclick="AddStep">Add step</button>
-
-	<hr />
-
-	<div class="my-2">
-		<button type="submit" class="btn btn-primary">@SubmitText</button>
-		<button type="button" class="btn btn-danger" @onclick="OnCancel">Cancel</button>
 	</div>
 
+	<div class="form-actions">
+		<button type="submit" class="btn btn-cs-primary btn-with-icon"><i class="bi bi-check bi-invert"></i>@SubmitText</button>
+		<button type="button" class="btn btn-cs-secondary btn-with-icon" @onclick="OnCancel"><i class="bi bi-x"></i>Cancel</button>
+	</div>
 	
 </EditForm>
 
