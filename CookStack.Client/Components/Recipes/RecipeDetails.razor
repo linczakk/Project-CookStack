@@ -1,4 +1,5 @@
-﻿@using CookStack.Client.Models.UI
+﻿@using CookStack.Client.Constants
+@using CookStack.Client.Models.UI
 @using CookStack.Client.Services
 @using CookStack.Shared.Recipes.Dtos
 
@@ -6,46 +7,84 @@
 @inject RecipeApiClient RecipesApi
 @inject LoadingService LoadingService
 @inject BrowserTitleService TitleService;
+@inject NavigationManager NavManager;
 
 <ShoppingListFromRecipeModal @ref="shoppingListModal" OnSaved="ReloadList" OnClose="SetTitleName" />
 
 @if(recipeDto != null)
 {
-	<h2><b>@recipeDto.Title</b></h2>
+	<div class="page-top">
+		<div class="page-header">
+			<div>
+				<h3>@recipeDto.Title</h3>
+				<p class="page-subtitle">@recipeDto.Description</p>
+			</div>
 
-	<br />
-	<p>@recipeDto.Description</p>
-
-	<br />
-	<p><b> Składniki na @recipeDto.Title:</b></p>
-
-	<table class="table table-sm">
-		@foreach (var item in ingredients)
-		{
-			<tr class="@(item.IsChecked ? "ingredient-checked" : "")">
-				<td><input type="checkbox" @bind="item.IsChecked"></td>
-				<td>@item.Ingredient.Name</td>
-				<td>@item.Ingredient.Quantity @item.Ingredient.Unit</td>
-			</tr>
-		}
-	</table>
-
-	<button class="btn btn-primary d-flex align-items-center" @onclick="AddShoppingList"><span class="bi bi-cart-plus"></span> Add ingredients to list</button>
-
-	<br/>
-
-	@foreach (var item in steps)
-	{
-		<hr class="border-2" />
-		<p><b><input type="checkbox" @bind="item.IsChecked"> @StepConst @item.Step.Order:</b></p>
-		<div class="@(item.IsChecked ? "step-checked" : "")">
-			<p>@item.Step.Description</p>
+			<button class="btn btn-cs-secondary btn-with-icon" @onclick="GoToEdit">
+				<span class="bi bi-pencil"></span>
+				Edit
+			</button>
 		</div>
-		
-	}
+	</div>
 
-	<br/>
-	<p>Source: @recipeDto.SourceUrl</p>
+	<div class="details-actions">
+		<button class="btn btn-cs-primary btn-with-icon" @onclick="AddShoppingList">
+			<span class="bi bi-cart-plus bi-invert"></span>
+			Add ingredients to list
+		</button>
+	</div>
+
+	
+	<section class="details-card">
+		<div class="section-title">
+			<h4>Ingredients (@ingredients.Count())</h4>
+		</div>
+
+		<div class=details-list> 
+			@foreach (var item in ingredients)
+			{
+				<label class="details-list-item @(item.IsChecked ? "ingredient-checked" : "")">
+					<input type="checkbox" @bind="item.IsChecked"/>
+
+					<span class="details-item-name">@item.Ingredient.Name</span>
+
+					<span class="details-item-meta">
+						@item.Ingredient.Quantity @item.Ingredient.Unit
+					</span>
+				</label>
+			}
+		</div>
+	</section>
+
+	<section class="details-card">
+		<div class="section-title">
+			<h4>Steps (@steps.Count())</h4>
+		</div>
+	
+		<div class="steps-list">
+			@foreach (var item in steps)
+			{
+				<div class="step-card @(item.IsChecked ? "step-checked" : "")">
+					<label class="step-header">
+						<input type="checkbox" @bind="item.IsChecked" />
+						<strong>Step @item.Step.Order</strong>
+					</label>
+
+					<p>@item.Step.Description</p>
+				</div>
+			}
+		</div>
+	</section>
+
+	@if (!string.IsNullOrWhiteSpace(recipeDto.SourceUrl))
+	{
+		<p>
+			Source:
+			<a class="source-link" href="@recipeDto.SourceUrl" target="_blank">
+				@recipeDto.SourceUrl
+			</a>
+		</p>
+	}
 }
 
 @code {
@@ -103,5 +142,10 @@
 		{
 			await TitleService.SetTitle(recipeDto.Title);
 		}
+	}
+
+	private void GoToEdit()
+	{
+		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeUpdate, Id));
 	}
 }

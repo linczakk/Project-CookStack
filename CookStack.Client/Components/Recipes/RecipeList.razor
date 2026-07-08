@@ -34,7 +34,7 @@
 				<p class="page-subtitle">Manage your recipes.</p>
 			</div>
 
-			<button class="btn btn-cs-primary" @onclick="AddRecipe">
+			<button class="btn btn-cs-primary" @onclick="GoToCreate">
 				+ Add recipe
 			</button>
 		</div>
@@ -77,7 +77,7 @@
 						</div>
 
 						<div class="recipe-card-actions">
-							<button class="btn btn-cs-secondary btn-sm" @onclick="() => UpdateRecipe(recipe.Id)">
+							<button class="btn btn-cs-secondary btn-sm" @onclick="() => GoToEdit(recipe.Id)">
 								Edit
 							</button>
 							<button class="btn btn-cs-danger btn-sm" @onclick="() => AskDelete(recipe.Id)">
@@ -164,12 +164,12 @@
 		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
 	}
 
-	private void AddRecipe()
+	private void GoToCreate()
 	{
 		NavManager.NavigateTo(Routes.Recipes.RecipeCreate);
 	}
 
-	private void UpdateRecipe(int id)
+	private void GoToEdit(int id)
 	{
 		NavManager.NavigateTo(string.Format(Routes.Recipes.RecipeUpdate, id));
 	}
