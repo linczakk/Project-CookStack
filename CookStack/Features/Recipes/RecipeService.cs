@@ -19,8 +19,8 @@ namespace CookStack.Api.Features.Recipes
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                var normalizedSearch = search.ToLower();
-                query = query.Where(r => r.Title.ToLower().Contains(normalizedSearch));
+                var normalizedSearch = search.ToLowerInvariant();
+                query = query.Where(r => r.Title.ToLowerInvariant().Contains(normalizedSearch));
             }
 
             return await query

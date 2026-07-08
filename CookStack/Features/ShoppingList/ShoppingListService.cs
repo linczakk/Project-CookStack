@@ -20,8 +20,8 @@ namespace CookStack.Api.Features.ShoppingList
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                var normalizedSearch = search;
-                query = query.Where(s => s.Title.ToLower().Contains(normalizedSearch));
+                var normalizedSearch = search.ToLowerInvariant();
+                query = query.Where(s => s.Title.ToLowerInvariant().Contains(normalizedSearch));
             }
 
             return await query

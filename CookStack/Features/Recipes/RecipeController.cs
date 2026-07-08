@@ -36,7 +36,7 @@ namespace CookStack.Api.Features.Recipes
         public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeDto dto)
         {
             var id = await _recipeService.Create(dto);
-            return CreatedAtAction(nameof(GetRecipe), new { id }, null);
+            return CreatedAtAction(nameof(GetRecipe), new { id }, id);
         }
 
 

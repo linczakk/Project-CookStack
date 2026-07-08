@@ -52,8 +52,10 @@
 	private async Task Update()
 	{
 		await Api.UpdateRecipeAsync(Id, dto);
-		Nav.NavigateTo(Routes.Recipes.RecipesMain);
+		GoToDetails();
 	}
 
-	private void Cancel() => Nav.NavigateTo(Routes.Recipes.RecipesMain);
+	private void GoToDetails() => Nav.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, Id));
+
+	private void Cancel() => GoToDetails();
 }

@@ -29,12 +29,15 @@
 
 	private async Task Create()
 	{
-		await Api.CreateRecipeAsync(dto);
-		Nav.NavigateTo(Routes.Recipes.RecipesMain);
+		var createdId = await Api.CreateRecipeAsync(dto);
+
+		if (createdId == null)
+			return;
+
+		GoToDetails(createdId);
 	}
 
-	private void Cancel()
-	{
-		Nav.NavigateTo(Routes.Recipes.RecipesMain);
-	}
+	private void GoToDetails(int? id) => Nav.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+
+	private void Cancel() => Nav.NavigateTo(Routes.Recipes.RecipesMain);
 }

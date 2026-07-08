@@ -67,6 +67,26 @@ namespace CookStack.Client.Services
             }
         }
 
+        protected async Task<TResult?> PostAndReadAsync<TData, TResult>(string url, TData data)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync(url, data);
+
+                if(!response.IsSuccessStatusCode)
+                {
+                    _toast.ShowError("Something went wrong");
+                    return default;
+                }
+
+                return await response.Content.ReadFromJsonAsync<TResult>();
+            }
+            catch
+            {
+                _toast.ShowError("Server unreachable");
+                return default;
+            }
+        }
 
         protected async Task<bool> PutAsync<T>(string url, T data)
         {

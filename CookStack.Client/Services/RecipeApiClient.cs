@@ -21,9 +21,9 @@ namespace CookStack.Client.Services
             return await GetAsync<RecipeDetailsDto>($"api/recipe/{id}");
         }
 
-        public async Task<bool> CreateRecipeAsync(CreateRecipeDto dto)
+        public async Task<int?> CreateRecipeAsync(CreateRecipeDto dto)
         {
-            return await PostAsync("api/recipe", dto);
+            return await PostAndReadAsync<CreateRecipeDto, int>("api/recipe", dto);
         }
 
         public async Task<bool> MarkRecipeAsVisitedAsync(int id)
