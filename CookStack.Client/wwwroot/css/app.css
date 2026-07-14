@@ -244,6 +244,20 @@ code {
         box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
     }
 
+
+.btn-cs-ghost {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--cs-text-muted);
+}
+
+    .btn-cs-ghost:hover {
+        border-color: var(--cs-border);
+        background: var(--cs-bg-secondary);
+        color: var(--cs-text);
+    }
+
+
 /* ===========================
    Bootstrap SVG Icons
 =========================== */

@@ -1,62 +1,188 @@
 ﻿@using CookStack.Shared.Enums
 @using CookStack.Shared.ShoppingList.Dtos
+
 <EditForm Model="Model" OnValidSubmit="OnSubmit">
 	<DataAnnotationsValidator />
 
-	<div class="shopping-list-container ">
-		<div class="modal-body">
-			<input class="form-control mb-2" placeholder="Title" @bind="Model.Title" @ref="titleInput" @onkeydown="OnKey" />
-
-			<InputTextArea class="form-control mb-2" placeholder="Description" @bind-Value="Model.Description" @onkeydown="OnKey" />
-
-			@foreach (var item in Model.Items)
-			{
-				<div class="input-group mb-2" @key="item">
-					@if (IsEditMode)
-					{
-						<InputCheckbox class="m-2" @bind-Value="item.IsChecked" @onkeydown="OnKey" />
-					}
-					<InputText class="form-control" placeholder="Item name" @bind-Value="item.Name" @onkeydown="OnKey" />
-					<InputNumber class="form-control" min="0" @bind-Value="item.Quantity" @onkeydown="OnKey" TValue="decimal" />
-					<InputSelect class="form-control" placeholder="Unit" @bind-Value="item.Unit" @onkeydown="OnKey">
-						@foreach (var unit in Enum.GetValues<UnitType>())
-						{
-							<option value="@unit">@unit</option>
-						}
-					</InputSelect>
-					<button type="button" class="btn btn-danger" @onclick="() => RemoveShoppingItem(item)">X</button>
-				</div>
-			}
-			<button type="button" class="btn btn-secondary mb-2" @onclick="AddShoppingItem">Add item</button>
+	<div class="modal-header shopping-edit-header">
+		<div>
+			<h3>@(IsEditMode ? "Edit shopping list" : "Create shopping list")</h3>
+			<p>
+				@(IsEditMode
+					? "Update list details and shopping items."
+					: "Create a new list and add the items you need.")
+			</p>
 		</div>
 	</div>
-	<div class="modal-footer">
-		<button type="submit" class="btn btn-primary">Save</button>
+
+	<div class="modal-body shopping-edit-body">
+		<ValidationSummary class="validation-summary" />
+
+		<section class="modal-card">
+			<div class="modal-card-header">
+				<h4>List details</h4>
+			</div>
+
+			<div class="form-field">
+				<label for="shopping-list-title">Title</label>
+
+				<input id="shopping-list-title"
+						   class="form-control cs-input"
+						   placeholder="Weekly groceries"
+						   @bind="Model.Title"
+						   @ref="titleInput" />
+			</div>
+
+			<div class="form-field">
+				<label for="shopping-list-description">Description</label>
+
+				<InputTextArea id="shopping-list-description"
+							   class="form-control cs-input"
+							   rows="3"
+							   placeholder="Optional description of the shopping list"
+							   @bind-Value="Model.Description" />
+			</div>
+		</section>
+
+		<section class="modal-card">
+			<div class="modal-card-header">
+				<h4>Items (@Model.Items.Count)</h4>
+
+				<button type="button"
+						class="btn btn-cs-secondary btn-with-icon"
+						@onclick="AddShoppingItem">
+					<span class="bi bi-plus" aria-hidden="true"></span>
+					Add item
+				</button>
+			</div>
+
+			@if (Model.Items.Count == 0)
+			{
+				<p class="empty-items-message">
+					No items added yet.
+				</p>
+			}
+			else
+			{
+				<div class="shopping-item-header @(IsEditMode ? "edit-mode" : "create-mode")">
+					@if (IsEditMode)
+					{
+						<span></span>
+					}
+
+					<span>Name</span>
+					<span>Quantity</span>
+					<span>Unit</span>
+					<span></span>
+				</div>
+
+				<div class="shopping-edit-list">
+					@foreach (var item in Model.Items)
+					{
+						<div class="shopping-edit-item"
+							 @key="item">
+
+							<div class="shopping-item-fields @(IsEditMode ? "edit-mode" : "create-mode")">
+								@if (IsEditMode)
+								{
+									<div class="shopping-checkbox-field">
+										<label class="mobile-field-label">Completed</label>
+
+										<InputCheckbox class="shopping-item-checkbox"
+													   @bind-Value="item.IsChecked" />
+									</div>
+								}
+
+								<div class="form-field">
+									<label class="mobile-field-label">Name</label>
+
+									<InputText class="form-control cs-input"
+											   placeholder="Item name"
+											   @bind-Value="item.Name" />
+								</div>
+
+								<div class="form-field">
+									<label class="mobile-field-label">Quantity</label>
+
+									<InputNumber class="form-control cs-input"
+												 min="0"
+												 TValue="decimal"
+												 @bind-Value="item.Quantity" />
+								</div>
+
+								<div class="form-field">
+									<label class="mobile-field-label">Unit</label>
+
+									<InputSelect class="form-control cs-input"
+												 @bind-Value="item.Unit">
+										@foreach (var unit in Enum.GetValues<UnitType>())
+										{
+											<option value="@unit">@unit</option>
+										}
+									</InputSelect>
+								</div>
+
+								<button type="button"
+										class="btn btn-cs-danger item-remove"
+										title="Delete item"
+										aria-label="Delete @item.Name"
+										@onclick="() => RemoveShoppingItem(item)">
+									<span class="bi bi-trash bi-invert"
+										  aria-hidden="true"></span>
+								</button>
+							</div>
+						</div>
+					}
+				</div>
+			}
+		</section>
+	</div>
+
+	<div class="modal-footer shopping-edit-footer">
+		<button type="submit"
+				class="btn btn-cs-primary btn-with-icon">
+			<span class="bi bi-check bi-invert"
+				  aria-hidden="true"></span>
+			Save
+		</button>
 
 		@if (IsEditMode)
 		{
-			<button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancel</button>
+			<button type="button"
+					class="btn btn-cs-secondary"
+					@onclick="OnCancel">
+				Cancel changes
+			</button>
 		}
 
-		<button type="button" class="btn btn-danger" @onclick="OnClose">Close</button>
-
+		<button type="button"
+				class="btn btn-cs-ghost"
+				@onclick="OnClose">
+			Close
+		</button>
 	</div>
-
 </EditForm>
 
 @code {
-	[Parameter] public ShoppingListBaseDto Model { get; set; } = new CreateShoppingListDto();
-	[Parameter] public bool IsEditMode { get; set; }
-	[Parameter] public bool ShouldFocus { get; set; }
+	[Parameter]
+	public ShoppingListBaseDto Model { get; set; } = new CreateShoppingListDto();
 
+	[Parameter]
+	public bool IsEditMode { get; set; }
 
-	[Parameter] public EventCallback OnCancel { get; set; }
-	[Parameter] public EventCallback OnClose { get; set; }
-	[Parameter] public EventCallback OnSubmit { get; set; }
-	[Parameter] public EventCallback<KeyboardEventArgs> OnKey { get; set; }
+	[Parameter]
+	public bool ShouldFocus { get; set; }
+
+	[Parameter]
+	public EventCallback OnCancel { get; set; }
+
+	[Parameter]
+	public EventCallback OnClose { get; set; }
+
+	[Parameter]
+	public EventCallback OnSubmit { get; set; }
 
 	private ElementReference titleInput;
-
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -66,17 +192,21 @@
 		}
 	}
 
-	private void RemoveShoppingItem(ShoppingItemDto item) => Model.Items.Remove(item);
+	private void RemoveShoppingItem(ShoppingItemDto item)
+	{
+		Model.Items.Remove(item);
+	}
+
 	private void AddShoppingItem()
 	{
-		var item = new ShoppingItemDto();
-
 		var maxOrder = Model.Items
 			.Select(i => i.Order)
 			.DefaultIfEmpty(0)
 			.Max();
 
-		item.Order = maxOrder + 1;
-		Model.Items.Add(item);
+		Model.Items.Add(new ShoppingItemDto
+		{
+			Order = maxOrder + 1
+		});
 	}
 }

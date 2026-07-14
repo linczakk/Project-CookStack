@@ -1,51 +1,211 @@
-﻿.dragging {
-    opacity: 0.5;
+﻿
+.modal-header{
+    padding: 20px 24px;
 }
 
-.drag-over {
-    background-color: rgba(13, 110, 253, 0.1);
+    .modal-header h3 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .modal-header p3 {
+        margin: 6px 0 0;
+        color: var(--cs-text-muted);
+    }
+
+.modal-card {
+    border: 1px solid var(--cs-border);
+    border-radius: 16px;
+    background: white;
+    padding: 20px;
+    
 }
 
-.drop-zone {
-    height: 8px;
-    overflow: hidden;
-    transition: all 0.2s ease;
+.modal-card-header {
+    margin-bottom: 20px;
 }
 
-.drag-active .drop-zone {
-    opacity: 0.6;
+    .modal-card-header h4 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+.shopping-section + .shopping-section{
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--cs-border);
 }
 
-.drop-zone.active .drop-hint {
-    opacity: 1;
+.shopping-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
-.drop-zone.active {
-    opacity: 1;
-    height: 40px;
-    background: rgba(0, 123, 255, 0.08);
-    border: 2px dashed #0d6efd;
+    .shopping-section-header h5 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+.item-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--cs-bg-secondary);
+    color: var(--cs-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
-.drop-hint {
-    text-align: center;
-    font-size: 12px;
-    color: #6c757d;
-    opacity: 0;
-    transition: opacity 0.2s ease;
+.modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-list-item {
+    border: 1px solid var(--cs-border);
+    border-radius: 12px;
+    background: var(--cs-bg-secondary);
+    padding: 8px 10px;
+    transition: 
+        opacity 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease,
+        transform 0.15s ease;
+}
+
+.item-fields {
+    display: grid;
+    grid-template-columns: 28px 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cs-text-muted);
+    cursor: grab;
+    user-select: none;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.item.checkbox {
+    margin: 0;
 }
 
 .item-name {
-    max-width: 250px;
-    word-break: break-word;
-    white-space: normal;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--cs-text);
 }
 
-tr {
-    transition: all 0.15s ease;
+.item-amount {
+    color: var(--cs-text-muted);
+    white-space: nowrap;
 }
 
-td {
-    height: 40px;
-    word-break: break-word;
+.completed-item {
+    opacity: 0.65;
+}
+
+    .completed-item. .item-name {
+        text-decoration: line-through;
+    }
+
+
+.dragging {
+    opacity: 0.35;
+}
+
+.drag-over {
+    border-color: var(--cs-accent);
+    background: var(--cs-accent-focus);
+    transform: translateY(1px);
+}
+
+.drop-zone {
+    min-height: 52px;
+    margin-top: 12px;
+    border: 2px dashed var(--cs-accent);
+    border-radius: 12px;
+    background: var(--cs-accent-focus);
+    padding: 10px 16px;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    color: var(--cs-accent-hover);
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    overflow:hidden;
+    transform-origin: top;
+
+    animation: dropZoneAppear 0.18s ease-out;
+}
+
+.drop-zone-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.empty-section-message {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--cs-bg-secondary);
+    color: var(--cs-text-muted);
+    font-size: 0.9rem;
+}
+
+@keyframes dropZoneAppear {
+    from {
+        opacity: 0;
+        max-height: 0;
+        min-height: 0;
+        margin-top: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        max-height: 52px;
+        min-height: 52px;
+        margin-top: 12px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 520px) {
+    .item-fields {
+        grid-template-columns: 24px 22px minmax(0, 1fr);
+    }
+
+    .item-amount {
+        grid-column: 3;
+        font-size: 0.85rem;
+    }
 }

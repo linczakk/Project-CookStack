@@ -24,7 +24,8 @@ window.keyboardShortcuts = {
                 dotNetHelper.invokeMethodAsync("ArrowUpPressed");
             }
 
-            if (e.key === "Enter") {
+            if (e.ctrlKey && e.key === "Enter") {
+                e.preventDefault();
                 dotNetHelper.invokeMethodAsync("EnterPressed");
             }
         });

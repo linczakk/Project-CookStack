@@ -1,96 +1,152 @@
 ﻿@using CookStack.Shared.ShoppingList.Dtos
 <div class="modal-header">
-	<h2><b>@Model.Title</b></h2>
+	<div>
+		<h3>@Model.Title</h3>
+
+		@if (!string.IsNullOrWhiteSpace(Model.Description))
+		{
+			<p>@Model.Description</p>
+		}
+	</div>
 </div>
+
+@{
+	var activeItems = Model.Items.Where(i => !i.IsChecked).ToList();
+	var completedItems = Model.Items.Where(i => i.IsChecked).ToList();
+}
+
 
 <div class="modal-body">
-	<p>@Model.Description</p>
-	<div class="shopping-list-container">
-		<table class="table table-sm @(isDragging ? "drag-active" : "")"
-			   @ondragover:preventDefault="true">
-			@foreach (var item in Model.Items.Where(i => !i.IsChecked))
+	<div class="modal-card @(isDragging ? "drag-active" : "")">
+		<div class="modal-card-header">
+			<h4>Shopping Items</h4>
+		</div>
+
+		<section class="shopping-section">
+			<div class="shopping-section-header">
+				<h5>Active</h5>
+				<span class="item-count">@activeItems.Count</span>
+			</div>
+
+			@if(activeItems.Count == 0)
 			{
-				<tr @key="(item.Id, item.IsChecked)"
-					@ondragenter="() => DragEnter(item)"
-					@ondragover:preventDefault="true"
-					@ondrop="() => Drop(item)"
-					class="@(draggedItem == item ? "dragging" : "")
-					@(dragOverItem == item ? "drag-over" : "")">
-					<td draggable="true"
-						@ondragstart="() => StartDrag(item)"
-						@ondragend="ResetDragState"
-						style="cursor: grab;">
-						☰
-					</td>
-					<td>
-						<input type="checkbox"
-							   checked="@item.IsChecked"
-							   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-					</td>
-					<td class="item-name">@item.Name</td>
-					<td>@item.Quantity @item.Unit</td>
-				</tr>
+				<p class="empty-secion-message">No active items.</p>
+			}
+			else
+			{
+				<div class="modal-list">
+					@foreach (var item in activeItems)
+					{
+						<div @key="(item.Id, item.IsChecked)"
+							 @ondragenter="() => DragEnter(item)"
+							 @ondragover:preventDefault="true"
+							 @ondrop="() => Drop(item)"
+							 class="modal-list-item
+							@(draggedItem == item ? "dragging" : "")
+							@(dragOverItem == item ? "drag-over" : "")">
+
+							<div class="item-fields">
+								<div class="drag-handle"
+									 draggable="true"
+									 title="Drag to reorder"
+									 @ondragstart="() => StartDrag(item)"
+									 @ondragend="ResetDragState">
+									☰
+								</div>
+								<input class="item-checkbox"
+									   type="checkbox"
+									   checked="@item.IsChecked"
+									   aria-label="Mark @item.Name as completed"
+									   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
+								
+								<span class="item-name">@item.Name</span>
+
+								<span class="item-amount">
+									@item.Quantity @item.Unit
+								</span>
+							</div>
+						</div>
+					}
+				</div>
 			}
 
-			<tr class="drop-zone @(draggedItem?.IsChecked == true ? "active" : "")"
-				@ondragover:preventDefault="true"
-				@ondrop="() => DropToEnd(false)">
-				<td colspan="4">
-					<div class="drop-hint">
-						Move to active
-					</div>
-				</td>
-			</tr>
-
-			@if (Model.Items.Any(i => i.IsChecked) && Model.Items.Any(i => !i.IsChecked) || draggedItem != null)
+			@if (draggedItem?.IsChecked == true)
 			{
-				<tr>
-					<td colspan="3"><hr /></td>
-				</tr>
+				<div class="drop-zone"
+					 @ondragover:preventDefault="true"
+					 @ondrop="() => DropToEnd(false)">
+					<span class="bi bi-cart-dash drop-zone-icon" aria-hidden="true"></span>
+					<span>Move to active</span>
+				</div>
 			}
+			
+		</section>
 
-			@foreach (var item in Model.Items.Where(i => i.IsChecked))
+		<section class="shopping-section">
+			<div class="shopping-section-header">
+				<h5>Completed</h5>
+				<span class="item-count">@completedItems.Count</span>
+			</div>
+
+			@if(completedItems.Count == 0)
 			{
-				<tr @key="(item.Id, item.IsChecked)"
-					@ondragenter="() => DragEnter(item)"
-					@ondragover:preventDefault="true"
-					@ondrop="() => Drop(item)"
-					class="completed-list
-					@(draggedItem == item ? "dragging" : "")
-					@(dragOverItem == item ? "drag-over" : "")">
-					<td draggable="true"
-						@ondragstart="() => StartDrag(item)"
-						@ondragend="ResetDragState"
-						style="cursor: grab;">
-						☰
-					</td>
-					<td>
-						<input type="checkbox"
-							   checked="@item.IsChecked"
-							   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
-					</td>
-					<td class="title text muted">@item.Name</td>
-					<td>@item.Quantity @item.Unit</td>
-				</tr>
+				<p class="empty-section-message">No completed items.</p>
 			}
+			else
+			{
+				<div class="modal-list">
+					@foreach (var item in Model.Items.Where(i => i.IsChecked))
+					{
+						<div @key="(item.Id, item.IsChecked)"
+							 @ondragenter="() => DragEnter(item)"
+							 @ondragover:preventDefault="true"
+							 @ondrop="() => Drop(item)"
+							 class="modal-list-item completed-item
+							@(draggedItem == item ? "dragging" : "")
+							@(dragOverItem == item ? "drag-over" : "")">
 
-			<tr class="drop-zone @(draggedItem?.IsChecked == false ? "active" : "")"
-				@ondragover:preventDefault="true"
-				@ondrop="() => DropToEnd(true)">
-				<td colspan="4">
-					<div class="drop-hint">
-						Move to completed
-					</div>
-				</td>
-			</tr>
+							<div class="item-fields">
+								<div class="drag-handle"
+									 draggable="true"
+									 title="Drag to reorder"
+									 @ondragstart="() => StartDrag(item)"
+									 @ondragend="ResetDragState">
+									☰
+								</div>
+								<input class="item-checkbox"
+									   type="checkbox"
+									   checked="@item.IsChecked"
+									   aria-label="Mark @item.Name as active"
+									   @onchange="(e) => ToggleItem(item, (bool)e.Value!)" />
 
-		</table>
+								<span class="item-name">@item.Name</span>
+
+								<div class="item-amount">
+									@item.Quantity @item.Unit
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			}
+			
+
+			@if (draggedItem?.IsChecked == false)
+			{
+				<div class="drop-zone"
+					 @ondragover:preventDefault="true"
+					 @ondrop="() => DropToEnd(true)">
+					<span class="bi bi-cart-plus drop-zone-icon" aria-hidden="true"></span>
+					<span>Move to completed</span>
+				</div>
+			}
+		</section>
 	</div>
-
 </div>
+
 <div class="modal-footer">
-	<button class="btn btn-primary" @onclick="() => OnEdit.InvokeAsync()">Update</button>
-	<button type="button" class="btn btn-secondary" @onclick="() => OnClose.InvokeAsync()">Close</button>
+	<button class="btn btn-cs-primary" @onclick="() => OnEdit.InvokeAsync()">Update</button>
+	<button type="button" class="btn btn-cs-ghost" @onclick="() => OnClose.InvokeAsync()">Close</button>
 </div>
 @code {
 
@@ -184,7 +240,6 @@
 		else
 			items.Add(draggedItem);
 
-		Model.Items = Model.Items.ToList();
 
 		RecalculateOrder();
 		ResetDragState();

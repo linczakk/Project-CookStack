@@ -14,8 +14,8 @@
 	<div class="modal-backdrop fade show"></div> 
 
 	<div class="modal fade show d-block" tabindex="-1" @onclick="Close">
-		<div class="modal-dialog" @onclick:stopPropagation="true">
-			<div class="modal-content">
+		<div class="modal-dialog shopping-modal-dialog" @onclick:stopPropagation="true">
+			<div class="modal-content shopping-modal-content">
 
 				@if(isViewMode)
 				{
@@ -35,11 +35,10 @@
 						OnSubmit="SaveAndClose"
 						OnCancel="ExitEditMode"
 						OnClose="Close" 
-						OnKey="HandleKey" />
+						/>
 				}
 			</div>
 		</div>
-
 	</div>
 }
 
@@ -96,6 +95,7 @@
 	protected override void OnInitialized()
 	{
 		KeyboardShortcutService.OnEscapePressed += HandleEscape;
+		KeyboardShortcutService.OnEnter += HandleEnter;
 	}
 
 	private async Task HandleChanged()
@@ -114,13 +114,10 @@
 		shoppingListDto.Items.AddRange(sorted);
 	}
 
-	private async Task HandleKey(KeyboardEventArgs e)
+	private async void HandleEnter()
 	{
-		if (e.Key == "Enter")
-			await SaveAndClose();
-
+		await SaveAndClose();
 	}
-
 
 	private async Task ExitEditMode()
 	{

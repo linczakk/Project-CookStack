@@ -29,15 +29,15 @@
     margin-bottom: 18px;
 }
 
-.form-field:last-child {
-    margin-bottom: 0px;
-}
+    .form-field:last-child {
+        margin-bottom: 0px;
+    }
 
-.form-field label {
-    font-size: .9rem;
-    font-weight: 600;
-    color: var(--cs-text);
-}
+    .form-field label {
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--cs-text);
+    }
 
 .form-list {
     display: flex;
