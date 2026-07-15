@@ -1,5 +1,4 @@
-﻿@using CookStack.Client.Components.ShoppingList
-@using CookStack.Client.Services
+﻿@using CookStack.Client.Services
 @using CookStack.Client.Services.ToastMessage
 @using CookStack.Shared.Recipes.Dtos
 @using CookStack.Shared.ShoppingList.Dtos
@@ -15,36 +14,111 @@
 {
 	<div class="modal-backdrop fade show"></div>
 
-	<div class="modal fade show d-block" tabindex="-1" @onclick="Close">
-		<div class="modal-dialog" @onclick:stopPropagation="true">
-			<div class="modal-content">
-				<EditForm Model="FormModel" OnValidSubmit="SaveAndClose">
+	<div class="modal fade show d-block" 
+		  tabindex="-1" 
+		  @onclick="Close">
+
+		<div class="modal-dialog ingredients-modal-dialog" 
+			 @onclick:stopPropagation="true">
+
+			<div class="modal-content ingedients-modal-content">
+
+				<EditForm Model="FormModel" 
+						  OnValidSubmit="SaveAndClose">
+
 					<DataAnnotationsValidator />
-					<div class="modal-body">
-						<ShoppingListModeSelector @bind-IsNew="IsNew" />
 
-						@if(IsNew)
-						{
-							<input class="form-control mb-2" @bind="FormModel.Title" placeholder="FormModel.Title" @ref="titleInput" @onkeydown="HandleKey" />
-							<InputTextArea class="form-control mb-2" @bind-Value="FormModel.Description" @onkeydown="HandleKey" />
-						}
-						else
-						{
-							<ShoppingListSelector
-								Lists="ShoppingLists"
-								@bind-SelectedListId="SelectedListId" />
-						}
+					<div class="modal-header ingredients-modal-header">
+						<div>
+							<h3>Add ingredients to shopping list</h3>
 
-						<IngredientSelector Ingredients="Ingredients"/>
-
+							<p>
+								Choose where to add ingredients from
+								<strong>@recipeTitle</strong>
+							</p>
+						</div>
 					</div>
-					<div class="modal-footer">
-						<button type="submit" class="btn btn-primary" disabled="@isSaving">
-							@(isSaving ? "Saving..." : "Add")
+
+
+					<div class="modal-body ingredients-modal-body">
+
+						<ValidationSummary class="validation-summary" />
+
+						<section class="modal-card">
+							<div class="modal-card-header">
+								<h4>Destination</h4>
+							</div>
+
+							<ShoppingListModeSelector 
+								@bind-IsNew="IsNew" 
+								HasExistingLists="@ShoppingLists.Any()"/>
+
+								@if(IsNew)
+								{
+									<div class="form-field">
+										<label for="new-list-title">Title</label>
+
+										<input id="new-list-title"
+											   class="form-control cs-input"
+											   placeholder="Shopping list title"
+											   @bind="FormModel.Title"
+											   @ref="titleInput" />
+									</div>
+
+									<div class="form-field">
+										<label for="new-list-description">
+											Description
+										</label>
+									</div>
+
+									<InputTextArea id="new-list-description" 
+												   class="form-control cs-input"
+												   row="3"
+												   placeholder="Optional description"
+												   @bind-Value="FormModel.Description"/>
+
+								}
+								else
+							{
+								<ShoppingListSelector Lists="ShoppingLists"
+													  @bind-SelectedListId="SelectedListId" />
+							}
+
+						</section>
+
+						<section class="modal-card">
+							<div class="modal-card-header">
+								<h4>
+									Ingredients
+									<span class="selected-count">
+										(@SelectedIngredientsCount selected)
+									</span>
+								</h4>
+							</div>
+
+							<IngredientSelector 
+								Ingredients="Ingredients" 
+								OnSelectionChanged="RefreshSelectedCount"/>
+						</section>
+					</div>
+
+					<div class="modal-footer ingredients-modal-footer">
+						<button type="submit" 
+								class="btn btn-cs-primary btn-with-icon" 
+								disabled="@isSaving">
+
+							<span class="bi bi-cart-plus bi-invert"
+								  aria-hidden="true"></span>
+
+							@(isSaving ? "Saving..." : "Add ingredients")
 						</button>
-						<button type="button" class="btn btn-secondary" @onclick="Close">Close</button>
-					</div>
 
+						<button type="button" 
+								class="btn btn-cs-ghost" 
+								@onclick="Close">
+							Close
+						</button>
+					</div>
 				</EditForm>
 			</div>
 		</div>
@@ -77,6 +151,10 @@
 
 	private bool isOpen;
 	private bool shouldFocus;
+	private bool isSaving = false;
+
+	private string recipeTitle = string.Empty;
+
 	private ElementReference titleInput;
 
 	private int? SelectedListId;
@@ -86,17 +164,35 @@
 
 	private AddIngredientsToShoppingListDto FormModel = new();
 
-	private bool isSaving = false;
+	private int SelectedIngredientsCount =>
+		Ingredients.Count(i => i.IsSelected);
+
+
+	protected override void OnInitialized()
+	{
+		KeyboardShortcutService.OnEscapePressed += HandleEscape;
+		KeyboardShortcutService.OnEnter += HandleEnter;
+	}
+
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (shouldFocus && IsNew)
+		{
+			shouldFocus = false;
+			await titleInput.FocusAsync();
+		}
+	}
 
 	public async Task Open(RecipeDetailsDto dto)
 	{
-		FormModel = new();
+		recipeTitle = dto.Title;
 
-		IsNew = true;
-		shouldFocus = true;
-
-		FormModel.Title = dto.Title;
-		FormModel.Description = $"Shopping list for: {dto.Title}";
+		FormModel = new AddIngredientsToShoppingListDto
+		{
+			Title = dto.Title,
+			Description = $"Shopping list for: {dto.Title}"
+		};
 
 		Ingredients = dto.Ingredients
 		.Select(i => new SelectableIngredientDto
@@ -109,48 +205,53 @@
 
 		ShoppingLists = await ShoppingListApi.GetShoppingListsAsync();
 
+		SelectedListId = null;
+		_isNew = true;
+		shouldFocus = true;
+		isSaving = false;
 		isOpen = true;
+
+		KeyboardShortcutService.IsModalOpen = true;
 
 		await TitleService.SetTitle($"Create shopping list from: {FormModel.Title}");
 		StateHasChanged();
-
-		await Task.Yield();
-
-		if(IsNew)
-			await titleInput.FocusAsync();
-	}
-
-	protected override void OnInitialized()
-	{
-		KeyboardShortcutService.OnEscapePressed += HandleEscape;
-	}
-
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (shouldFocus && IsNew)
-		{
-			shouldFocus = false;
-			await titleInput.FocusAsync();
-		}
-	}
-
-	private async Task HandleKey(KeyboardEventArgs e)
-	{
-		if (e.Key == "Enter")
-			await SaveAndClose();
 	}
 
 	private void HandleEscape()
 	{
-		if(isOpen)
-			Close();
+		if (isOpen)
+			_ = Close();
+	}
+
+	private async void HandleEnter()
+	{
+		await SaveAndClose();
+	}
+
+	private void RefreshSelectedCount()
+	{
+		StateHasChanged();
 	}
 
 	private async Task SaveAndClose()
 	{
-		var success = await Save();
-		if(success)
-			Close();
+		if (isSaving)
+			return;
+
+		isSaving = true;
+
+		try
+		{
+			var success = await Save();
+
+			if (success)
+				await Close();
+		}
+		finally
+		{
+			isSaving = false;
+		}
+
 	}
 
 	private async Task<bool> Save()
@@ -171,13 +272,13 @@
 			})
 			.ToList();
 
-		if(!selectedItems.Any())
+		if(selectedItems.Count == 0)
 		{
 			ToastService.ShowError("Select at least one ingredient", 3);
 			return false;
 		}
 
-		FormModel = new AddIngredientsToShoppingListDto
+		var request = new AddIngredientsToShoppingListDto
 		{
 			Title = IsNew ? FormModel.Title : null,
 			Description = IsNew ? FormModel.Description : null,
@@ -185,25 +286,31 @@
 			Items = selectedItems
 		};
 
-		await ShoppingListApi.AddIngredientsAsync(FormModel);
+		var success = await ShoppingListApi.AddIngredientsAsync(request);
 
-		ToastService.ShowSuccess("Added!", 3);
+		if (!success)
+			return false;
+
+
+		ToastService.ShowSuccess("Ingredients added!", 3);
+		await OnSaved.InvokeAsync();
+
 		return true;
 	}
-	public async void Close()
+	public async Task Close()
 	{
 		isOpen = false;
+		isSaving = false;
+
+		KeyboardShortcutService.IsModalOpen = false;
+
 		StateHasChanged();
 		await OnClose.InvokeAsync();
-	}
-
-	private void ShowSuccess()
-	{
-		ToastService.ShowSuccess("Saved!", 3);
 	}
 
 	public void Dispose()
 	{
 		KeyboardShortcutService.OnEscapePressed -= HandleEscape;
+		KeyboardShortcutService.OnEnter -= HandleEnter;
 	}
 }

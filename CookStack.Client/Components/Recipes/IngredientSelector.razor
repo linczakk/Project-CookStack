@@ -1,24 +1,47 @@
 ﻿@using CookStack.Shared.ShoppingList.Dtos
 
-<div class="mb-3">
-	<label class="form-label">Ingredients:</label>
+@if (Ingredients.Count == 0)
+{
+	<p class="empty-ingredients-message">
+		This recipe has no ingredients.
+	</p>
+}
+else
+{
+	<div class="ingredient-selector-list">
+		@foreach (var ingredient in Ingredients)
+		{
+			<label class="ingredient-selector-item
+						  @(ingredient.IsSelected ? "selected" : "")">
+					  
+				<input type="checkbox"
+					   class="ingredient-checkbox cs-checkbox"
+						checked="@ingredient.IsSelected" 
+						@onchange="(e) => SelectionChanged(ingredient, (bool)e.Value!)"/>
 
-	@foreach (var ingredient in Ingredients)
-	{
-		<div class="form-check">
-			<input type="checkbox"
-				class="form-check-input"
-				@bind="ingredient.IsSelected" />
+				<span class="ingredient-name">
+					@ingredient.Name
+				</span>
 
-			<label class="form-check-label">
-				@ingredient.Name (@ingredient.Quantity @ingredient.Unit)
+				<span class="ingredient-amount">
+					@ingredient.Quantity @ingredient.Unit
+				</span>
 			</label>
-		</div>
-	}
-
-</div>
-
+		}
+	</div>
+}
 
 @code {
-	[Parameter] public List<SelectableIngredientDto> Ingredients { get; set; } = [];
+	[Parameter] 
+	public List<SelectableIngredientDto> Ingredients { get; set; } = [];
+
+	[Parameter]
+	public EventCallback OnSelectionChanged { get; set; }
+
+	private async Task SelectionChanged(SelectableIngredientDto ingredient, bool isSelected)
+	{
+		ingredient.IsSelected = isSelected;
+		await OnSelectionChanged.InvokeAsync();
+	}
+
 }

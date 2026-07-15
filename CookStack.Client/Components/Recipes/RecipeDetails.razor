@@ -44,7 +44,7 @@
 			@foreach (var item in ingredients)
 			{
 				<label class="details-list-item @(item.IsChecked ? "ingredient-checked" : "")">
-					<input type="checkbox" @bind="item.IsChecked"/>
+					<input type="checkbox" class="cs-checkbox" @bind="item.IsChecked"/>
 
 					<span class="details-item-name">@item.Ingredient.Name</span>
 

@@ -258,6 +258,11 @@ code {
     }
 
 
+.cs-checkbox {
+    accent-color: var(--cs-accent);
+    cursor: pointer;
+}
+
 /* ===========================
    Bootstrap SVG Icons
 =========================== */

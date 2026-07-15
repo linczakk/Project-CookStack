@@ -1,9 +1,111 @@
-﻿.selected {
-    background-color: #dbeafe;
-    border-radius: 4px;
+﻿
+.ingredients-modal-dialog {
+    max-width: 720px;
 }
 
-li {
-    padding: 6px 10px;
-    cursor: pointer;
+.ingredients-modal-content {
+    border: none;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+}
+
+.ingredients-modal-header {
+    padding: 20px 24px;
+}
+
+    .ingredients-modal-header h3 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .ingredients-modal-header p {
+        margin: 6px 0 0;
+        color: var(--cs-text-muted);
+    }
+
+
+.ingredients-modal-body {
+    max-height: 68vh;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding: 20px 24px;
+}
+
+.modal-card {
+    border: 1px solid var(--cs-border);
+    border-radius: 16px;
+    background: var(--cs-bg);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+    .modal-card:last-child {
+        margin-bottom: 0;
+    }
+
+.modal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+    .modal-card-header h4 {
+        margin: 0;
+        color: var(--cs-nav-bg);
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+.selected-count {
+    color: var(--cs-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+    .form-field:last-child {
+        margin-bottom: 18px;
+    }
+
+    .form-field label {
+        color: var(--cs-text);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+.ingredients-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+}
+
+.validation-summary {
+    margin-bottom: 16px;
+    color: #b91c1c;
+}
+
+@media (max-width: 700px) {
+    .ingredients-modal-body {
+        padding: 16px
+    }
+
+    .modal-card {
+        padding: 16px;
+    }
+
+    .ingredients-modal-footer {
+        flex-wrap: wrap;
+    }
 }

@@ -1,20 +1,56 @@
-﻿<div class="mb-3">
-	<div>
-		<input type="radio" checked="@IsNew" @onchange="() => ChangeMode(true)" />
-		<label class="ms-1 me-3">Create new list</label>
+﻿<div class="mode-selector"
+	 role="group"
+	 aria-label="Shopping list destination">
+ 
+	<button type="button"
+			class="mode-option @(IsNew ? "active" : "")"
+			aria-pressed="@IsNew"
+			@onclick="() => ChangeMode(true)">
 
-		<input type="radio" checked="@(!IsNew)" @onchange="() => ChangeMode(false)" />
-		<label class="ms-1">Add to existing list</label>
-	</div>
+		<span class="mode-option-title">
+			Create new list
+		</span>
 
+		<span class="mode-option-description">
+			Create a separate shopping list.
+		</span>
+	</button>
+ 
 
-</div>
+	<button type="button"
+			class="mode-option @(!IsNew ? "active" : "")" 
+			aria-pressed="@(!IsNew)"
+			disabled="@(!HasExistingLists)"
+			@onclick="() => ChangeMode(false)">
+		
+			<span class="mode-option-title">
+				Existing list
+			</span>
+
+			<span class="mode-option-description">
+				@(HasExistingLists 
+					? "Add ingredients to a saved list." 
+					: "No existing lists available.")
+			</span>
+	</button>
+ </div>
+
 @code {
-	[Parameter] public bool IsNew { get; set; }
-	[Parameter] public EventCallback<bool> IsNewChanged { get; set; }
+	[Parameter] 
+	public bool IsNew { get; set; }
+
+	[Parameter] 
+	public EventCallback<bool> IsNewChanged { get; set; }
+
+	[Parameter]
+	public bool HasExistingLists { get; set; }
+
 
 	private async Task ChangeMode(bool value)
 	{
+		if (!value && !HasExistingLists)
+			return;
+
 		IsNew = value;
 		await IsNewChanged.InvokeAsync(value);
 	}
