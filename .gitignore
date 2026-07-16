@@ -581,3 +581,15 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,csharp
+
+# ===========================
+# CookStack local data
+# ===========================
+
+# Local SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# User-uploaded recipe images
+CookStack.Api/wwwroot/uploads
