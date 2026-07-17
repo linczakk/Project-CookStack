@@ -1,4 +1,25 @@
-﻿.details-actions {
+﻿
+.recipe-details-image {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    border-radius: 16px;
+    margin-bottom: 24px;
+}
+
+.recipe-image-placeholder {
+    min-height: 240px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--cs-border);
+    border-radius: 16px;
+    background: var(--cs-bg-secondary);
+    color: var(--cs-text-muted);
+}
+
+.details-actions {
     margin-bottom: 24px;
 }
 

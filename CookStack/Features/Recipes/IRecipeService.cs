@@ -8,7 +8,7 @@ namespace CookStack.Api.Features.Recipes
         Task<RecipeDetailsDto?> GetById(int id);
         Task<int> Create(CreateRecipeDto dto);
         Task<bool> Update(int id, RecipeUpdateDto dto);
-
+        Task<string> UploadImage(int recipeId, IFormFile file);
         Task<bool> MarkAsVisited(int id);
         Task<bool> Delete(int id);
     }

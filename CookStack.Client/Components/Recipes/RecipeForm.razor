@@ -28,6 +28,32 @@
 							@bind-Value="RecipeDto.Description" />
 		</div>
 
+		
+
+		<div class="form-field">
+			<label>Recipe image</label>
+
+			@if (!string.IsNullOrWhiteSpace(imagePreviewUrl))
+			{
+				<img class="recipe-image-preview"
+					 src="@imagePreviewUrl"
+					 alt="Selected recipe image preview" />
+			}
+			else if (!string.IsNullOrWhiteSpace(ExistingImageUrl))
+			{
+				<img class="recipe-image-preview"
+					 src="@ExistingImageUrl"
+					 alt="Selected recipe image preview" />
+			}
+
+			<InputFile OnChange="HandleImageSelected"
+					   accept="image/jpeg,image/png,image/webp" />
+
+			<small class="form-hint">
+				JPG, PNG or WebP. Maximum size: 5 MB.
+			</small>
+		</div>
+
 		<div class="form-field">
 			<label for="recipe-url">Source URL</label>
 			<InputText id="recipe-url" 
@@ -142,13 +168,28 @@
 
 @code {
 
-	[Parameter] public RecipeBaseDto RecipeDto { get; set; } = default!;
-	[Parameter] public EventCallback OnSubmit { get; set; }
-	[Parameter] public EventCallback OnCancel { get; set; }
-	[Parameter] public string SubmitText { get; set; } = "Save";
+	[Parameter] 
+	public RecipeBaseDto RecipeDto { get; set; } = default!;
+
+	[Parameter] 
+	public EventCallback OnSubmit { get; set; }
+
+	[Parameter] 
+	public EventCallback OnCancel { get; set; }
+
+	[Parameter] 
+	public string SubmitText { get; set; } = "Save";
+
+	[Parameter]
+	public EventCallback<IBrowserFile?> OnImageSelected { get; set; }
+
+	[Parameter]
+	public string? ExistingImageUrl { get; set; }
 
 	private void AddIngredient() => RecipeDto.Ingredients.Add(new());
 	private void RemoveIngredient(RecipeIngredientDto i) => RecipeDto.Ingredients.Remove(i);
+
+	private string? imagePreviewUrl;
 
 	private void AddStep()
 	{
@@ -168,5 +209,21 @@
 		{
 			RecipeDto.Steps[i].Order = i + 1;
 		}
+	}
+
+	private async Task HandleImageSelected(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+
+		await OnImageSelected.InvokeAsync(file);
+
+		await using var stream = file.OpenReadStream(5 * 1024 * 1024);
+		using var memoryStream = new MemoryStream();
+
+		await stream.CopyToAsync(memoryStream);
+
+		var base64 = Convert.ToBase64String(memoryStream.ToArray());
+
+		imagePreviewUrl = $"data:{file.ContentType};base64,{base64}";
 	}
 }

@@ -17,10 +17,12 @@
 	</div>
 </div>
 
-<RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" SubmitText="Create recipe" />
+<RecipeForm RecipeDto="dto" OnSubmit="Create" OnCancel="Cancel" OnImageSelected="HandleImageSelected" SubmitText="Create recipe" />
 
 @code{
 	private CreateRecipeDto dto = new();
+
+	private IBrowserFile? selectedImage;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -29,15 +31,28 @@
 
 	private async Task Create()
 	{
-		var createdId = await Api.CreateRecipeAsync(dto);
+		var recipeId = await Api.CreateRecipeAsync(dto);
 
-		if (createdId == null)
+		if (recipeId is null or <= 0)
 			return;
 
-		GoToDetails(createdId);
+		if(selectedImage is not null)
+		{
+			var imagePath = await Api.UploadRecipeImageAsync(recipeId.Value, selectedImage);
+
+			if (imagePath is null)
+				return;
+		}
+
+		GoToDetails(recipeId.Value);
 	}
 
-	private void GoToDetails(int? id) => Nav.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+	private void GoToDetails(int id) => Nav.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, id));
+
+	private void HandleImageSelected(IBrowserFile? file)
+	{
+		selectedImage = file;
+	}
 
 	private void Cancel() => Nav.NavigateTo(Routes.Recipes.RecipesMain);
 }

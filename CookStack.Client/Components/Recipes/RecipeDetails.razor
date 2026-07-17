@@ -14,6 +14,20 @@
 @if(recipeDto != null)
 {
 	<div class="page-top">
+
+		@if (!string.IsNullOrWhiteSpace(recipeDto.ImagePath))
+		{
+			<img class="recipe-details-image"
+				 src="@RecipesApi.GetImageUrl(recipeDto.ImagePath)"
+				 alt="@recipeDto.Title" />
+		}
+		else
+		{
+			<div class="recipe-image-placeholder">
+				No image
+			</div>
+		}
+
 		<div class="page-header">
 			<div>
 				<h3>@recipeDto.Title</h3>

@@ -1,5 +1,7 @@
 ﻿using CookStack.Client.Services.ToastMessage;
 using CookStack.Shared.Recipes.Dtos;
+using Microsoft.AspNetCore.Components.Forms;
+using System.Net.Http.Headers;
 
 namespace CookStack.Client.Services
 {
@@ -24,6 +26,36 @@ namespace CookStack.Client.Services
         public async Task<int?> CreateRecipeAsync(CreateRecipeDto dto)
         {
             return await PostAndReadAsync<CreateRecipeDto, int>("api/recipe", dto);
+        }
+
+        public async Task<string?> UploadRecipeImageAsync(int recipeId, IBrowserFile file)
+        {
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            await using var stream = file.OpenReadStream(maxFileSize);
+
+            using var fileContent = new StreamContent(stream);
+
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+            using var formContent = new MultipartFormDataContent();
+
+            formContent.Add(fileContent, "file", file.Name);
+
+            var response = await PostContentAndReadAsync<RecipeImageResponseDto>($"api/recipe/{recipeId}/image", formContent);
+
+            return response?.ImagePath;
+        }
+
+        public string? GetImageUrl(string? imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath))
+                return null;
+
+            return new Uri(
+                _httpClient.BaseAddress!,
+                imagePath.TrimStart('/'))
+                .ToString();
         }
 
         public async Task<bool> MarkRecipeAsVisitedAsync(int id)

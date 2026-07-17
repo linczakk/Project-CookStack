@@ -13,6 +13,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\CreateRecipeDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeBaseDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeDetailsDto.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeImageResponseDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeIngredientDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeListDto.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Recipes\Dtos\RecipeStepDto.cs" />

@@ -1,7 +1,9 @@
 ﻿using CookStack.Api.Data;
 using CookStack.Api.Features.Recipes;
 using CookStack.Shared.Recipes.Dtos;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace CookStack.Tests.Services
 {
@@ -18,11 +20,22 @@ namespace CookStack.Tests.Services
 
         private ApplicationDbContext CreateDbContext() => new ApplicationDbContext(_options);
 
+        private static RecipeService CreateService(ApplicationDbContext dbContext)
+        {
+            var environmentMock = new Mock<IWebHostEnvironment>();
+
+            environmentMock
+                .SetupGet(e => e.WebRootPath)
+                .Returns(Path.GetTempPath());
+
+            return new RecipeService(dbContext, environmentMock.Object);
+        }
+
         [Fact]
         public async Task GetAll_Should_ReturnAllRecipes_WhenSearchIsNull()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var now = DateTime.UtcNow;
 
@@ -59,8 +72,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task GetAll_Should_ReturnFilteredRecipes_WhenSearchMatchesTitle()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var now = DateTime.UtcNow;
 
@@ -96,8 +109,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task GetAll_Should_ReturnEmptyList_WhenNoMatchFound()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipe = new Recipe
             {
@@ -116,8 +129,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task GetById_Should_ReturnRecipe()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipe = new Recipe
             {
@@ -157,8 +170,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task GetById_Should_ReturnNull_WhenRecipeNotFound()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var result = await service.GetById(0);
 
@@ -168,8 +181,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task Create_Should_CreateRecipe()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipeDto = new CreateRecipeDto
             {
@@ -209,8 +222,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task Update_Should_UpdateRecipe()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipe = new Recipe
             {
@@ -281,8 +294,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task Update_Should_ReturnFalse_WhenRecipeNotFound()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipeDto = new RecipeUpdateDto
             {
@@ -298,8 +311,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task MarkAsVisited_Should_MarkRecipeAsVisited()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipe = new Recipe
             {
@@ -321,8 +334,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task MarkAsVisited_Should_ReturnFalse_WhenRecipeNotFound()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var success = await service.MarkAsVisited(0);
 
@@ -332,8 +345,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task Delete_Should_DeleteRecipe()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var recipe = new Recipe
             {
@@ -354,8 +367,8 @@ namespace CookStack.Tests.Services
         [Fact]
         public async Task Delete_Should_ReturnFalse_WhenRecipeNotFound()
         {
-            var db = CreateDbContext();
-            var service = new RecipeService(db);
+            await using var db = CreateDbContext();
+            var service = CreateService(db);
 
             var success = await service.Delete(0);
 

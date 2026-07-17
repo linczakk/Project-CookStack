@@ -39,6 +39,12 @@
         color: var(--cs-text);
     }
 
+
+.form-hint {
+    margin: 6px 0 0;
+    color: var(--cs-text-muted);
+}
+
 .form-list {
     display: flex;
     flex-direction: column;
@@ -58,6 +64,15 @@
     .form-list-item .form-field {
         margin-bottom: 0;
     }
+
+.recipe-image-preview {
+    width: 100%;
+    max-width: 420px;
+    max-height: 240px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-top: 12px;
+}
 
 .item-fields {
     flex: 1;

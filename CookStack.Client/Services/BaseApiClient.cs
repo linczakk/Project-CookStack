@@ -88,6 +88,32 @@ namespace CookStack.Client.Services
             }
         }
 
+        protected async Task<TResult?> PostContentAndReadAsync<TResult>(string url, HttpContent content)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(url, content);
+
+                if(!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+
+                    Console.Error.WriteLine($"Upload failed: {(int)response.StatusCode} {error}");
+
+                    _toast.ShowError("Upload failed");
+                    return default;
+                }
+
+                return await response.Content.ReadFromJsonAsync<TResult>();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                _toast.ShowError("Server unreachable");
+                return default;
+            }
+        }
+
         protected async Task<bool> PutAsync<T>(string url, T data)
         {
             try

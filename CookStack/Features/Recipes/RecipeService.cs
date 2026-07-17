@@ -7,10 +7,12 @@ namespace CookStack.Api.Features.Recipes
     public class RecipeService : IRecipeService
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly IWebHostEnvironment _environment;
 
-        public RecipeService(ApplicationDbContext context)
+        public RecipeService(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _dbContext = context;
+            _environment = environment;
         }
 
         public async Task<IEnumerable<RecipeListDto>> GetAll(string? search = null)
@@ -19,8 +21,8 @@ namespace CookStack.Api.Features.Recipes
 
             if(!string.IsNullOrWhiteSpace(search))
             {
-                var normalizedSearch = search.ToLowerInvariant();
-                query = query.Where(r => r.Title.ToLowerInvariant().Contains(normalizedSearch));
+                var normalized = search.ToLower();
+                query = query.Where(r => r.Title.ToLower().Contains(normalized));
             }
 
             return await query
@@ -28,6 +30,7 @@ namespace CookStack.Api.Features.Recipes
                 {
                     Id = r.Id,
                     Title = r.Title,
+                    ImagePath = r.ImagePath,
                     CreatedAt = r.CreatedAt,
                     LastVisitedAt = r.LastVisitedAt,
                 })
@@ -45,6 +48,7 @@ namespace CookStack.Api.Features.Recipes
                     Title = r.Title,
                     Description = r.Description,
                     SourceUrl = r.SourceUrl,
+                    ImagePath = r.ImagePath,
                     Ingredients = r.Ingredients
                     .Select(i => new RecipeIngredientDto
                     {
@@ -135,6 +139,69 @@ namespace CookStack.Api.Features.Recipes
 
             await _dbContext.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<string> UploadImage(int recipeId, IFormFile file)
+        {
+            if (file is null || file.Length == 0)
+                throw new ArgumentException("No image was provided.");
+
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            if (file.Length > maxFileSize)
+                throw new ArgumentException("The image cannot exceed 5 MB.");
+
+            var extension = file.ContentType switch
+            {
+                "image/jpeg" => ".jpg",
+                "image/png" => ".png",
+                "image/webp" => ".webp",
+                _ => throw new ArgumentException("Unsupported image format.")
+            };
+
+            var recipe = await _dbContext.Recipes.FirstOrDefaultAsync(r => r.Id == recipeId);
+
+            if (recipe is null)
+                throw new KeyNotFoundException($"Recipe with ID {recipeId} was not found.");
+
+            var directory = Path.Combine(_environment.WebRootPath, "uploads", "recipes");
+
+            Directory.CreateDirectory(directory);
+
+            var fileName = $"{Guid.NewGuid():N}{extension}";
+            var physicalPath = Path.Combine(directory, fileName);
+
+            await using (var stream = File.Create(physicalPath))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            DeletePreviousImage(recipe.ImagePath);
+
+            recipe.ImagePath = $"/uploads/recipes/{fileName}";
+
+            await _dbContext.SaveChangesAsync();
+
+            return recipe.ImagePath;
+
+        }
+
+        private void DeletePreviousImage(string? imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath))
+                return;
+
+            var uploadPrefix = "/uploads/recipes/";
+
+            if (!imagePath.StartsWith(uploadPrefix, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var relativePath = imagePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+
+            var physicalPath = Path.Combine(_environment.WebRootPath, relativePath);
+
+            if (File.Exists(physicalPath))
+                File.Delete(physicalPath);
         }
 
         public async Task<bool> MarkAsVisited(int id)

@@ -51,6 +51,20 @@
 
 					<div class="home-card @(selectedIndex == i ? "selected" : "")">
 						<div class="home-card-body" @onclick="() => GoToRecipeDetails(recipe.Id)">
+
+							@if (!string.IsNullOrWhiteSpace(recipe.ImagePath))
+							{
+								<img class="recipe-card-image"
+									 src="@RecipesApi.GetImageUrl(recipe.ImagePath)"
+									 alt="@recipe.Title" />
+							}
+							else
+							{
+								<div class="recipe-card-image-placeholder">
+									No image
+								</div>
+							}
+
 							<h5>@recipe.Title</h5>
 
 							<p class="text-muted">
@@ -86,6 +100,20 @@
 
 					<div class="home-card @(selectedIndex == globalIndex ? "selected" : "")">
 						<div class="home-card-body" @onclick="() => GoToRecipeDetails(recipe.Id)">
+
+							@if (!string.IsNullOrWhiteSpace(recipe.ImagePath))
+							{
+								<img class="recipe-card-image"
+									 src="@RecipesApi.GetImageUrl(recipe.ImagePath)"
+									 alt="@recipe.Title" />
+							}
+							else
+							{
+								<div class="recipe-card-image-placeholder">
+									No image
+								</div>
+							}
+
 							<h5>@recipe.Title</h5>
 
 							<p class="text-muted">

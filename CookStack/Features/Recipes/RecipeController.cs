@@ -51,6 +51,28 @@ namespace CookStack.Api.Features.Recipes
             return NotFound();
         }
 
+        [HttpPost("{id:int}/image")]
+        public async Task<ActionResult<string>> UploadImage(int id, IFormFile file)
+        {
+            try
+            {
+                var imagePath = await _recipeService.UploadImage(id, file);
+
+                return Ok(new RecipeImageResponseDto
+                {
+                    ImagePath = imagePath
+                });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("{id}/visit")]
         public async Task<IActionResult> MarkRecipeAsVisited(int id)
         {

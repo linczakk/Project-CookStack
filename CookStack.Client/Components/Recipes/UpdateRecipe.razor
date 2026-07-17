@@ -17,11 +17,21 @@
 	</div>
 </div>
 
-<RecipeForm RecipeDto="dto" OnSubmit="Update" OnCancel="Cancel" SubmitText="Update recipe" />
+<RecipeForm 
+	RecipeDto="dto" 
+	OnSubmit="Update" 
+	OnCancel="Cancel" 
+	OnImageSelected="HandleImageSelected" 
+	ExistingImageUrl="@Api.GetImageUrl(existingImagePath)" 
+	SubmitText="Update recipe" />
 
 @code{
 	[Parameter] public int Id { get; set; }
 	private RecipeUpdateDto dto = new();
+
+	private IBrowserFile? selectedImage;
+
+	private string? existingImagePath;
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -39,6 +49,8 @@
 
 	private RecipeUpdateDto MapToUpdateDto(RecipeDetailsDto r)
 	{
+		existingImagePath = r.ImagePath;
+
 		return new RecipeUpdateDto
 		{
 			Title = r.Title,
@@ -51,11 +63,23 @@
 
 	private async Task Update()
 	{
-		await Api.UpdateRecipeAsync(Id, dto);
+		var success = await Api.UpdateRecipeAsync(Id, dto);
+
+		if (!success)
+			return;
+
+		if(selectedImage is not null)
+			await Api.UploadRecipeImageAsync(Id, selectedImage);
+
 		GoToDetails();
 	}
 
 	private void GoToDetails() => Nav.NavigateTo(string.Format(Routes.Recipes.RecipeDetails, Id));
+
+	private void HandleImageSelected(IBrowserFile? file)
+	{
+		selectedImage = file;
+	}
 
 	private void Cancel() => GoToDetails();
 }

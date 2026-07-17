@@ -12,6 +12,7 @@ namespace CookStack.Api.Features.Recipes
         public List<RecipeIngredient> Ingredients { get; set; } = new();
         public List<RecipeStep> Steps { get; set; } = new();
         public string? SourceUrl { get; set; }
+        public string? ImagePath { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastVisitedAt { get; set; }
     }
