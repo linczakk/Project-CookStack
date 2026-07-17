@@ -592,4 +592,4 @@ FodyWeavers.xsd
 *.db-wal
 
 # User-uploaded recipe images
-CookStack.Api/wwwroot/uploads
+CookStack/wwwroot/uploads
